@@ -72,7 +72,7 @@ cp .env.example .env            # заполнить DATABASE_URL, POSTGRES_PASS
 docker compose up -d db
 pip install -e ".[dev]"
 alembic upgrade head
-python -m app.schedule.import_ruz --full    # весь семестр, все группы: ~1,5–2 часа
+python -m app.schedule.import_ruz --full    # весь семестр, все группы: ~40 минут
 python -m app.schedule.import_ruz           # ежедневно: окно −7…+35 дней
 pytest
 ```
