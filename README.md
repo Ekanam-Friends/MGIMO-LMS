@@ -173,4 +173,5 @@ MGIMO-LMS/
 ## Команда
 
 Организация **Ekanam & Friends**, три исполнителя: Legpopov (капитан), kelleshh, raxlin4ik.
-Задачи — в [Issues](https://github.com/Ekanam-Friends/MGIMO-LMS/issues), доска — в Projects организации.
+Задачи — в [Issues](https://github.com/Ekanam-Friends/MGIMO-LMS/issues), доска —
+[MGIMO-LMS — Цифровой деканат](https://github.com/orgs/Ekanam-Friends/projects/4).
