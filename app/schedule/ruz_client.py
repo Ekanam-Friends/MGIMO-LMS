@@ -2,7 +2,8 @@
 
 API недокументирован, эндпоинты найдены по запросам самого сайта — см.
 docs/decisions/0002-schedule-source.md. Сервер чужой, поэтому клиент сам выдерживает
-паузу между запросами и не распараллеливает их.
+паузу между началами запросов; сколько запросов идёт одновременно, решает импортёр
+(по замеру 2026-11-05 предел без роста времени ответа — 2 потока, см. решение 0002).
 """
 
 from __future__ import annotations
@@ -46,6 +47,7 @@ class RuzClient:
         self._retries = retries
         self._backoff = backoff
         self._last_request: float | None = None
+        self._throttle_lock = asyncio.Lock()
 
     async def __aenter__(self) -> RuzClient:
         return self
@@ -103,9 +105,11 @@ class RuzClient:
         raise RuzError(f"{path}: не удалось после {self._retries + 1} попыток") from last_error
 
     async def _throttle(self) -> None:
-        now = time.monotonic()
-        if self._last_request is not None:
-            wait = self._delay - (now - self._last_request)
-            if wait > 0:
-                await asyncio.sleep(wait)
-        self._last_request = time.monotonic()
+        """Между началами любых двух запросов — не меньше `delay`, в том числе при параллельной загрузке."""
+        async with self._throttle_lock:
+            now = time.monotonic()
+            if self._last_request is not None:
+                wait = self._delay - (now - self._last_request)
+                if wait > 0:
+                    await asyncio.sleep(wait)
+            self._last_request = time.monotonic()

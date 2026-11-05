@@ -34,9 +34,9 @@ def ruz():
     return fake
 
 
-async def run_import(sf, ruz: FakeRuz, **kwargs):
+async def run_import(sf, ruz: FakeRuz, *, concurrency: int = 2, **kwargs):
     async with RuzClient("https://ruz.test/api/", delay=0, backoff=0, retries=1, transport=ruz.transport()) as client:
-        importer = ScheduleImporter(sf, client, fake_name_salt="test")
+        importer = ScheduleImporter(sf, client, fake_name_salt="test", concurrency=concurrency)
         return await importer.run(START, FINISH, **kwargs)
 
 
@@ -133,6 +133,35 @@ async def test_second_run_logs_changes(sf, ruz):
     old = await lesson_row(sf, 5)
     assert (old.status, old.moved_to_id) == (LessonStatus.CANCELLED, 6)
     assert (await lesson_row(sf, 3)).status == LessonStatus.ACTIVE
+
+
+async def test_group_loaded_for_the_first_time_is_not_logged_as_added(sf, ruz):
+    # Регрессия: пробный импорт по одной группе покрывал весь период, и следующий полный
+    # импорт записал бы все занятия остальных групп как «добавлено».
+    base_schedule(ruz)
+    await run_import(sf, ruz, group_filter=lambda g: g.id == A)
+
+    ruz.schedules[A].append(lesson(8, THU, "15:00", "16:20", discipline="Новая у A"))
+    stats = await run_import(sf, ruz)
+
+    assert [(c.kind, c.lesson_id) for c in await changes(sf, stats.run_id)] == [(ChangeKind.ADDED, 8)]
+    assert await groups_of(sf, 3) == {B}
+
+
+async def test_sequential_and_parallel_give_same_result(sf, ruz, tmp_path):
+    base_schedule(ruz)
+    await run_import(sf, ruz, concurrency=1)
+    async with sf() as s:
+        sequential = sorted((await s.execute(select(LessonGroup.lesson_id, LessonGroup.group_id))).all())
+
+    other = make_session_factory(make_engine(f"sqlite+aiosqlite:///{tmp_path / 'p.db'}"))
+    async with other.kw["bind"].begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    await run_import(other, ruz, concurrency=4)
+    async with other() as s:
+        parallel = sorted((await s.execute(select(LessonGroup.lesson_id, LessonGroup.group_id))).all())
+    await other.kw["bind"].dispose()
+    assert sequential == parallel
 
 
 async def test_failed_group_does_not_cancel_its_lessons(sf, ruz):

@@ -77,7 +77,10 @@ async def main(argv: list[str] | None = None) -> int:
             settings.ruz_base_url, delay=settings.ruz_request_delay, timeout=settings.ruz_timeout
         ) as client:
             importer = ScheduleImporter(
-                make_session_factory(engine), client, fake_name_salt=settings.fake_name_salt
+                make_session_factory(engine),
+                client,
+                fake_name_salt=settings.fake_name_salt,
+                concurrency=settings.ruz_concurrency,
             )
             stats = await importer.run(start, finish, group_filter=_group_filter(args), limit=args.limit)
     finally:

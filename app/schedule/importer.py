@@ -25,6 +25,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
@@ -111,11 +112,13 @@ class ScheduleImporter:
         client: RuzClient,
         *,
         fake_name_salt: str,
+        concurrency: int = 1,
         now: Callable[[], datetime] = datetime.now,
     ) -> None:
         self._sf = session_factory
         self._client = client
         self._salt = fake_name_salt
+        self._concurrency = max(1, concurrency)
         self._now = now
 
         self._run_id = 0
@@ -125,6 +128,8 @@ class ScheduleImporter:
         self._surnames: tuple[str, ...] = ()
         self._new_lesson_ids: list[int] = []
         self._ok_groups: set[int] = set()
+        self._known_groups: set[int] = set()
+        """Группы, у которых занятия были в БД до этого запуска: только у них новое занятие — «добавлено»."""
         self._changes: dict[str, int] = {}
 
     async def run(
@@ -151,21 +156,31 @@ class ScheduleImporter:
             self._surnames = allowed_surnames(real_surnames(await self._client.lecturers()))
             await self._load_teachers()
 
-            for index, group in enumerate(selected, 1):
+            # Запросы к РУЗ — до `concurrency` одновременно, запись в БД — строго по одной группе.
+            fetch_slots = asyncio.Semaphore(self._concurrency)
+            db_lock = asyncio.Lock()
+            done = 0
+
+            async def handle(group: GroupData) -> None:
+                nonlocal done
                 try:
-                    raw = await self._client.group_schedule(group.id, start, finish)
-                    seen = await self._import_group(group.id, raw, start, finish)
+                    async with fetch_slots:
+                        raw = await self._client.group_schedule(group.id, start, finish)
+                    async with db_lock:
+                        seen = await self._import_group(group.id, raw, start, finish)
                 except (RuzError, KeyError, ValueError) as exc:
                     stats.groups_failed += 1
                     stats.failed_groups.append(group.number)
                     log.warning("группа %s (%s): %s", group.number, group.id, exc)
-                    continue
-                self._ok_groups.add(group.id)
-                stats.groups_ok += 1
-                stats.lessons_seen += seen
-                if index % 50 == 0 or index == len(selected):
-                    log.info("загружено групп: %s из %s", index, len(selected))
+                else:
+                    self._ok_groups.add(group.id)
+                    stats.groups_ok += 1
+                    stats.lessons_seen += seen
+                done += 1
+                if done % 50 == 0 or done == len(selected):
+                    log.info("загружено групп: %s из %s", done, len(selected))
 
+            await asyncio.gather(*(handle(g) for g in selected))
             await self._finalize(start, finish)
         except BaseException as exc:
             await self._finish_run(stats, ImportStatus.FAILED, error=repr(exc))
@@ -268,6 +283,13 @@ class ScheduleImporter:
         self, group_id: int, lessons: dict[int, LessonData], start: date, finish: date
     ) -> int:
         async with self._sf() as session:
+            had_lessons = await session.scalar(
+                select(LessonGroup.lesson_id)
+                .where(LessonGroup.group_id == group_id, LessonGroup.last_seen_run_id != self._run_id)
+                .limit(1)
+            )
+            if had_lessons is not None:
+                self._known_groups.add(group_id)
             if not lessons:
                 known = await session.scalar(
                     select(func.count())
@@ -493,10 +515,15 @@ class ScheduleImporter:
         ).all()
         if not covered:
             return []
+        # Дата покрыта прошлым импортом — мало: прошлый импорт мог быть по другим группам.
+        # Нужно, чтобы хотя бы одна группа занятия уже загружалась раньше.
+        groups_of = await self._groups_of(session, self._new_lesson_ids)
         result: list[Lesson] = []
         for chunk in _chunks(self._new_lesson_ids):
             for row in (await session.scalars(select(Lesson).where(Lesson.id.in_(chunk)))).all():
-                if any(ps <= row.date <= pe for ps, pe in covered):
+                if groups_of.get(row.id, set()) & self._known_groups and any(
+                    ps <= row.date <= pe for ps, pe in covered
+                ):
                     result.append(row)
         return result
 

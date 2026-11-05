@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     database_url: str
 
     ruz_base_url: str = "https://ruz.mgimo.ru/api/"
-    ruz_request_delay: float = 1.0
+    ruz_request_delay: float = 0.5
+    ruz_concurrency: int = 2
     ruz_timeout: float = 120.0
 
     fake_name_salt: str = "mgimo-lms"
