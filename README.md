@@ -64,8 +64,22 @@ Telegram (aiogram) ┘     │
 
 ## Запуск
 
-Появится вместе с каркасом проекта. Планируется: `docker compose up`, затем скрипт seed с тестовыми
-аккаунтами. Логины и пароли тестовых студентов и сотрудника — в `docs/test-accounts.md`.
+Каркас пока состоит из БД и импорта расписания. Кабинет, бот и seed тестовых аккаунтов появятся
+позже; логины тестовых студентов и сотрудника будут в `docs/test-accounts.md`.
+
+```bash
+cp .env.example .env            # заполнить DATABASE_URL, POSTGRES_PASSWORD, FAKE_NAME_SALT
+docker compose up -d db
+pip install -e ".[dev]"
+alembic upgrade head
+python -m app.schedule.import_ruz --full    # весь семестр, все группы: ~1,5–2 часа
+python -m app.schedule.import_ruz           # ежедневно: окно −7…+35 дней
+pytest
+```
+
+Для быстрой проверки без Docker: `DATABASE_URL=sqlite+aiosqlite:///./local.db` и, например,
+`--group 1МО-01 --group 1МО-02`. Как устроен импорт — в
+[docs/decisions/0002-schedule-source.md](docs/decisions/0002-schedule-source.md).
 
 ## Как мы это делаем
 

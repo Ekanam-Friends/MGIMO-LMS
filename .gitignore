@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+# Сырые ответы РУЗ содержат реальные ФИО и email преподавателей — в репозиторий не попадают.
+ruz_raw/
