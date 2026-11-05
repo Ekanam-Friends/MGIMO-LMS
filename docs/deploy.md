@@ -54,7 +54,15 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 ```
 
 `scripts/deploy.sh` поднимает `bot`, только если токен задан. Логи: `docker compose logs -f bot`.
-Если Telegram с сервера отвечает с перебоями — `TELEGRAM_PROXY` (как у бота Ikanam).
+
+**api.telegram.org с этого VPS напрямую недоступен** (проверено 2026-11-05: curl не соединяется).
+Бот ходит через socks5-прокси проекта Ikanam — контейнер `proxy` в сети `ikanam_default`.
+Для этого на сервере (не в репозитории) лежит `/opt/mgimo-lms/docker-compose.override.yml`,
+который подключает к `ikanam_default` только сервис `bot`, а в `.env` —
+`TELEGRAM_PROXY=socks5://proxy:1080`. Сам Ikanam не менялся. В `ikanam_default` есть и сервис
+`db` (база Ikanam), поэтому override переопределяет боту `DATABASE_URL` на хост
+`mgimo-lms-db-1` — иначе бот уходит в чужую базу. Если прокси Ikanam переедет или
+упадёт, наш бот потеряет связь с Telegram вместе с ним.
 Демонстрация пуша: `docker compose exec bot python -m app.bot.demo_change --login student1`.
 
 ## Подводные камни
@@ -67,4 +75,7 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 - **Блок кабинета живёт и в репозитории бота** (`lkanam-schedule/Caddyfile`, коммит `b33f3b0`),
   поэтому деплой бота его не сотрёт. Подключение caddy к сети `edge` — только в серверном
   `docker-compose.override.yml`: его при деплое бота не перезаписывать.
+- **Сборка образа на сервере медленная** (PyPI ~50 КБ/с, несколько минут), и ssh из
+  `deploy.sh` может оборваться посреди неё. Тогда сборку запускать на сервере отвязанно:
+  `nohup sh -c "docker compose up -d --build web && docker compose up -d --build bot" > /tmp/mgimo-deploy.log 2>&1 &`.
 - Pyrus на стенде не настроен — заявки на справки копятся в очереди со статусом «Принята».
