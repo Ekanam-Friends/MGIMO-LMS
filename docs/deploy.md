@@ -49,7 +49,7 @@ docker compose exec web python -m app.seed
   reload` ответит «config is unchanged». Так и случилось при первой выкладке. Помогает
   `docker compose up -d --no-deps caddy` в `/opt/ikanam` — перерыв у schedule.ekanamfriends.ru
   несколько секунд, сертификаты лежат в volume и не перевыпускаются.
-- **Выкладка Ikanam-schedule может стереть блок кабинета.** В репозитории бота `Caddyfile`
-  без блока lms-university: если при его деплое `Caddyfile` скопировать из репозитория,
-  кабинет пропадёт из Caddy. Блок нужно перенести и в репозиторий бота.
+- **Блок кабинета живёт и в репозитории бота** (`lkanam-schedule/Caddyfile`, коммит `b33f3b0`),
+  поэтому деплой бота его не сотрёт. Подключение caddy к сети `edge` — только в серверном
+  `docker-compose.override.yml`: его при деплое бота не перезаписывать.
 - Pyrus на стенде не настроен — заявки на справки копятся в очереди со статусом «Принята».
