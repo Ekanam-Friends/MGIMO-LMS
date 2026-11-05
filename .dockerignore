@@ -1,0 +1,11 @@
+.env
+.venv
+.git
+.claude
+.pytest_cache
+*.db
+*.db.*
+**/__pycache__
+docs
+tests
+ruz_raw
