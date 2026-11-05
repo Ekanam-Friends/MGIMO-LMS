@@ -19,6 +19,25 @@ class Settings(BaseSettings):
 
     fake_name_salt: str = "mgimo-lms"
 
+    # Pyrus — система деканата (решение 0003). Логин и ключ — бота Pyrus: ими же
+    # проверяется подпись входящего вебхука. Пустой логин = интеграция выключена.
+    pyrus_auth_url: str = "https://accounts.pyrus.com/api/v4/auth"
+    pyrus_login: str = ""
+    pyrus_security_key: str = ""
+    pyrus_form_id: int = 0
+    pyrus_sync_interval: int = 300
+    """Секунды между фоновыми сверками открытых заявок. 0 — сверка только вручную (CLI)."""
+
+    cert_download_days: int = 30
+    """Сколько дней после готовности студент может скачать PDF справки."""
+
+    pdf_font_path: str = ""
+    """TTF с кириллицей для PDF. Пусто — ищем DejaVuSans / Arial в системных путях."""
+
+    @property
+    def pyrus_enabled(self) -> bool:
+        return bool(self.pyrus_login and self.pyrus_security_key and self.pyrus_form_id)
+
 
 @lru_cache
 def get_settings() -> Settings:
