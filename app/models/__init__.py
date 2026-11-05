@@ -1,3 +1,4 @@
+from app.models.auth import AuthSession, User
 from app.models.certificates import (
     CertificateRequest,
     CertificateRequestEvent,
@@ -17,6 +18,8 @@ from app.models.schedule import (
 )
 
 __all__ = [
+    "AuthSession",
+    "User",
     "CertificateRequest",
     "CertificateRequestEvent",
     "Faculty",

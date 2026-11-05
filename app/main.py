@@ -1,4 +1,4 @@
-"""Приложение FastAPI. Пока только служебное: проверка живости и вебхук Pyrus.
+"""Приложение FastAPI: экраны кабинета студента, проверка живости и вебхук Pyrus.
 
     uvicorn app.main:app --port 8000
 
@@ -13,13 +13,19 @@ import contextlib
 import logging
 from collections.abc import AsyncIterator
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from app.certificates.pyrus_client import PyrusClient
 from app.certificates.service import CertificateSync
 from app.certificates.webhook import router as pyrus_router
 from app.core.config import Settings, get_settings
 from app.db.session import make_engine, make_session_factory
+from app.web.deps import LoginRequired
+from app.web.views import router as web_router
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         cfg = settings or get_settings()
+        app.state.settings = cfg
         engine = make_engine(cfg.database_url)
         app.state.session_factory = make_session_factory(engine)
         app.state.certificate_sync = None
@@ -72,7 +79,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def healthz() -> dict:
         return {"ok": True}
 
+    @app.exception_handler(LoginRequired)
+    async def _login_required(request: Request, exc: LoginRequired) -> Response:
+        if request.headers.get("HX-Request"):
+            return Response(status_code=401, headers={"HX-Redirect": "/login"})
+        return RedirectResponse("/login", status_code=303)
+
+    app.mount("/static", StaticFiles(directory=Path(__file__).parent / "web" / "static"), name="static")
     app.include_router(pyrus_router)
+    app.include_router(web_router)
     return app
 
 

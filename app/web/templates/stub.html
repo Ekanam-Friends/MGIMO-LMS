@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ page.title }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ page.title }}</span></nav>{% endblock %}
+{% block content %}
+<div class="page page--narrow">
+  <h1 class="title-1">{{ page.title }}</h1>
+  <section class="panel stub">
+    <span class="badge badge--grey">Раздел в разработке</span>
+    <p class="stub__text">{{ page.text }}</p>
+    <p class="muted">{{ page.plan }}</p>
+  </section>
+</div>
+{% endblock %}

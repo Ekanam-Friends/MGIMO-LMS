@@ -64,8 +64,9 @@ Telegram (aiogram) ┘     │
 
 ## Запуск
 
-Каркас пока состоит из БД и импорта расписания. Кабинет, бот и seed тестовых аккаунтов появятся
-позже; логины тестовых студентов и сотрудника будут в `docs/test-accounts.md`.
+Есть кабинет студента (вход, главная, расписание, справки, профиль; остальные разделы —
+каркасы), импорт расписания и интеграция справок с Pyrus. Бот появится позже. Вёрстка пока
+повторяет ЛК РАНХиГС — см. [решение 0004](docs/decisions/0004-web-shell.md).
 
 ```bash
 cp .env.example .env            # заполнить DATABASE_URL, POSTGRES_PASSWORD, FAKE_NAME_SALT
@@ -74,10 +75,13 @@ pip install -e ".[dev]"
 alembic upgrade head
 python -m app.schedule.import_ruz --full    # весь семестр, все группы: ~40 минут
 python -m app.schedule.import_ruz           # ежедневно: окно −7…+35 дней
+python -m app.seed                          # тестовые учётки student1, student2, dean (пароль — DEMO_PASSWORD)
+uvicorn app.main:app --port 8000            # кабинет: http://localhost:8000
 pytest
 ```
 
-Для быстрой проверки без Docker: `DATABASE_URL=sqlite+aiosqlite:///./local.db` и, например,
+Для быстрой проверки без Docker: `DATABASE_URL=sqlite+aiosqlite:///./local.db`, `COOKIE_SECURE=false`
+(иначе браузер не сохранит cookie по http) и, например,
 `--group 1МО-01 --group 1МО-02`. Как устроен импорт — в
 [docs/decisions/0002-schedule-source.md](docs/decisions/0002-schedule-source.md).
 

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block bare %}
+<div class="login">
+  <form class="login__card" method="post" action="/login" autocomplete="on">
+    <a class="wordmark wordmark--big"><span class="wordmark__mark">ЛК</span><span class="wordmark__text">студента<br><small>концепт</small></span></a>
+    <h1 class="login__title">Вход в личный кабинет</h1>
+    {% if error %}<p class="alert alert--error" role="alert">{{ error }}</p>{% endif %}
+    <label class="field">
+      <span class="field__label">Логин</span>
+      <input class="field__input" name="login" value="{{ login }}" autocomplete="username" required autofocus>
+    </label>
+    <label class="field">
+      <span class="field__label">Пароль</span>
+      <input class="field__input" type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <button class="btn btn--primary btn--wide" type="submit">Войти</button>
+    <p class="login__hint">Тестовые учётки для жюри создаёт <code>python -m app.seed</code>.</p>
+  </form>
+</div>
+{% endblock %}

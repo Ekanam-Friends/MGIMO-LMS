@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Профиль{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
+{% block content %}
+<div class="page page--narrow">
+  <h1 class="title-1">Профиль</h1>
+  {% if student %}
+  <section class="panel profile">
+    <div class="profile__head">
+      <span class="avatar avatar--big">{{ student.full_name[:1] }}</span>
+      <div><p class="profile__name">{{ student.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }}</p></div>
+    </div>
+    <dl class="props">
+      <dt>Факультет</dt><dd>{{ student.faculty_name or "—" }}</dd>
+      <dt>Курс</dt><dd>{{ student.course }}</dd>
+      <dt>Группа</dt><dd>{% if group %}{{ group.number }} ({{ group.name }}){% else %}—{% endif %}</dd>
+      <dt>Направление</dt><dd>{{ student.speciality or (group.speciality if group else "—") }}</dd>
+      {% if group and group.specialization %}<dt>Профиль</dt><dd>{{ group.specialization }}</dd>{% endif %}
+      <dt>Уровень</dt><dd>{{ student.level }}</dd>
+      <dt>Форма обучения</dt><dd>{{ student.form_of_education }}</dd>
+      <dt>Основа обучения</dt><dd>{{ student.education_basis }}</dd>
+      <dt>Номер зачётной книжки</dt><dd>{{ student.record_book }}</dd>
+      <dt>Приказ о зачислении</dt><dd>{{ student.enrollment_order or "—" }}</dd>
+    </dl>
+    <p class="page__note">Данные вымышленные. В рабочей версии они приходили бы из 1С:Университет.</p>
+  </section>
+  {% else %}
+    <p class="alert">Учётная запись сотрудника: студенческих данных нет.</p>
+  {% endif %}
+</div>
+{% endblock %}

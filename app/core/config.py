@@ -34,6 +34,14 @@ class Settings(BaseSettings):
     pdf_font_path: str = ""
     """TTF с кириллицей для PDF. Пусто — ищем DejaVuSans / Arial в системных путях."""
 
+    session_days: int = 14
+    """Сколько живёт сессия входа в кабинет."""
+    cookie_secure: bool = True
+    """Флаг Secure у cookie сессии. False — только для локального запуска по http."""
+
+    demo_password: str = ""
+    """Пароль тестовых учёток, которые создаёт `python -m app.seed`. Пусто — seed откажется."""
+
     @property
     def pyrus_enabled(self) -> bool:
         return bool(self.pyrus_login and self.pyrus_security_key and self.pyrus_form_id)

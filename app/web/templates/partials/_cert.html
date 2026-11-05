@@ -1,0 +1,5 @@
+{% macro status_badge(label, status) -%}
+  {% set tone = {"ready": "green", "rejected": "red", "need_info": "orange"}.get(status, "grey") %}
+  {% if label in ("Срок скачивания истёк",) %}{% set tone = "grey" %}{% endif %}
+  <span class="badge badge--{{ tone }}">{{ label }}</span>
+{%- endmacro %}

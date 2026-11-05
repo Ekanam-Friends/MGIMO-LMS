@@ -1,0 +1,72 @@
+{% from "_icons.html" import icon %}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Личный кабинет студента{% endblock %} · концепт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+<script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" defer></script>
+</head>
+<body{% if viewer %} hx-headers='{"X-CSRF-Token": "{{ viewer.csrf }}"}'{% endif %}>
+<div class="concept-bar" role="note">Концепт для конкурса MGIMO×AI Challenge — не официальный сервис. Все данные вымышленные.</div>
+{% if viewer %}
+<input type="checkbox" id="menu-toggle" class="menu-toggle" hidden>
+<div class="layout">
+  <aside class="menu" aria-label="Разделы">
+    <div class="menu__head">
+      <a href="/" class="wordmark"><span class="wordmark__mark">ЛК</span><span class="wordmark__text">студента<br><small>концепт</small></span></a>
+      <label for="menu-toggle" class="menu__close" aria-label="Закрыть меню">{{ icon("close") }}</label>
+    </div>
+    <nav>
+      {% for item in MENU %}
+        {% if item.children %}
+          {% set ns = namespace(open=false) %}
+          {% for sub in item.children %}{% if path.startswith(sub.href) %}{% set ns.open = true %}{% endif %}{% endfor %}
+          {% set open = ns.open %}
+          <details class="menu__group"{% if open %} open{% endif %}>
+            <summary class="menu__link{% if open %} menu__link--active{% endif %}">{{ icon(item.icon) }}<span>{{ item.title }}</span>{{ icon("chev-down", 16) }}</summary>
+            <div class="menu__sub">
+              {% for sub in item.children %}<a href="{{ sub.href }}" class="menu__sublink{% if path.startswith(sub.href) %} menu__sublink--active{% endif %}">{{ sub.title }}</a>{% endfor %}
+            </div>
+          </details>
+        {% else %}
+          <a href="{{ item.href }}" class="menu__link{% if path.startswith(item.href) %} menu__link--active{% endif %}">{{ icon(item.icon) }}<span>{{ item.title }}</span></a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  </aside>
+  <label for="menu-toggle" class="menu-backdrop" aria-hidden="true"></label>
+  <div class="layout__main">
+    <header class="header">
+      <div class="header__left">
+        <label for="menu-toggle" class="header__burger" aria-label="Меню">{{ icon("menu") }}</label>
+        {% block header %}<p class="header__title">Личный кабинет студента</p>{% endblock %}
+      </div>
+      <div class="header__right">
+        <a href="/s/notifications" class="header__bell" aria-label="Уведомления">{{ icon("bell", 24) }}</a>
+        <a href="/profile" class="header__user">
+          <span class="avatar">{{ viewer.student.full_name[:1] if viewer.student else "С" }}</span>
+          <span class="header__name">{% if viewer.student %}{% set p = viewer.student.full_name.split() %}{{ p[0] }} {{ p[1][:1] }}.{% if p|length > 2 %} {{ p[2][:1] }}.{% endif %}{% else %}{{ viewer.user.login }}{% endif %}</span>
+        </a>
+        <form method="post" action="/logout" class="header__logout">
+          <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+          <button type="submit" aria-label="Выйти" title="Выйти">{{ icon("logout") }}</button>
+        </form>
+      </div>
+    </header>
+    <main class="main">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+<nav class="tabbar" aria-label="Быстрые разделы">
+  {% for t in TABBAR %}
+    <a href="{{ t.href }}" class="tabbar__link{% if (t.href == '/' and path == '/') or (t.href != '/' and path.startswith(t.href)) %} tabbar__link--active{% endif %}">{{ icon(t.icon, 22) }}<span>{{ t.title }}</span></a>
+  {% endfor %}
+</nav>
+{% else %}
+{% block bare %}{% endblock %}
+{% endif %}
+</body>
+</html>

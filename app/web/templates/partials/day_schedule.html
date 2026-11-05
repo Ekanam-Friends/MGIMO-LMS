@@ -1,0 +1,30 @@
+{% from "_icons.html" import icon %}
+{% from "partials/_lesson.html" import slot_card %}
+<div id="day-widget" class="day-widget">
+  <div class="day-header">
+    <p class="day-header__month">{{ sv.MONTHS[day.month - 1] | capitalize }} {{ day.year }}</p>
+    <div class="day-header__nav">
+      <a class="day-header__btn" href="/?d={{ prev_week.isoformat() }}"
+         hx-get="/partials/day?d={{ prev_week.isoformat() }}" hx-target="#day-widget" hx-swap="outerHTML" aria-label="Предыдущая неделя">{{ icon("chev-left", 18) }}</a>
+      <div class="day-header__week">
+        {% for d in week %}
+          <a class="weekday{% if d == day %} weekday--active{% endif %}{% if d == today %} weekday--today{% endif %}"
+             href="/?d={{ d.isoformat() }}" hx-get="/partials/day?d={{ d.isoformat() }}" hx-target="#day-widget" hx-swap="outerHTML">
+            <span class="weekday__name">{{ sv.WEEKDAYS[loop.index0] }}</span>
+            <span class="weekday__num">{{ d.day }}</span>
+            <span class="weekday__dot{% if d in busy %} weekday__dot--on{% endif %}"></span>
+          </a>
+        {% endfor %}
+      </div>
+      <a class="day-header__btn" href="/?d={{ next_week.isoformat() }}"
+         hx-get="/partials/day?d={{ next_week.isoformat() }}" hx-target="#day-widget" hx-swap="outerHTML" aria-label="Следующая неделя">{{ icon("chev-right", 18) }}</a>
+    </div>
+  </div>
+  {% for slot in slots %}
+    {{ slot_card(slot) }}
+  {% else %}
+    <div class="lesson-card lesson-card--empty">
+      {% if viewer.student and viewer.student.study_group_id %}Занятий нет{% else %}Учебная группа не указана — расписание появится после привязки группы{% endif %}
+    </div>
+  {% endfor %}
+</div>
