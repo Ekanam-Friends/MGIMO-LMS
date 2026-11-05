@@ -312,3 +312,7 @@ small { font-size: 12px; }
   .table__paper { text-align: right; }
   .week-nav__label { min-width: 0; }
 }
+
+/* Профиль: блок Telegram-бота */
+.tg { margin-top: 16px; }
+.tg__actions { display: flex; flex-wrap: wrap; gap: 8px; }

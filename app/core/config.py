@@ -42,6 +42,30 @@ class Settings(BaseSettings):
     demo_password: str = ""
     """Пароль тестовых учёток, которые создаёт `python -m app.seed`. Пусто — seed откажется."""
 
+    # Telegram-бот (решение 0005). Токен — только из .env. Пустой токен = бот не стартует,
+    # а кабинет прячет кнопку «Подключить Telegram».
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = ""
+    """Имя бота без @ — для ссылки t.me/<имя>?start=<код> из профиля."""
+    telegram_proxy: str = ""
+    """http:// или socks5:// — если с сервера api.telegram.org доступен с перебоями."""
+    public_base_url: str = "http://localhost:8000"
+    """Адрес кабинета снаружи: из него собирается ссылка-подписка на календарь."""
+    telegram_link_code_minutes: int = 15
+    """Сколько живёт одноразовый код привязки из профиля."""
+    bot_import_hours: int = 6
+    """Как часто бот перечитывает РУЗ по группам подключённых студентов (0 — не перечитывает)."""
+
+    @property
+    def bot_link_enabled(self) -> bool:
+        return bool(self.telegram_bot_username)
+
+    def feed_url(self, token: str) -> str:
+        return f"{self.public_base_url.rstrip('/')}/feed/{token}.ics"
+
+    def webcal_url(self, token: str) -> str:
+        return "webcal://" + self.feed_url(token).split("://", 1)[1]
+
     @property
     def pyrus_enabled(self) -> bool:
         return bool(self.pyrus_login and self.pyrus_security_key and self.pyrus_form_id)

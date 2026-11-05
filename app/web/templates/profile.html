@@ -25,6 +25,29 @@
     </dl>
     <p class="page__note">Данные вымышленные. В рабочей версии они приходили бы из 1С:Университет.</p>
   </section>
+  {% if bot_username or tg %}
+  <section class="panel tg" id="telegram">
+    <h2 class="profile__name">Telegram-бот</h2>
+    {% if tg %}
+      <p>Подключён {{ tg.linked_at | ddmmyyyy }}. Бот присылает утреннюю сводку, переносы занятий,
+        статусы справок и напоминания о зачётах. Настройки — командой /settings в боте.</p>
+      <div class="tg__actions">
+        {% if bot_username %}<a class="btn btn--ghost" href="https://t.me/{{ bot_username }}" target="_blank" rel="noopener">Открыть бота</a>{% endif %}
+        <form method="post" action="/profile/telegram/unlink">
+          <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+          <button class="btn btn--ghost" type="submit">Отключить</button>
+        </form>
+      </div>
+    {% else %}
+      <p>Расписание, переносы и статусы справок — в Telegram. Пароль в бот вводить не нужно:
+        кнопка откроет бота с одноразовым кодом, он действует {{ code_minutes }} минут.</p>
+      <form method="post" action="/profile/telegram/link" target="_blank">
+        <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+        <button class="btn btn--primary" type="submit">Подключить Telegram</button>
+      </form>
+    {% endif %}
+  </section>
+  {% endif %}
   {% else %}
     <p class="alert">Учётная запись сотрудника: студенческих данных нет.</p>
   {% endif %}

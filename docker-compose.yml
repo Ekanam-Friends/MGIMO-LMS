@@ -49,6 +49,22 @@ services:
       edge:
         aliases: [lms-web]
 
+  # Telegram-бот (решение 0005): long polling, наружу не публикуется. Тот же образ, что web;
+  # миграции применяет web, поэтому бот стартует после него.
+  bot:
+    <<: *logging
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@db:5432/lms
+    command: ["python", "-m", "app.bot.main"]
+    depends_on:
+      db:
+        condition: service_healthy
+      web:
+        condition: service_started
+
 volumes:
   pgdata:
 

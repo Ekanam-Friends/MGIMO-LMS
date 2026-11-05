@@ -16,8 +16,13 @@ from app.models.schedule import (
     Teacher,
     lesson_teachers,
 )
+from app.models.telegram import BotCursor, BotNotice, TelegramLink, TelegramLinkCode
 
 __all__ = [
+    "BotCursor",
+    "BotNotice",
+    "TelegramLink",
+    "TelegramLinkCode",
     "AuthSession",
     "User",
     "CertificateRequest",

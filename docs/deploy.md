@@ -40,7 +40,22 @@ docker compose exec web python -m app.seed
 ```
 
 На стенде импортированы только две группы демо-студентов (1987 занятий за семестр, 10 секунд).
-Регулярного обновления расписания пока нет.
+Регулярно расписание обновляет бот: раз в `BOT_IMPORT_HOURS` часов по группам подключённых студентов.
+
+## Telegram-бот
+
+Контейнер `bot` (решение [0005](decisions/0005-telegram-bot.md)), long polling — в Caddy ничего
+добавлять не нужно. Один раз в `/opt/mgimo-lms/.env` на сервере:
+
+```
+TELEGRAM_BOT_TOKEN=<от @BotFather>
+TELEGRAM_BOT_USERNAME=Lms_university_ekanamfriends_bot
+PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
+```
+
+`scripts/deploy.sh` поднимает `bot`, только если токен задан. Логи: `docker compose logs -f bot`.
+Если Telegram с сервера отвечает с перебоями — `TELEGRAM_PROXY` (как у бота Ikanam).
+Демонстрация пуша: `docker compose exec bot python -m app.bot.demo_change --login student1`.
 
 ## Подводные камни
 

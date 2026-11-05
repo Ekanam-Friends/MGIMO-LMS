@@ -17,6 +17,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import service as auth
+from app.bot import ics
+from app.bot import link as tg_link
 from app.certificates import service as certs
 from app.models import StudyGroup
 from app.models.certificates import CertificateKind, RequestStatus
@@ -154,7 +156,46 @@ async def profile(request: Request, viewer: Viewer = Depends(current_viewer), db
     group = None
     if viewer.student and viewer.student.study_group_id:
         group = await db.get(StudyGroup, viewer.student.study_group_id)
-    return render(request, "profile.html", viewer, student=viewer.student, group=group)
+    tg = await tg_link.by_student(db, viewer.student.id) if viewer.student else None
+    cfg = request.app.state.settings
+    return render(request, "profile.html", viewer, student=viewer.student, group=group, tg=tg,
+                  bot_username=cfg.telegram_bot_username if cfg.bot_link_enabled else "",
+                  code_minutes=cfg.telegram_link_code_minutes)
+
+
+# --- Telegram-бот (решение 0005) ---
+
+
+@router.post("/profile/telegram/link")
+async def telegram_link(request: Request, viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)) -> Response:
+    cfg = request.app.state.settings
+    if not cfg.bot_link_enabled:
+        raise HTTPException(status_code=404)
+    code = await tg_link.issue_code(db, viewer.student_id, ttl=timedelta(minutes=cfg.telegram_link_code_minutes))
+    await db.commit()
+    return RedirectResponse(f"https://t.me/{cfg.telegram_bot_username}?start={code}", status_code=303)
+
+
+@router.post("/profile/telegram/unlink")
+async def telegram_unlink(viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)) -> Response:
+    await tg_link.unlink(db, viewer.student_id)
+    await db.commit()
+    return RedirectResponse("/profile", status_code=303)
+
+
+@router.get("/feed/{token}.ics")
+async def calendar_feed(token: str, db: AsyncSession = Depends(get_db)) -> Response:
+    """Лента подписки. Без входа: календари не умеют cookie, доступ — по секрету в адресе."""
+    found = await tg_link.by_feed_token(db, token)
+    if found is None:
+        raise HTTPException(status_code=404)
+    link, student = found
+    start = today()
+    body = await ics.build_calendar(db, student.study_group_id, start=start - ics.FEED_BACK, end=start + ics.FEED_AHEAD,
+                                    for_subscription=True, reminder_minutes=link.reminder_minutes)
+    return Response(body, media_type="text/calendar; charset=utf-8",
+                    headers={"Cache-Control": "private, max-age=900", "Content-Disposition": 'inline; filename="mgimo.ics"',
+                             "X-Robots-Tag": "noindex"})
 
 
 # --- справки (студенческий офис) ---
