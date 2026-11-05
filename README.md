@@ -8,6 +8,19 @@
 > «Вайб-кодинг») и не является официальным сервисом МГИМО. Все данные вымышленные,
 > к системам вуза прототип не подключён.
 
+## Как войти
+
+Демо: **https://lms-university.ekanamfriends.ru**
+
+| Логин | Пароль | Кто это |
+|-------|--------|---------|
+| `student1` | `mgimo-Oxq9JJow` | Вымыслова Алиса, 3-й курс, журналистика (группа 3МЖ-02) |
+| `student2` | `mgimo-Oxq9JJow` | Придумкин Егор, 2-й курс, международные отношения (группа 2МО-24) |
+
+Студенты вымышленные, расписание — настоящее, из открытого расписания МГИМО (ФИО
+преподавателей заменены). Пароль общий для демо-учёток и публикуется специально: за ним нет
+реальных данных.
+
 ## Зачем
 
 Сегодня учебная жизнь студента разбросана: расписание на сайте, оценки в отдельной системе,
@@ -69,8 +82,7 @@ Telegram (aiogram) ┘     │
 повторяет ЛК РАНХиГС — см. [решение 0004](docs/decisions/0004-web-shell.md).
 
 ```bash
-cp .env.example .env            # заполнить DATABASE_URL, POSTGRES_PASSWORD, FAKE_NAME_SALT
-docker compose up -d db
+cp .env.example .env            # заполнить DATABASE_URL, FAKE_NAME_SALT, DEMO_PASSWORD
 pip install -e ".[dev]"
 alembic upgrade head
 python -m app.schedule.import_ruz --full    # весь семестр, все группы: ~40 минут
@@ -84,6 +96,8 @@ pytest
 (иначе браузер не сохранит cookie по http) и, например,
 `--group 1МО-01 --group 1МО-02`. Как устроен импорт — в
 [docs/decisions/0002-schedule-source.md](docs/decisions/0002-schedule-source.md).
+
+Выкладка на сервер — `sh scripts/deploy.sh`, устройство стенда — [docs/deploy.md](docs/deploy.md).
 
 ## Как мы это делаем
 
