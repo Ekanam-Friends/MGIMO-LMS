@@ -84,7 +84,7 @@ async def test_create_and_push_to_pyrus(sf, sync, pyrus):
     task = pyrus.tasks[req.pyrus_task_id]
     assert pyrus.field(task["id"], "Студент") == "Тестова Анна Вымышленовна"
     assert pyrus.field(task["id"], "Номер заявки ЛК") == str(rid)
-    assert pyrus.field(task["id"], "Количество экземпляров") == 2
+    assert pyrus.field(task["id"], "Количество экземпляров") == "2"
     assert [e.status for e in await events(sf, rid) if e.kind == EventKind.STATUS] == [RequestStatus.IN_REVIEW]
 
 

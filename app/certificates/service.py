@@ -250,7 +250,7 @@ def task_fields(student: Student, request: CertificateRequest) -> list[dict[str,
         {"name": "Основа обучения", "value": student.education_basis},
         {"name": "Вид справки", "value": CertificateKind.TITLES[request.kind]},
         {"name": "Куда требуется", "value": request.purpose or "по месту требования"},
-        {"name": "Количество экземпляров", "value": request.copies},
+        {"name": "Количество экземпляров", "value": str(request.copies)},
         {"name": "Номер заявки ЛК", "value": str(request.id)},
         {"name": "Выдача", "value": "только на бумаге" if request.kind in CertificateKind.PAPER_ONLY
                                     else "электронно, оригинал по запросу"},
