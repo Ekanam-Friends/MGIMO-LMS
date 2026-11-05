@@ -125,7 +125,7 @@ async def test_logout_kills_session(client):
 
 async def test_all_pages_render(client):
     await login(client)
-    for path in ["/", "/schedule", "/profile", "/mfc/certificates", "/s/grades", "/s/assistant", "/s/notifications"]:
+    for path in ["/", "/schedule", "/profile", "/mfc/certificates", "/s/grades", "/s/assistant", "/s/notifications", "/services"]:
         r = await client.get(path)
         assert r.status_code == 200, path
         assert "концепт для конкурса" in r.text.lower(), path

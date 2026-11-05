@@ -76,10 +76,10 @@
     </section>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/s/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
       <div class="services">
         {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
-          <a class="service" href="/s/services"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+          <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
         {% endfor %}
       </div>
     </section>

@@ -316,3 +316,7 @@ small { font-size: 12px; }
 /* Профиль: блок Telegram-бота */
 .tg { margin-top: 16px; }
 .tg__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tg__feed { width: 100%; font-family: monospace; font-size: 12px; margin: 4px 0 8px; }
+.svc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.svc-list__item { display: flex; gap: 12px; align-items: center; }
+.svc-list__item .service__logo { flex: none; }

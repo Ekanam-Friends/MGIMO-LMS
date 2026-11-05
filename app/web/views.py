@@ -24,7 +24,7 @@ from app.models import StudyGroup
 from app.models.certificates import CertificateKind, RequestStatus
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
-from app.web.nav import MENU, STUBS, TABBAR
+from app.web.nav import MENU, SERVICES, STUBS, TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, sv=sv, KINDS=CertificateKind.TITLES)
@@ -156,11 +156,26 @@ async def profile(request: Request, viewer: Viewer = Depends(current_viewer), db
     group = None
     if viewer.student and viewer.student.study_group_id:
         group = await db.get(StudyGroup, viewer.student.study_group_id)
+    return render(request, "profile.html", viewer, student=viewer.student, group=group,
+                  **await _telegram_ctx(request, viewer, db))
+
+
+async def _telegram_ctx(request: Request, viewer: Viewer, db: AsyncSession) -> dict:
+    """Данные блока «Telegram-бот» (partials/_telegram.html): привязка только своего студента."""
     tg = await tg_link.by_student(db, viewer.student.id) if viewer.student else None
     cfg = request.app.state.settings
-    return render(request, "profile.html", viewer, student=viewer.student, group=group, tg=tg,
-                  bot_username=cfg.telegram_bot_username if cfg.bot_link_enabled else "",
-                  code_minutes=cfg.telegram_link_code_minutes)
+    return {"tg": tg, "bot_username": cfg.telegram_bot_username if cfg.bot_link_enabled else "",
+            "code_minutes": cfg.telegram_link_code_minutes}
+
+
+@router.get("/services", response_class=HTMLResponse)
+async def services(request: Request, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)) -> HTMLResponse:
+    ctx = await _telegram_ctx(request, viewer, db)
+    cfg = request.app.state.settings
+    tg = ctx["tg"]
+    return render(request, "services.html", viewer, student=viewer.student, services=SERVICES,
+                  feed_url=cfg.feed_url(tg.feed_token) if tg else "",
+                  webcal_url=cfg.webcal_url(tg.feed_token) if tg else "", **ctx)
 
 
 # --- Telegram-бот (решение 0005) ---
@@ -177,10 +192,12 @@ async def telegram_link(request: Request, viewer: Viewer = Depends(check_csrf), 
 
 
 @router.post("/profile/telegram/unlink")
-async def telegram_unlink(viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)) -> Response:
+async def telegram_unlink(back: str = Form("/profile"), viewer: Viewer = Depends(check_csrf),
+                         db: AsyncSession = Depends(get_db)) -> Response:
     await tg_link.unlink(db, viewer.student_id)
     await db.commit()
-    return RedirectResponse("/profile", status_code=303)
+    # Возврат только на свои страницы: произвольный адрес из формы — открытый редирект.
+    return RedirectResponse(back if back in ("/profile", "/services") else "/profile", status_code=303)
 
 
 @router.get("/feed/{token}.ics")

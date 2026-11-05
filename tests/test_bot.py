@@ -170,6 +170,34 @@ async def test_profile_link_flow_and_feed(client, db):
     assert (await client.get(f"/feed/{link.feed_token}.ics")).status_code == 404
 
 
+async def test_services_page_shows_bot_and_own_feed(client, db):
+    _, sf = db
+    await _login(client)
+    page = await client.get("/services")
+    assert page.status_code == 200
+    assert "Подключить Telegram" in page.text and "появится после подключения" in page.text
+    csrf = re.search(r'name="csrf" value="([^"]+)"', page.text).group(1)
+
+    async with sf() as s:  # anna — студент 1
+        link, _ = await links.consume_code(s, await links.issue_code(s, 1, ttl=timedelta(minutes=5)), telegram_id=555)
+        other, _ = await links.consume_code(s, await links.issue_code(s, 2, ttl=timedelta(minutes=5)), telegram_id=777)
+        await s.commit()
+    page = await client.get("/services")
+    assert "Подключён" in page.text
+    assert f"https://lms.test/feed/{link.feed_token}.ics" in page.text
+    assert f"webcal://lms.test/feed/{link.feed_token}.ics" in page.text
+    assert other.feed_token not in page.text  # чужая лента не видна
+
+    r = await client.post("/profile/telegram/unlink", data={"csrf": csrf, "back": "/services"})
+    assert r.status_code == 303 and r.headers["location"] == "/services"
+
+
+async def test_unlink_back_is_not_open_redirect(client, db):
+    csrf = await _login(client)
+    r = await client.post("/profile/telegram/unlink", data={"csrf": csrf, "back": "https://evil.example/"})
+    assert r.status_code == 303 and r.headers["location"] == "/profile"
+
+
 async def test_staff_cannot_issue_code(client, db):
     _, sf = db
     async with sf() as s:
