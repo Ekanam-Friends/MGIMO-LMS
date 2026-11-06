@@ -1,0 +1,8 @@
+#!/bin/sh
+# ForceCommand для участников с доступом «только к проекту» (docs/deploy.md, задача #21).
+# Шелла на сервере у них нет: любая ssh-команда превращается в вызов обёртки mgimo-lms.
+# Строка делится на слова без подстановок (set -f), shell её не исполняет.
+set -f
+# shellcheck disable=SC2086
+set -- ${SSH_ORIGINAL_COMMAND:-help}
+exec sudo -n /usr/local/bin/mgimo-lms "$@"

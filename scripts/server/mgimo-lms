@@ -1,0 +1,98 @@
+#!/bin/sh
+# Ограниченный доступ участника команды к стенду кабинета (задача #21, docs/deploy.md).
+# Ставится на сервер в /usr/local/bin/mgimo-lms (root:root 755), вызывается только через
+# sudo из mgimo-lms-ssh. Работает с одним compose-проектом /opt/mgimo-lms и ничем больше:
+# группа docker дала бы root на всём VPS, включая соседний проект Ikanam.
+#
+# Аргументы приходят без shell: никакого eval, сервисы и модули — по белому списку.
+set -eu
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DIR=/opt/mgimo-lms
+WHO=${SUDO_USER:-unknown}
+cd "$DIR"
+logger -t mgimo-lms -- "$WHO: $*" 2>/dev/null || true
+
+dc() { docker compose --project-directory "$DIR" "$@"; }
+
+usage() {
+  cat <<'EOF'
+Команды (ssh <пользователь>@195.24.71.184 <команда>):
+  status                       контейнеры проекта
+  logs [web|bot|db] [N] [-f]   последние N строк логов (по умолчанию 200), -f — следить
+  restart [web|bot]            перезапуск без пересборки (по умолчанию web)
+  deploy                       выкладка: архив git на stdin, пересборка web и bot
+                               git archive --format=tar HEAD | ssh ... deploy
+  seed                         python -m app.seed
+  run <app.модуль> [арг...]    python -m <модуль> внутри web, например
+                               run app.schedule.import_ruz --full --group 24МЖ-02
+  shell [web|bot]              sh внутри контейнера (нужен ssh -t)
+  psql                         psql к базе проекта (нужен ssh -t)
+EOF
+}
+
+service() { # $1 — значение, $2... — допустимые
+  v=$1; shift
+  for s in "$@"; do [ "$v" = "$s" ] && return 0; done
+  echo "Недопустимый сервис: $v (можно: $*)" >&2; exit 2
+}
+
+tty_flag() { [ -t 0 ] && [ -t 1 ] && echo "" || echo "-T"; }
+
+cmd=${1:-help}
+[ $# -gt 0 ] && shift
+
+case "$cmd" in
+  status) dc ps ;;
+
+  logs)
+    svc=web; n=200; follow=""
+    for a in "$@"; do
+      case "$a" in
+        -f) follow="-f" ;;
+        *[!0-9]*) service "$a" web bot db; svc=$a ;;
+        *) n=$a ;;
+      esac
+    done
+    dc logs --tail "$n" $follow "$svc" ;;
+
+  restart)
+    svc=${1:-web}; service "$svc" web bot
+    dc restart "$svc" ;;
+
+  deploy)
+    tmp=$(mktemp -d /tmp/mgimo-deploy.XXXXXX)
+    trap 'rm -rf "$tmp"' EXIT
+    tar -x -C "$tmp" --no-same-owner --no-same-permissions
+    # Ссылки в архиве могли бы указать за пределы проекта — такой архив не принимаем.
+    if [ -n "$(find "$tmp" -type l -print -quit)" ]; then
+      echo "В архиве есть символические ссылки — выкладка отменена." >&2; exit 3
+    fi
+    # Конфигурацию запуска меняет только root: compose решает, что монтируется с хоста.
+    rm -f "$tmp"/docker-compose*.yml "$tmp"/compose*.yml "$tmp"/.env "$tmp"/.env.bak*
+    cp -R "$tmp"/. "$DIR"/
+    dc up -d --build web
+    if grep -q '^TELEGRAM_BOT_TOKEN=.' .env; then dc up -d --build bot
+    else echo "TELEGRAM_BOT_TOKEN не задан — бот не запущен"; fi
+    dc ps ;;
+
+  seed) dc exec -T web python -m app.seed ;;
+
+  run)
+    mod=${1:-}
+    case "$mod" in
+      app.*) ;;
+      *) echo "Нужен модуль вида app.что_то" >&2; exit 2 ;;
+    esac
+    case "$mod" in *[!A-Za-z0-9_.]*) echo "Недопустимое имя модуля" >&2; exit 2 ;; esac
+    shift
+    dc exec -T web python -m "$mod" "$@" ;;
+
+  shell)
+    svc=${1:-web}; service "$svc" web bot
+    dc exec $(tty_flag) "$svc" sh ;;
+
+  psql) dc exec $(tty_flag) db psql -U lms -d lms ;;
+
+  help|-h|--help) usage ;;
+  *) echo "Неизвестная команда: $cmd" >&2; usage >&2; exit 2 ;;
+esac

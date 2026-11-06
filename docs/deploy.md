@@ -97,8 +97,30 @@ psql -h localhost -p 5433 -U kostya -d lms
 Отозвать: `userdel -r kostya`, удалить `70-kostya-db-tunnel.conf`, `systemctl reload ssh`,
 в базе `REASSIGN OWNED BY kostya TO lms; DROP OWNED BY kostya; DROP ROLE kostya;`.
 
-**Келли (kelleshh)** — доступ к серверу в рамках проекта пока не выдан (задача #21): группа
-`docker` даёт root на всём VPS, включая Ikanam, поэтому нужен отдельный механизм.
+**Келли (kelleshh)** — выдано 2026-11-06, только этот проект:
+
+- Linux-пользователь `kelli` без пароля, ключ — с её GitHub. Шелла на сервере нет:
+  sshd (`/etc/ssh/sshd_config.d/71-kelli-mgimo-lms.conf`) любую команду отдаёт в
+  `/usr/local/bin/mgimo-lms-ssh`, а та — через sudo в обёртку `/usr/local/bin/mgimo-lms`.
+  В sudoers (`/etc/sudoers.d/mgimo-lms-kelli`) разрешена только эта обёртка.
+- Обёртка ([scripts/server/mgimo-lms](../scripts/server/mgimo-lms), на сервер ставится
+  руками root-ом) работает только с compose-проектом `/opt/mgimo-lms`: сервисы и модули по
+  белому списку, каждый вызов пишется в журнал (`journalctl -t mgimo-lms`). В группу docker
+  Келли не добавлена: это был бы root на всём VPS, включая Ikanam.
+- При `deploy` обёртка не принимает архивы с символическими ссылками и выбрасывает из них
+  `docker-compose*.yml` и `.env`: что монтируется с хоста, решает только root.
+
+```bash
+ssh kelli@195.24.71.184 help
+ssh kelli@195.24.71.184 status
+ssh kelli@195.24.71.184 logs web 100
+DEPLOY_HOST=kelli@195.24.71.184 sh scripts/deploy.sh
+ssh -t kelli@195.24.71.184 psql
+```
+
+Обновить обёртку: `scp scripts/server/mgimo-lms* root@…:/tmp/` и `install -m 755` в
+`/usr/local/bin`. Отозвать: `userdel -r kelli`, удалить `71-kelli-mgimo-lms.conf` и
+`/etc/sudoers.d/mgimo-lms-kelli`, `systemctl reload ssh`.
 
 ## Подводные камни
 
