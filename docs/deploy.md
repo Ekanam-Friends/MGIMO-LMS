@@ -65,6 +65,41 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 упадёт, наш бот потеряет связь с Telegram вместе с ним.
 Демонстрация пуша: `docker compose exec bot python -m app.bot.demo_change --login student1`.
 
+## Доступ к базе для команды
+
+База наружу не открыта: compose публикует её только на `127.0.0.1:5433` сервера (5432 на
+хосте занят базой Ikanam). Участник ходит через SSH-туннель.
+
+**Костя (raxlin4ik)** — выдано 2026-11-06:
+
+- Linux-пользователь `kostya` без пароля и без шелла, ключ — с его GitHub
+  (`github.com/raxlin4ik.keys`). В `authorized_keys` и в `/etc/ssh/sshd_config.d/70-kostya-db-tunnel.conf`
+  ему разрешён только проброс на `127.0.0.1:5433`: ни команд, ни терминала, ни других портов.
+- Роль PostgreSQL `kostya`: чтение и запись данных во всех таблицах `public`, без права
+  создавать и менять таблицы — схема меняется только миграциями Alembic. Новые таблицы из
+  миграций получают те же права автоматически (`ALTER DEFAULT PRIVILEGES FOR ROLE lms`).
+  Не больше 5 соединений.
+- Пароль роли лежит только на сервере: `/root/access/kostya-postgres.txt` (600). Передавать
+  лично, не в чат проекта и не в репозиторий.
+
+Подключение со своего компьютера:
+
+```bash
+ssh -N -L 5433:127.0.0.1:5433 kostya@195.24.71.184
+```
+
+и в другом окне (или в DBeaver / DataGrip: host `localhost`, port `5433`, db `lms`, user `kostya`):
+
+```bash
+psql -h localhost -p 5433 -U kostya -d lms
+```
+
+Отозвать: `userdel -r kostya`, удалить `70-kostya-db-tunnel.conf`, `systemctl reload ssh`,
+в базе `REASSIGN OWNED BY kostya TO lms; DROP OWNED BY kostya; DROP ROLE kostya;`.
+
+**Келли (kelleshh)** — доступ к серверу в рамках проекта пока не выдан (задача #21): группа
+`docker` даёт root на всём VPS, включая Ikanam, поэтому нужен отдельный механизм.
+
 ## Подводные камни
 
 - **Caddyfile монтируется в контейнер одним файлом.** Если файл на хосте заменить целиком

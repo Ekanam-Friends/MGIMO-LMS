@@ -1,5 +1,5 @@
 # Стенд кабинета на общем VPS (решение 0001): своя база, свой web, своя docker-сеть.
-# Наружу ничего не публикуется. HTTPS делает общий Caddy проекта Ikanam-schedule:
+# Наружу ничего не публикуется (порт базы — только на 127.0.0.1 сервера). HTTPS делает общий Caddy проекта Ikanam-schedule:
 # он подключён к внешней сети `edge` и проксирует lms-university.ekanamfriends.ru на lms-web:8000
 # (см. docs/deploy.md).
 #
@@ -26,6 +26,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задай POSTGRES_PASSWORD в .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # Только на loopback сервера: снаружи порт закрыт, участники команды ходят через
+    # SSH-туннель (см. docs/deploy.md, «Доступ к базе»). 5432 на хосте занят базой Ikanam.
+    ports:
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lms -d lms"]
       interval: 5s
