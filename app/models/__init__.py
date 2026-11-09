@@ -7,6 +7,15 @@ from app.models.certificates import (
     Student,
     StudentReply,
 )
+from app.models.grades import (
+    Assessment,
+    Course,
+    CourseEnrollment,
+    Discipline,
+    FinalGrade,
+    GradeEvent,
+    Score,
+)
 from app.models.schedule import (
     Faculty,
     ImportRun,
@@ -23,6 +32,13 @@ __all__ = [
     "Activity",
     "ActivitySignup",
     "ElectiveChoice",
+    "Assessment",
+    "Course",
+    "CourseEnrollment",
+    "Discipline",
+    "FinalGrade",
+    "GradeEvent",
+    "Score",
     "BotCursor",
     "BotNotice",
     "TelegramLink",

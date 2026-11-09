@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "partials/_lesson.html" import slot_card %}
+{% from "teacher/_macros.html" import crumbs %}
+{% block title %}Расписание{% endblock %}
+{% block header %}{{ crumbs([("Расписание", none)]) }}{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page__head">
+    <h1 class="title-1">Расписание</h1>
+    <div class="week-nav">
+      <a class="week-nav__btn" href="/t/schedule?week={{ prev_week.isoformat() }}" aria-label="Предыдущая неделя">{{ icon("chev-left") }}</a>
+      <span class="week-nav__label">{{ days[0].day }} {{ sv.MONTHS_GEN[days[0].month - 1] }} — {{ days[-1].day }} {{ sv.MONTHS_GEN[days[-1].month - 1] }} {{ days[-1].year }}</span>
+      <a class="week-nav__btn" href="/t/schedule?week={{ next_week.isoformat() }}" aria-label="Следующая неделя">{{ icon("chev-right") }}</a>
+      <a class="btn btn--ghost" href="/t/schedule">Сегодня</a>
+    </div>
+  </div>
+  {% if not lessons %}<p class="alert">На этой неделе занятий нет.</p>{% endif %}
+  <div class="week-grid">
+    {% for d in days %}
+      {% set slots = lessons.get(d, []) %}
+      {% if slots %}
+      <section class="week-day" id="d-{{ d.isoformat() }}">
+        <h2 class="week-day__title">{{ sv.WEEKDAYS_FULL[d.weekday()] }}, {{ d.day }} {{ sv.MONTHS_GEN[d.month - 1] }}{% if d == today %} <span class="badge badge--red">сегодня</span>{% endif %}</h2>
+        {% for slot in slots %}{{ slot_card(slot) }}{% endfor %}
+      </section>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <p class="page__note">Источник — открытое расписание МГИМО (РУЗ). ФИО преподавателей заменены на вымышленные.</p>
+</div>
+{% endblock %}

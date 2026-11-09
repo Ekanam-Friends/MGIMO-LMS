@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import crumbs %}
+{% block title %}Домашние задания{% endblock %}
+{% block header %}{{ crumbs([("Домашние задания", none)]) }}{% endblock %}
+{% macro hw_list(items, empty) -%}
+  {% if items %}
+  <ul class="hw-list">
+    {% for i in items %}
+      <li><a class="hw" href="/t/courses/{{ i.card.course.id }}/assessments/{{ i.assessment.id }}">
+        <span class="hw__date">{{ i.assessment.due_date.strftime("%d.%m") if i.assessment.due_date else "—" }}</span>
+        <span class="hw__body"><span class="hw__title">{{ i.assessment.title }}</span><small class="muted">{{ i.card.discipline }} · {{ i.card.group }}</small></span>
+        <span class="hw__count">{{ i.submitted }}/{{ i.students }}</span>
+      </a></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="muted">{{ empty }}</p>{% endif %}
+{%- endmacro %}
+{% block content %}
+<div class="page page--narrow">
+  <h1 class="title-1">Домашние задания</h1>
+  <section class="panel{% if to_check %} panel--accent{% endif %}">
+    <h2 class="panel__title">Ждут проверки <span class="badge badge--{{ 'red' if to_check else 'grey' }}">{{ to_check | length }}</span></h2>
+    {{ hw_list(to_check, "Всё проверено — так держать.") }}
+  </section>
+  <section class="panel">
+    <h2 class="panel__title">Срок ещё не наступил</h2>
+    {{ hw_list(upcoming, "Нет заданий с будущим сроком. Новое задание создаётся в журнале курса.") }}
+  </section>
+  {% if done %}
+  <details class="panel">
+    <summary class="panel__title">Проверенные ({{ done | length }})</summary>
+    {{ hw_list(done, "") }}
+  </details>
+  {% endif %}
+  <p class="page__note">Справа — сколько студентов уже получили баллы за задание.</p>
+</div>
+{% endblock %}

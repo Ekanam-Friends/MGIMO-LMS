@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import progress %}
+{% block title %}Мои курсы{% endblock %}
+{% block header %}<p class="header__title">Кабинет преподавателя</p>{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page__head">
+    <div>
+      <p class="muted">Здравствуйте, {{ viewer.teacher.full_name.split()[1:] | join(" ") }}</p>
+      <h1 class="title-1">Мои курсы</h1>
+    </div>
+    {% if years | length > 1 %}
+    <nav class="chips" aria-label="Учебный год">
+      {% for y in years %}<a class="chip{% if y == shown %} chip--on{% endif %}" href="/t/courses?year={{ y }}">{{ y }}</a>{% endfor %}
+    </nav>
+    {% endif %}
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="stat__num">{{ cards | length }}</span><span class="stat__label">ведомостей</span></div>
+    <div class="stat"><span class="stat__num">{{ students_total }}</span><span class="stat__label">студентов</span></div>
+    <div class="stat"><span class="stat__num">{{ due_soon | length }}</span><span class="stat__label">сроков ДЗ на неделе</span></div>
+  </div>
+
+  {% if cards %}
+  <div class="course-grid">
+    {% for c in cards %}
+      <a class="course-card" href="/t/courses/{{ c.course.id }}">
+        <div class="course-card__top">
+          <span class="work-type work-type--{{ 'exam' if c.course.control_form == 'exam' else 'seminar' }}">{{ c.form_title }}</span>
+          {% if c.course.status == "closed" %}<span class="badge badge--grey">ведомость закрыта</span>{% endif %}
+        </div>
+        <p class="course-card__title">{{ c.discipline }}</p>
+        <p class="course-card__meta">{{ icon("user", 14) }} {{ c.group }}{% if c.course.subgroup %}, {{ c.course.subgroup }}{% endif %} · {{ c.students }} студ. · {{ c.course.semester }}-й семестр</p>
+        <div class="course-card__progress">
+          {% if c.avg_percent is not none %}{{ progress(c.avg_percent, 100, false) }}<span class="meter__label">средний {{ c.avg_percent | pts }} %</span>
+          {% else %}<span class="muted">Заданий пока нет</span>{% endif %}
+        </div>
+        <p class="course-card__meta">{{ icon("book", 14) }} заданий: {{ c.assessments }}{% if c.next_due %} · ближайший срок {{ c.next_due | ddmmyyyy }}{% endif %}</p>
+      </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <section class="panel empty">
+    <p class="empty__title">Курсов в этом учебном году нет</p>
+    <p class="muted">Ведомости создаёт деканат по учебному плану. Если курс должен быть здесь — напишите в деканат.</p>
+  </section>
+  {% endif %}
+
+  {% if activity %}
+  <section class="panel">
+    <h2 class="panel__title">Последние оценки</h2>
+    <ul class="timeline">
+      {% for at, text in activity %}<li><span class="timeline__date">{{ at | ddmmyyyy }} {{ at | hhmm }}</span><span>{{ text }}</span></li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

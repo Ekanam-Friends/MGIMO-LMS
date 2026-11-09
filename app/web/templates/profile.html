@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% block title %}Профиль{% endblock %}
-{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
+{% block header %}<nav class="breadcr"><a href="{{ '/t/courses' if viewer.teacher else '/' }}" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
   <h1 class="title-1">Профиль</h1>
@@ -26,6 +26,19 @@
     <p class="page__note">Данные вымышленные. В рабочей версии они приходили бы из 1С:Университет.</p>
   </section>
   {% set back = "/profile" %}{% include "partials/_telegram.html" %}
+  {% elif viewer.teacher %}
+  <section class="panel profile">
+    <div class="profile__head">
+      <span class="avatar avatar--big">{{ viewer.teacher.full_name[:1] }}</span>
+      <div><p class="profile__name">{{ viewer.teacher.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }} · преподаватель</p></div>
+    </div>
+    <dl class="props">
+      <dt>Ведомостей</dt><dd>{{ teacher_courses | length }}</dd>
+      <dt>Групп</dt><dd>{{ teacher_courses | map(attribute="group") | unique | list | length }}</dd>
+      <dt>Дисциплины</dt><dd>{{ teacher_courses | map(attribute="discipline") | unique | sort | join(", ") or "—" }}</dd>
+    </dl>
+    <p class="page__note">ФИО вымышленное: при импорте расписания каждому преподавателю РУЗ присваивается сгенерированное имя.</p>
+  </section>
   {% else %}
     <p class="alert">Учётная запись сотрудника: студенческих данных нет.</p>
   {% endif %}

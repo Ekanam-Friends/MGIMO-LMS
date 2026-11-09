@@ -122,6 +122,23 @@ ssh -t kelli@195.24.71.184 psql
 `/usr/local/bin`. Отозвать: `userdel -r kelli`, удалить `71-kelli-mgimo-lms.conf` и
 `/etc/sudoers.d/mgimo-lms-kelli`, `systemctl reload ssh`.
 
+## Успеваемость и вымышленный контингент (решение 0007)
+
+Миграция 0007 применяется сама при старте web (`alembic upgrade head` в Dockerfile). После
+выкладки данные создаются один раз:
+
+```bash
+docker compose exec web python -m app.seed       # student1, student2, dean
+docker compose exec web python -m app.generate   # ~3000 студентов, ведомости, баллы, teacher1/teacher2
+```
+
+Или со своего компьютера через туннель ролью `kostya` (схему она не меняет, данные — может):
+в локальном `.env` `DATABASE_URL=postgresql+asyncpg://kostya:<пароль>@localhost:5433/lms` и
+`DEMO_PASSWORD` — тот же, что на стенде (README), затем те же две команды без `docker compose exec web`.
+
+Повторный запуск ничего не дублирует. `--reset` стирает сгенерированных студентов и **всю**
+успеваемость, включая баллы, поставленные руками, — на стенде во время показа не запускать.
+
 ## Подводные камни
 
 - **Caddyfile монтируется в контейнер одним файлом.** Если файл на хосте заменить целиком

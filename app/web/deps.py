@@ -9,7 +9,7 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import service as auth
-from app.models import Student
+from app.models import Student, Teacher
 from app.models.auth import AuthSession, User
 
 COOKIE_NAME = "lms_session"
@@ -29,6 +29,7 @@ class Viewer:
     user: User
     auth_session: AuthSession
     student: Student | None
+    teacher: Teacher | None = None
 
     @property
     def csrf(self) -> str:
@@ -41,6 +42,13 @@ class Viewer:
             raise HTTPException(status_code=404)
         return self.student.id
 
+    @property
+    def teacher_id(self) -> int:
+        """id преподавателя для фильтра ведомостей. Только отсюда — никогда из параметров запроса."""
+        if self.teacher is None:
+            raise HTTPException(status_code=404)
+        return self.teacher.id
+
 
 async def current_viewer(request: Request, db: AsyncSession = Depends(get_db)) -> Viewer:
     found = await auth.resolve(db, request.cookies.get(COOKIE_NAME))
@@ -48,7 +56,8 @@ async def current_viewer(request: Request, db: AsyncSession = Depends(get_db)) -
         raise LoginRequired
     user, auth_session = found
     student = await db.get(Student, user.student_id) if user.student_id else None
-    return Viewer(user=user, auth_session=auth_session, student=student)
+    teacher = await db.get(Teacher, user.teacher_id) if user.teacher_id else None
+    return Viewer(user=user, auth_session=auth_session, student=student, teacher=teacher)
 
 
 async def check_csrf(request: Request, viewer: Viewer = Depends(current_viewer)) -> Viewer:

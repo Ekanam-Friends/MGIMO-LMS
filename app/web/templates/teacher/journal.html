@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import crumbs, result_badge %}
+{% block title %}{{ j.card.discipline }} · {{ j.card.group }}{% endblock %}
+{% block header %}{{ crumbs([(j.card.group, none)]) }}{% endblock %}
+{% block content %}
+{% set c = j.card.course %}
+<div class="page">
+  <div class="page__head">
+    <div>
+      <p class="muted">{{ j.card.group }}{% if c.subgroup %}, {{ c.subgroup }}{% endif %} · {{ c.semester }}-й семестр · {{ c.academic_year }} · {{ j.card.form_title }}</p>
+      <h1 class="title-2">{{ j.card.discipline }}</h1>
+    </div>
+    <div class="actions">
+      {% if not j.locked %}<a class="btn btn--primary" href="/t/courses/{{ c.id }}/assessments/new">+ Задание</a>{% endif %}
+      <a class="btn btn--ghost" href="/t/courses/{{ c.id }}/final">Итоговая ведомость</a>
+    </div>
+  </div>
+
+  {% if j.locked %}<p class="alert">Ведомость закрыта {{ c.closed_at | ddmmyyyy }}. Баллы и итоги только для просмотра; пересдачи — в итоговой ведомости.</p>{% endif %}
+
+  <div class="stats">
+    <div class="stat"><span class="stat__num">{{ j.rows | length }}</span><span class="stat__label">студентов</span></div>
+    <div class="stat"><span class="stat__num">{{ j.planned_max | pts }}<small> / {{ j.current_max | pts }}</small></span><span class="stat__label">баллов распределено по заданиям</span></div>
+    <div class="stat{% if j.at_risk %} stat--warn{% endif %}"><span class="stat__num">{{ j.at_risk | length }}</span><span class="stat__label">в зоне риска (&lt; 55 % от возможного)</span></div>
+  </div>
+  {% if j.planned_max > j.current_max %}<p class="alert alert--error">Сумма максимумов заданий ({{ j.planned_max | pts }}) больше максимума накопа ({{ j.current_max | pts }}). Проверьте веса.</p>{% endif %}
+
+  {% if not j.rows %}
+    <section class="panel empty"><p class="empty__title">В ведомости нет студентов</p><p class="muted">Состав группы ведёт деканат.</p></section>
+  {% elif not j.assessments %}
+    <section class="panel empty">
+      <p class="empty__title">Заданий пока нет</p>
+      <p class="muted">Добавьте домашнее задание, контрольную или «работу на семинарах» — баллы за них сложатся в накоп.</p>
+      {% if not j.locked %}<a class="btn btn--primary" href="/t/courses/{{ c.id }}/assessments/new">Добавить первое задание</a>{% endif %}
+    </section>
+  {% else %}
+  <section class="panel panel--flush">
+    <div class="journal-wrap" tabindex="0" aria-label="Журнал баллов, прокручивается по горизонтали">
+      <table class="journal">
+        <thead>
+          <tr>
+            <th class="journal__name" scope="col">Студент</th>
+            {% for a in j.assessments %}
+              <th scope="col" class="journal__a"><a href="/t/courses/{{ c.id }}/assessments/{{ a.id }}" title="{{ AssessmentKind.TITLES.get(a.kind) }}">{{ a.title }}</a>
+                <small>макс. {{ a.max_points | pts }}{% if a.due_date %} · {{ a.due_date.strftime("%d.%m") }}{% endif %}</small></th>
+            {% endfor %}
+            <th scope="col" class="journal__total">Накоп</th>
+            <th scope="col">Итог</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in j.rows %}
+          <tr{% if r in j.at_risk %} class="journal__risk"{% endif %}>
+            <th scope="row" class="journal__name">{{ r.student.full_name }}</th>
+            {% for a in j.assessments %}
+              <td>{% with score = r.scores.get(a.id), student_id = r.student.id, course_id = c.id, raw = none, error = none, saved = false, oob = false, locked = j.locked %}{% include "teacher/_score_cell.html" %}{% endwith %}</td>
+            {% endfor %}
+            <td class="journal__total"><span id="total-{{ r.student.id }}" class="total">{{ r.current | pts }}</span></td>
+            <td>{{ result_badge(r.final.result if r.final else none) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <p class="page__note">Баллы сохраняются сразу при выходе из поля. Пустое поле — балл удалён. Шаг — полбалла, дробь через запятую.</p>
+  {% endif %}
+</div>
+{% endblock %}

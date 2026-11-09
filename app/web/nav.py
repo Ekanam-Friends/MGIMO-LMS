@@ -10,7 +10,7 @@ from __future__ import annotations
 MENU = [
     {"title": "Расписание", "icon": "calendar", "href": "/schedule"},
     {"title": "Учёба", "icon": "cap", "children": [
-        {"title": "Успеваемость", "href": "/s/grades"},
+        {"title": "Успеваемость", "href": "/grades"},
         {"title": "Учебный план", "href": "/s/plan"},
     ]},
     {"title": "Элективные дисциплины", "icon": "book", "href": "/electives"},
@@ -30,6 +30,20 @@ MENU = [
     {"title": "Справочная информация", "icon": "chat", "href": "/s/info"},
 ]
 
+# Кабинет преподавателя (решение 0007): свой короткий набор разделов.
+TEACHER_MENU = [
+    {"title": "Мои курсы", "icon": "cap", "href": "/t/courses"},
+    {"title": "Домашние задания", "icon": "book", "href": "/t/homework"},
+    {"title": "Расписание", "icon": "calendar", "href": "/t/schedule"},
+    {"title": "Профиль", "icon": "user", "href": "/profile"},
+]
+TEACHER_TABBAR = [
+    {"title": "Курсы", "icon": "cap", "href": "/t/courses"},
+    {"title": "Задания", "icon": "book", "href": "/t/homework"},
+    {"title": "Расписание", "icon": "calendar", "href": "/t/schedule"},
+    {"title": "Профиль", "icon": "user", "href": "/profile"},
+]
+
 TABBAR = [
     {"title": "Главная", "icon": "home", "href": "/"},
     {"title": "Расписание", "icon": "calendar", "href": "/schedule"},
@@ -38,8 +52,8 @@ TABBAR = [
 ]
 
 STUBS = {
-    "grades": {"title": "Успеваемость", "text": "Электронная зачётная книжка: оценки по семестрам, средний балл, долги.",
-               "plan": "Обязательное ядро (решение 0001). Нужны таблица оценок и seed с вымышленными оценками; виджет «Текущая успеваемость» на главной подключится к ней же."},
+    "contests": {"title": "Конкурсы", "text": "Конкурсы, портфолио и рейтинг студента.",
+                 "plan": "Пока без бэкенда и без решения, нужен ли раздел в прототипе."},
     "plan": {"title": "Учебный план", "text": "Дисциплины по семестрам, часы и формы контроля.",
              "plan": "Можно собрать из дисциплин РУЗ по группе студента."},
     "military": {"title": "Воинский учёт", "text": "Сведения о воинском учёте и заказ справки для военкомата.",

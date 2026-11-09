@@ -13,7 +13,7 @@ from datetime import date, time, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Lesson, LessonGroup, Teacher, lesson_teachers
+from app.models import Lesson, LessonGroup, StudyGroup, Teacher, lesson_teachers
 from app.models.schedule import LessonStatus
 
 WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
@@ -36,6 +36,8 @@ class LessonView:
     subgroup: str
     teachers: list[str]
     cancelled: bool
+    groups: list[str] = field(default_factory=list)
+    """Для расписания преподавателя: какие группы на занятии."""
 
     @property
     def kind_class(self) -> str:
@@ -78,6 +80,37 @@ async def lessons_for(
         .where(LessonGroup.group_id == group_id, Lesson.date >= start, Lesson.date <= end)
         .order_by(Lesson.date, Lesson.begins_at, Lesson.discipline)
     )).scalars().all()
+    return await _arrange(session, list(rows))
+
+
+async def teacher_lessons_for(
+    session: AsyncSession, teacher_id: int | None, start: date, end: date
+) -> dict[date, list[Slot]]:
+    """Занятия преподавателя за [start, end] с группами на каждом. id — только из сессии."""
+    if teacher_id is None:
+        return {}
+    rows = (await session.execute(
+        select(Lesson)
+        .join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
+        .where(lesson_teachers.c.teacher_id == teacher_id, Lesson.date >= start, Lesson.date <= end)
+        .order_by(Lesson.date, Lesson.begins_at, Lesson.discipline)
+    )).scalars().all()
+    if not rows:
+        return {}
+    group_rows = (await session.execute(
+        select(LessonGroup.lesson_id, StudyGroup.number)
+        .join(StudyGroup, StudyGroup.id == LessonGroup.group_id)
+        .where(LessonGroup.lesson_id.in_([r.id for r in rows]))
+    )).all()
+    groups: dict[int, list[str]] = defaultdict(list)
+    for lesson_id, number in group_rows:
+        groups[lesson_id].append(number)
+    return await _arrange(session, list(rows), groups)
+
+
+async def _arrange(
+    session: AsyncSession, rows: list[Lesson], groups: dict[int, list[str]] | None = None
+) -> dict[date, list[Slot]]:
     if not rows:
         return {}
     teacher_rows = (await session.execute(
@@ -96,6 +129,7 @@ async def lessons_for(
             begins_at=r.begins_at, ends_at=r.ends_at, auditorium=r.auditorium or "",
             building=r.building or "", subgroup=r.subgroup or "",
             teachers=sorted(teachers.get(r.id, [])), cancelled=r.status == LessonStatus.CANCELLED,
+            groups=sorted((groups or {}).get(r.id, [])),
         )
         slots = days[r.date]
         if slots and slots[-1].begins_at == r.begins_at and slots[-1].ends_at == r.ends_at:
