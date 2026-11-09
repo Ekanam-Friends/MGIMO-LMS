@@ -65,6 +65,63 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 упадёт, наш бот потеряет связь с Telegram вместе с ним.
 Демонстрация пуша: `docker compose exec bot python -m app.bot.demo_change --login student1`.
 
+## Корпус для ИИ-ассистента (RAG)
+
+Решение [0007](decisions/0007-rag-assistant-infra.md). Это делает **root** один раз; Келли
+после этого работает через `deploy`, `run app.<модуль>` и `corpus`.
+
+Состояние на 2026-11-10: шаги 1 и 2 выполнены (папка `/opt/mgimo-lms/data/regulations` с 27 PDF и
+`manifest.csv`, монтирование `/data` в `web` и `bot`, команда `corpus` в обёртке). Не сделаны шаги 3 и 4:
+ключей LLM и сертификата на сервере пока нет, выход к провайдеру не проверен.
+
+1. Папка корпуса. Контейнеры работают под uid 1000 (`lms`), поэтому папка принадлежит ему:
+
+   ```bash
+   mkdir -p /opt/mgimo-lms/data/regulations /opt/mgimo-lms/data/ca
+   chown -R 1000:1000 /opt/mgimo-lms/data
+   ```
+
+2. Монтирование. В серверный `/opt/mgimo-lms/docker-compose.override.yml` (он уже есть:
+   там сети и `DATABASE_URL` для бота) **добавить**, не заменяя файл целиком:
+
+   ```yaml
+   services:
+     web:
+       volumes:
+         - /opt/mgimo-lms/data:/data
+     bot:
+       volumes:
+         - /opt/mgimo-lms/data:/data
+   ```
+
+   Применить: `cd /opt/mgimo-lms && docker compose up -d --no-deps web bot`.
+
+3. Ключи — в `/opt/mgimo-lms/.env` (имена — в `.env.example`, блок «ИИ-ассистент»). Значения
+   передаются лично, не в чат и не в репозиторий. Для GigaChat корневой сертификат Минцифры
+   кладётся в `/opt/mgimo-lms/data/ca/`, путь к нему — `GIGACHAT_CA_BUNDLE=/data/ca/<файл>`.
+   После правки `.env`: `docker compose up -d --no-deps web bot` (`restart` переменные не перечитывает).
+
+4. Проверка выхода к провайдеру из контейнера (до написания кода ассистента):
+
+   ```bash
+   docker compose exec web python -c "import urllib.request as u; print(u.urlopen('https://ngw.devices.sberbank.ru:9443', timeout=10).status)"
+   ```
+
+   Ответ с кодом (даже 4xx) — сеть есть; ошибка сертификата — нужен `GIGACHAT_CA_BUNDLE`;
+   таймаут — доступа нет, нужен прокси (как для Telegram). Для YandexGPT адрес —
+   `https://llm.api.cloud.yandex.net`.
+
+   Результат 2026-11-10 из контейнера `web`: GigaChat (`ngw.devices.sberbank.ru:9443`,
+   `gigachat.devices.sberbank.ru`) достижим, но `CERTIFICATE_VERIFY_FAILED` — нужен корневой сертификат
+   Минцифры в `data/ca/` и `GIGACHAT_CA_BUNDLE`; YandexGPT достижим (404 на корне — норма);
+   `mgimo.ru` отвечает 200, но это страница-проверка, не документ.
+
+5. Файлы с mgimo.ru Келли кладёт в `/data/regulations` (внутри контейнера) или скачивает
+   скриптом через `run app.<модуль>`. Корпус в git не попадает (`/data/` в `.gitignore`).
+
+`pgvector` на старте не нужен. Если понадобится, образ `db` менять нельзя поверх старого тома
+(см. «Риски» в 0007): сначала `pg_dump` в `/opt/mgimo-lms/backups/`.
+
 ## Доступ к базе для команды
 
 База наружу не открыта: compose публикует её только на `127.0.0.1:5433` сервера (5432 на
@@ -116,7 +173,13 @@ ssh kelli@195.24.71.184 status
 ssh kelli@195.24.71.184 logs web 100
 DEPLOY_HOST=kelli@195.24.71.184 sh scripts/deploy.sh
 ssh -t kelli@195.24.71.184 psql
+ssh kelli@195.24.71.184 corpus ls                      # корпус положений для ассистента
+ssh kelli@195.24.71.184 corpus put x.pdf < x.pdf        # записать файл (до 50 МБ, плоская папка)
+ssh kelli@195.24.71.184 corpus rm x.pdf                 # удалить файл корпуса
 ```
+
+`corpus` работает только с `/opt/mgimo-lms/data/regulations` (решение [0007](decisions/0007-rag-assistant-infra.md)):
+имена по белому списку, ссылок и вложенных путей нет. Файл больше 50 МБ команда отклоняет с ошибкой.
 
 Обновить обёртку: `scp scripts/server/mgimo-lms* root@…:/tmp/` и `install -m 755` в
 `/usr/local/bin`. Отозвать: `userdel -r kelli`, удалить `71-kelli-mgimo-lms.conf` и
