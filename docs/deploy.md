@@ -122,9 +122,9 @@ ssh -t kelli@195.24.71.184 psql
 `/usr/local/bin`. Отозвать: `userdel -r kelli`, удалить `71-kelli-mgimo-lms.conf` и
 `/etc/sudoers.d/mgimo-lms-kelli`, `systemctl reload ssh`.
 
-## Успеваемость и вымышленный контингент (решение 0006)
+## Успеваемость и вымышленный контингент (решение 0007)
 
-Миграция 0006 применяется сама при старте web (`alembic upgrade head` в Dockerfile). После
+Миграция 0007 применяется сама при старте web (`alembic upgrade head` в Dockerfile). После
 выкладки данные создаются один раз:
 
 ```bash

@@ -4,37 +4,12 @@
 {% block content %}
 <div class="dashboard">
   <div class="dashboard__col">
-    <div class="dashboard__row dashboard__row--feed">
-      <section class="dash-block">
-        <div class="dash-block__header"><h2 class="dash-title">Информационная лента</h2><span class="dash-link dash-link--off" title="Раздел в разработке">{{ icon("arrow") }}</span></div>
-        <div class="feed-slide">
-          <p class="feed-slide__badge">пример новости</p>
-          <p class="feed-slide__title">Открыта запись на зимнюю школу переговоров</p>
-          <p class="feed-slide__counter">1 / 3</p>
-        </div>
-      </section>
-      <section class="dash-block">
-        <div class="dash-block__header"><h2 class="dash-title">Мероприятия</h2><span class="dash-link dash-link--off" title="Раздел в разработке">{{ icon("arrow") }}</span></div>
-        <div class="events">
-          <article class="event-card">
-            <div class="event-card__img event-card__img--a" aria-hidden="true"></div>
-            <div class="event-card__body">
-              <p class="event-card__title">Дебаты клуба международного права</p>
-              <p class="event-card__meta">{{ icon("clock", 14) }} 12 ноября, 18:00</p>
-              <p class="event-card__meta">{{ icon("pin", 14) }} Актовый зал</p>
-            </div>
-          </article>
-          <article class="event-card">
-            <div class="event-card__img event-card__img--b" aria-hidden="true"></div>
-            <div class="event-card__body">
-              <p class="event-card__title">Ярмарка стажировок</p>
-              <p class="event-card__meta">{{ icon("clock", 14) }} 19 ноября, 12:00</p>
-              <p class="event-card__meta">{{ icon("pin", 14) }} Холл главного корпуса</p>
-            </div>
-          </article>
-        </div>
-      </section>
-    </div>
+    {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
+    <section class="dash-block">
+      <div class="dash-block__header"><h2 class="dash-title">Календарь</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="Расписание на неделю">{{ icon("arrow") }}</a></div>
+      <div class="only-desktop">{% include "partials/calendar.html" %}</div>
+      <div class="only-mobile">{% include "partials/day_schedule.html" %}</div>
+    </section>
 
     <section class="dash-block">
       <div class="dash-block__header"><h2 class="dash-title">Текущая успеваемость</h2><a class="dash-link" href="/grades" aria-label="Успеваемость">{{ icon("arrow") }}</a></div>
@@ -71,7 +46,7 @@
     </section>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Студенческий офис</h2><a class="dash-link" href="/mfc/certificates" aria-label="Справки и выписки">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">Деканат</h2><a class="dash-link" href="/mfc/certificates" aria-label="Справки и выписки">{{ icon("arrow") }}</a></div>
       <div class="dashboard__row dashboard__row--two">
         {% for r in requests %}
           <a class="ref-card" href="/mfc/certificates/{{ r.id }}">
@@ -88,19 +63,15 @@
       </div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
-      <div class="services">
-        {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
-          <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
-        {% endfor %}
-      </div>
-    </section>
   </div>
 
   <aside class="dashboard__aside">
-    <div class="dash-block__header"><h2 class="dash-title">Расписание</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="Расписание на неделю">{{ icon("arrow") }}</a></div>
-    {% include "partials/day_schedule.html" %}
+    <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
+    <div class="services services--column">
+      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
+        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+      {% endfor %}
+    </div>
   </aside>
 </div>
 {% endblock %}

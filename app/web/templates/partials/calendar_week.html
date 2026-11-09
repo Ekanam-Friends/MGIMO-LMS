@@ -1,0 +1,32 @@
+{% from "_icons.html" import icon %}
+{% from "partials/_event.html" import grid_event with context %}
+{#- Неделя календаря (десктоп). Меняется целиком при листании и записи на активность;
+    переключатели слоёв снаружи (partials/calendar.html) и при этом не сбрасываются. -#}
+{% set q = "&size=" ~ cal.size %}
+<div id="cal-main" class="cal__main">
+  <div class="cal__toolbar">
+    <a class="week-nav__btn" href="?{{ 'week' if cal.size == 'full' else 'd' }}={{ cal.prev_week.isoformat() }}"
+       hx-get="/partials/calendar?week={{ cal.prev_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="Предыдущая неделя">{{ icon("chev-left", 18) }}</a>
+    <a class="week-nav__btn" href="?{{ 'week' if cal.size == 'full' else 'd' }}={{ cal.next_week.isoformat() }}"
+       hx-get="/partials/calendar?week={{ cal.next_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="Следующая неделя">{{ icon("chev-right", 18) }}</a>
+    <span class="cal__label">{{ cal.days[0].day }} {{ sv.MONTHS_GEN[cal.days[0].month - 1] }} — {{ cal.days[-1].day }} {{ sv.MONTHS_GEN[cal.days[-1].month - 1] }} {{ cal.days[-1].year }}</span>
+    <a class="btn btn--ghost btn--small" href="{{ '/schedule' if cal.size == 'full' else '/' }}"
+       hx-get="/partials/calendar?week={{ cal.today.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML">Сегодня</a>
+  </div>
+  <div class="cal__grid" style="--hours: {{ cal.hours | length }}">
+    <div class="cal__corner"></div>
+    {% for d in cal.days %}
+      <div class="cal__dayhead{% if d == cal.today %} cal__dayhead--today{% endif %}">
+        <span class="cal__dow">{{ sv.WEEKDAYS[loop.index0] }}</span><span class="cal__num">{{ d.day }}</span>
+      </div>
+    {% endfor %}
+    <div class="cal__times">
+      {% for h in cal.hours %}<span class="cal__hour" style="--i: {{ loop.index0 }}">{{ "%02d" | format(h) }}:00</span>{% endfor %}
+    </div>
+    {% for d in cal.days %}
+      <div class="cal__day{% if d == cal.today %} cal__day--today{% endif %}{% if d.weekday() >= 5 %} cal__day--weekend{% endif %}">
+        {% for e in cal.events.get(d, []) %}{{ grid_event(e, cal, d, loop.index0) }}{% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+</div>

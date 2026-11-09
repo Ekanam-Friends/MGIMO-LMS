@@ -1,4 +1,5 @@
 from app.models.auth import AuthSession, User
+from app.models.calendar import Activity, ActivitySignup, ElectiveChoice
 from app.models.certificates import (
     CertificateRequest,
     CertificateRequestEvent,
@@ -28,6 +29,9 @@ from app.models.schedule import (
 from app.models.telegram import BotCursor, BotNotice, TelegramLink, TelegramLinkCode
 
 __all__ = [
+    "Activity",
+    "ActivitySignup",
+    "ElectiveChoice",
     "Assessment",
     "Course",
     "CourseEnrollment",

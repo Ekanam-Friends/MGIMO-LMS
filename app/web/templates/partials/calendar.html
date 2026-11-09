@@ -1,0 +1,37 @@
+{#- Календарь из трёх слоёв (решение 0006): слева «Мои календари», справа неделя.
+    Слои прячутся чистым CSS (:has), выбор запоминается в localStorage. -#}
+<section class="cal cal--{{ cal.size }}" aria-label="Календарь">
+  <div class="cal__side">
+    <p class="cal__side-title">Мои календари</p>
+    {% for key, title in cv.LAYERS %}
+      <label class="cal-layer cal-layer--{{ key }}">
+        <input type="checkbox" class="cal-layer__input" data-layer="{{ key }}" checked>
+        <span class="cal-layer__box" aria-hidden="true"></span><span>{{ title }}</span>
+      </label>
+    {% endfor %}
+    {% if not cal.has_group %}
+      <p class="cal__hint">Учебная группа не указана — пары появятся после привязки группы.</p>
+    {% elif not cal.has_choices %}
+      <p class="cal__hint">Элективы и подгруппы не выбраны. <a href="/electives">Выбрать →</a></p>
+    {% else %}
+      <p class="cal__hint"><a href="/electives">Изменить элективы и подгруппы</a></p>
+    {% endif %}
+    <p class="cal__hint">Нажмите на событие, чтобы увидеть аудиторию и время. Бледные активности открыты для записи.</p>
+  </div>
+  {% include "partials/calendar_week.html" %}
+</section>
+<script>
+(function () {
+  var KEY = "lms.calendar.layers";
+  var off = [];
+  try { off = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) {}
+  document.querySelectorAll(".cal-layer__input").forEach(function (box) {
+    if (off.indexOf(box.dataset.layer) >= 0) box.checked = false;
+    box.addEventListener("change", function () {
+      var now = [];
+      document.querySelectorAll(".cal-layer__input").forEach(function (b) { if (!b.checked) now.push(b.dataset.layer); });
+      try { localStorage.setItem(KEY, JSON.stringify(now)); } catch (e) {}
+    });
+  });
+})();
+</script>

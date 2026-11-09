@@ -24,13 +24,17 @@ from app.grades import scale
 from app.grades import service as grades
 from app.models import StudyGroup
 from app.models.certificates import CertificateKind, RequestStatus
+from app.web import calendar_view as cv
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
 from app.web.nav import MENU, SERVICES, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, TEACHER_MENU=TEACHER_MENU, TEACHER_TABBAR=TEACHER_TABBAR,
-                             sv=sv, KINDS=CertificateKind.TITLES)
+                             sv=sv, cv=cv, KINDS=CertificateKind.TITLES)
+# Версия стилей в адресе: после выкладки браузер не держит старый app.css из кэша.
+_CSS = Path(__file__).parent / "static" / "app.css"
+templates.env.globals["css_version"] = lambda: int(_CSS.stat().st_mtime)
 
 router = APIRouter()
 
@@ -100,17 +104,29 @@ async def logout(request: Request, viewer: Viewer = Depends(check_csrf), db: Asy
     return resp
 
 
-# --- главная ---
+# --- главная и расписание: календарь из трёх слоёв (решение 0006) ---
 
 
 async def _day_widget_ctx(db: AsyncSession, viewer: Viewer, day: date) -> dict:
-    group_id = viewer.student.study_group_id if viewer.student else None
+    """Список дня — мобильный вид календаря на главной."""
     start = sv.week_start(day)
     week = [start + timedelta(days=i) for i in range(7)]
-    lessons = await sv.lessons_for(db, group_id, day, day)
-    busy = await sv.days_with_lessons(db, group_id, week[0], week[-1])
-    return {"day": day, "week": week, "slots": lessons.get(day, []), "busy": busy, "today": today(),
-            "prev_week": start - timedelta(days=7), "next_week": start + timedelta(days=7)}
+    events = await cv.events_for(db, viewer.student, week[0], week[-1]) if viewer.student else {}
+    return {"day": day, "week": week, "day_events": events.get(day, []), "busy": {d for d, e in events.items() if e},
+            "today": today(), "prev_week": start - timedelta(days=7), "next_week": start + timedelta(days=7)}
+
+
+async def _calendar_ctx(db: AsyncSession, viewer: Viewer, anchor: date, size: str) -> dict:
+    """Недельная сетка (десктоп)."""
+    start = sv.week_start(anchor)
+    days = [start + timedelta(days=i) for i in range(7)]
+    student = viewer.student
+    events = await cv.events_for(db, student, days[0], days[-1]) if student else {}
+    my_subgroups, my_disciplines = await cv.get_choices(db, student.id) if student else (set(), set())
+    return {"days": days, "events": events, "today": today(), "size": "full" if size == "full" else "compact",
+            "prev_week": start - timedelta(days=7), "next_week": start + timedelta(days=7),
+            "hours": list(range(cv.GRID_FROM, cv.GRID_TO)), "has_choices": bool(my_subgroups or my_disciplines),
+            "has_group": bool(student and student.study_group_id)}
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -126,7 +142,7 @@ async def dashboard(
     book = await grades.record_book(db, viewer.student_id, today(), events=0)
     return render(
         request, "dashboard.html", viewer, requests=requests, certs=certs, book=book, scale=scale,
-        **await _day_widget_ctx(db, viewer, day)
+        cal=await _calendar_ctx(db, viewer, day, "compact"), **await _day_widget_ctx(db, viewer, day),
     )
 
 
@@ -138,21 +154,68 @@ async def day_partial(
     return render(request, "partials/day_schedule.html", viewer, **await _day_widget_ctx(db, viewer, day))
 
 
-# --- расписание ---
+@router.get("/partials/calendar", response_class=HTMLResponse)
+async def calendar_partial(
+    request: Request, week: str | None = None, size: str = "compact",
+    viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db),
+) -> HTMLResponse:
+    return render(request, "partials/calendar_week.html", viewer,
+                  cal=await _calendar_ctx(db, viewer, _parse_day(week, today()), size))
 
 
 @router.get("/schedule", response_class=HTMLResponse)
 async def schedule(
     request: Request, week: str | None = None, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)
 ) -> HTMLResponse:
-    start = sv.week_start(_parse_day(week, today()))
-    days = [start + timedelta(days=i) for i in range(7)]
-    group_id = viewer.student.study_group_id if viewer.student else None
-    lessons = await sv.lessons_for(db, group_id, days[0], days[-1])
-    return render(
-        request, "schedule.html", viewer, days=days, lessons=lessons, today=today(),
-        prev_week=start - timedelta(days=7), next_week=start + timedelta(days=7), has_group=group_id is not None,
-    )
+    cal = await _calendar_ctx(db, viewer, _parse_day(week, today()), "full")
+    return render(request, "schedule.html", viewer, cal=cal, days=cal["days"], events=cal["events"], today=cal["today"],
+                  prev_week=cal["prev_week"], next_week=cal["next_week"], has_group=cal["has_group"])
+
+
+@router.post("/activities/{activity_id}/{action}")
+async def activity_signup(
+    request: Request, activity_id: int, action: str, week: str = Form(""), size: str = Form("compact"),
+    back: str = Form("/"), viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Запись на активность и отмена — только за студента из сессии."""
+    if action not in ("signup", "cancel") or viewer.student is None:
+        raise HTTPException(status_code=404)
+    activity = await cv.set_signup(db, viewer.student_id, activity_id, on=action == "signup")
+    if activity is None:
+        raise HTTPException(status_code=404)
+    await db.commit()
+    anchor = _parse_day(week, activity.starts_at.date())
+    if request.headers.get("HX-Request"):
+        return render(request, "partials/calendar_week.html", viewer, cal=await _calendar_ctx(db, viewer, anchor, size))
+    # Без JS — назад на свою страницу (только из белого списка, не открытый редирект).
+    target = "/schedule" if back == "/schedule" else "/"
+    return RedirectResponse(f"{target}?{'week' if target == '/schedule' else 'd'}={anchor.isoformat()}", status_code=303)
+
+
+# --- элективы и подгруппы ---
+
+
+@router.get("/electives", response_class=HTMLResponse)
+async def electives(
+    request: Request, saved: int | None = None, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)
+) -> HTMLResponse:
+    student = viewer.student
+    catalog = await cv.elective_catalog(db, student.study_group_id if student else None)
+    my_subgroups, my_disciplines = await cv.get_choices(db, student.id) if student else (set(), set())
+    return render(request, "electives.html", viewer, catalog=catalog, my_subgroups=my_subgroups,
+                  my_disciplines=my_disciplines, saved=saved, has_group=bool(student and student.study_group_id))
+
+
+@router.post("/electives")
+async def electives_save(request: Request, viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)) -> Response:
+    if viewer.student is None:
+        raise HTTPException(status_code=404)
+    form = await request.form()
+    catalog = await cv.elective_catalog(db, viewer.student.study_group_id)
+    await cv.set_choices(db, viewer.student_id, catalog,
+                         [str(v) for v in form.getlist("subgroup")], [str(v) for v in form.getlist("discipline")])
+    await db.commit()
+    return RedirectResponse("/electives?saved=1", status_code=303)
 
 
 # --- успеваемость (зачётка) ---

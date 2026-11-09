@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Элективные дисциплины{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Элективные дисциплины</span></nav>{% endblock %}
+{% block content %}
+<div class="page page--narrow">
+  <h1 class="title-1">Элективы и подгруппы</h1>
+  <p class="muted">Отметьте, какие занятия по выбору ваши. В календаре останутся только они — без чужих подгрупп
+    и параллельных курсов. Варианты собраны из расписания вашей группы в РУЗ.</p>
+  {% if saved %}<p class="alert alert--ok">Сохранено. Календарь обновлён.</p>{% endif %}
+  {% if not has_group %}
+    <p class="alert">Учебная группа не указана — выбирать пока не из чего.</p>
+  {% elif not catalog.subgroups and not catalog.families %}
+    <p class="alert">В расписании вашей группы нет занятий по выбору.</p>
+  {% else %}
+  <form method="post" action="/electives" class="form">
+    <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+    {% if catalog.subgroups %}
+    <section class="panel elective-block">
+      <h2 class="panel__title">Языковые подгруппы</h2>
+      <p class="muted">Подгруппа определяет, на какие языки и семинары вы ходите.</p>
+      <div class="choice-list">
+        {% for sg, discs in catalog.subgroups.items() %}
+          <label class="choice">
+            <input type="checkbox" name="subgroup" value="{{ sg }}"{% if sg in my_subgroups %} checked{% endif %}>
+            <span><b>{{ sg }}</b><br><small class="muted">{{ discs | join(", ") }}</small></span>
+          </label>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+    {% for fam in catalog.families %}
+    <section class="panel elective-block">
+      <h2 class="panel__title">Курсы по выбору{% if catalog.families | length > 1 %} — блок {{ loop.index }}{% endif %}</h2>
+      <p class="muted">Эти дисциплины идут в одно время — отметьте свою.</p>
+      <div class="choice-list">
+        {% for d in fam %}
+          <label class="choice">
+            <input type="checkbox" name="discipline" value="{{ d }}"{% if d in my_disciplines %} checked{% endif %}>
+            <span>{{ d }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+    <button type="submit" class="btn btn--primary">Сохранить</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

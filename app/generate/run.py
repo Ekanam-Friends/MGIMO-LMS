@@ -5,7 +5,7 @@
     python -m app.generate --students 6000 --per-group 15
     python -m app.generate --reset          # стереть всё сгенерированное и успеваемость, создать заново
 
-Что создаётся (решение docs/decisions/0006-grades.md):
+Что создаётся (решение docs/decisions/0007-grades.md):
 
 - студенты в реальных группах из импорта РУЗ (чтобы у каждого было живое расписание), с
   вымышленными ФИО, зачётками «ГЕН-…», приказами; учётка `users` с роль student и случайным
@@ -554,7 +554,7 @@ async def generate(*, students: int, per_group: int, seed: str, do_reset: bool, 
 
 
 def main(argv: list[str] | None = None) -> None:
-    p = argparse.ArgumentParser(description="Вымышленные студенты и успеваемость (решение 0006)")
+    p = argparse.ArgumentParser(description="Вымышленные студенты и успеваемость (решение 0007)")
     p.add_argument("--students", type=int, default=3000, help="сколько студентов создать всего (по умолчанию 3000)")
     p.add_argument("--per-group", type=int, default=12, help="студентов в группе (по умолчанию 12)")
     p.add_argument("--group", action="append", default=[], help="только эти группы (24МЖ-02 или 3МЖ-02)")

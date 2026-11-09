@@ -1,5 +1,5 @@
 {% from "_icons.html" import icon %}
-{% from "partials/_lesson.html" import slot_card %}
+{% from "partials/_event.html" import event_card with context %}
 <div id="day-widget" class="day-widget">
   <div class="day-header">
     <p class="day-header__month">{{ sv.MONTHS[day.month - 1] | capitalize }} {{ day.year }}</p>
@@ -20,8 +20,8 @@
          hx-get="/partials/day?d={{ next_week.isoformat() }}" hx-target="#day-widget" hx-swap="outerHTML" aria-label="Следующая неделя">{{ icon("chev-right", 18) }}</a>
     </div>
   </div>
-  {% for slot in slots %}
-    {{ slot_card(slot) }}
+  {% for e in day_events %}
+    {{ event_card(e, day, "/") }}
   {% else %}
     <div class="lesson-card lesson-card--empty">
       {% if viewer.student and viewer.student.study_group_id %}Занятий нет{% else %}Учебная группа не указана — расписание появится после привязки группы{% endif %}
