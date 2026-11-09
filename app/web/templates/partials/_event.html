@@ -1,0 +1,81 @@
+{% from "_icons.html" import icon %}
+{#- События календаря (решение 0006). Слой задаёт цвет: core — обязательные пары,
+    elective — элективы и подгруппы, activity — внеучебные активности. -#}
+
+{% macro signup_form(e, week, size, back, target=none) -%}
+  {% set url = "/activities/" ~ e.activity_id ~ ("/cancel" if e.signed else "/signup") %}
+  <form method="post" action="{{ url }}" class="ev-form"
+        {% if target %}hx-post="{{ url }}" hx-target="{{ target }}" hx-swap="outerHTML"{% if e.signed %} hx-confirm="Отменить запись на «{{ e.title }}»?"{% endif %}
+        {% elif e.signed %}onsubmit="return confirm('Отменить запись на это мероприятие?')"{% endif %}>
+    <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+    <input type="hidden" name="week" value="{{ week.isoformat() }}">
+    <input type="hidden" name="size" value="{{ size }}">
+    <input type="hidden" name="back" value="{{ back }}">
+    {{ caller() }}
+  </form>
+{%- endmacro %}
+
+{% macro grid_event(e, cal, d, idx) -%}
+  {#- Короткая плашка в сетке; по клику раскрывается карточка (нативный popover, без JS). -#}
+  {% set pid = "ev-" ~ d.isoformat() ~ "-" ~ idx %}
+  {% set cls = "ev ev--" ~ e.layer ~ (" ev--available" if e.layer == "activity" and not e.signed else "") ~ (" ev--cancelled" if e.cancelled else "") %}
+  <button type="button" class="{{ cls }}" popovertarget="{{ pid }}"
+          style="--top:{{ e.top }};--len:{{ e.length }};--lane:{{ e.lane }};--lanes:{{ e.lanes }}"
+          aria-label="{{ e.title }}, {{ e.begins_at | hhmm }}–{{ e.ends_at | hhmm }}{% if e.auditorium %}, {{ e.auditorium }}{% endif %}">
+    <span class="ev__time">{{ e.begins_at | hhmm }}</span>
+    <span class="ev__title">{{ e.title }}</span>
+    {% if e.layer == "activity" %}<span class="ev__meta">{{ "✓ вы идёте" if e.signed else "+ можно записаться" }}</span>
+    {% elif e.auditorium %}<span class="ev__meta">{{ e.auditorium }}</span>{% endif %}
+  </button>
+  <div id="{{ pid }}" popover class="ev-pop ev-pop--{{ e.layer }}" role="dialog" aria-label="{{ e.title }}">
+    <div class="ev-pop__head">
+      <p class="ev-card__layer">{{ {"core": "Обязательная пара", "elective": "Электив / подгруппа", "activity": "Внеучебная активность"}[e.layer] }}</p>
+      <button type="button" class="ev-pop__close" popovertarget="{{ pid }}" popovertargetaction="hide" aria-label="Закрыть">{{ icon("close", 18) }}</button>
+    </div>
+    <h3 class="ev-pop__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</h3>
+    <ul class="lesson-card__details">
+      <li>{{ icon("clock", 16) }}<span><b>{{ e.begins_at | hhmm }} – {{ e.ends_at | hhmm }}</b>, {{ sv.WEEKDAYS_FULL[d.weekday()] | lower }}, {{ d.day }} {{ sv.MONTHS_GEN[d.month - 1] }}</span></li>
+      {% if e.layer == "activity" %}
+        {% if e.place %}<li>{{ icon("pin", 16) }}<span>{{ e.place }}</span></li>{% endif %}
+        {% if e.organizer %}<li class="lesson-card__muted">{{ e.organizer }}</li>{% endif %}
+      {% else %}
+        <li>{{ icon("door", 16) }}<span>Аудитория: <b>{{ e.auditorium or "не указана" }}</b></span></li>
+        {% if e.building %}<li>{{ icon("pin", 16) }}<span>{{ e.building }}</span></li>{% endif %}
+        {% for t in e.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}
+        {% if e.subgroup %}<li class="lesson-card__muted">{{ e.subgroup }}</li>{% endif %}
+      {% endif %}
+    </ul>
+    <div class="lesson-card__foot">
+      {% if e.layer == "activity" %}
+        {% call signup_form(e, cal.days[0], cal.size, "/schedule" if cal.size == "full" else "/", "#cal-main") %}
+          <button type="submit" class="btn {{ 'btn--ghost' if e.signed else 'btn--primary' }} btn--small">{{ "Отменить запись" if e.signed else "Записаться" }}</button>
+        {% endcall %}
+      {% else %}
+        <span class="work-type work-type--{{ e.kind_class }}">{{ e.kind | capitalize }}</span>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro event_card(e, week, back) -%}
+  <article class="lesson-card ev-card ev-card--{{ e.layer }}{% if e.cancelled %} lesson-card--cancelled{% endif %}{% if e.layer == 'activity' and not e.signed %} ev-card--available{% endif %}">
+    <p class="ev-card__layer">{{ {"core": "Обязательная пара", "elective": "Электив / подгруппа", "activity": "Внеучебная активность"}[e.layer] }}</p>
+    <h3 class="lesson-card__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</h3>
+    <ul class="lesson-card__details">
+      {% if e.place %}<li>{{ icon("pin", 16) }}<span>{{ e.place }}</span></li>{% endif %}
+      {% for t in e.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}
+      {% if e.organizer %}<li class="lesson-card__muted">{{ e.organizer }}</li>{% endif %}
+      {% if e.subgroup %}<li class="lesson-card__muted">{{ e.subgroup }}</li>{% endif %}
+    </ul>
+    <div class="lesson-card__foot">
+      <span class="lesson-card__time">{{ e.begins_at | hhmm }} –<br>{{ e.ends_at | hhmm }}</span>
+      {% if e.layer == "activity" %}
+        {% call signup_form(e, week, "compact", back) %}
+          <button type="submit" class="work-type work-type--activity{% if not e.signed %} work-type--cta{% endif %}">{{ "✓ Вы идёте" if e.signed else "Записаться" }}</button>
+        {% endcall %}
+      {% else %}
+        <span class="work-type work-type--{{ e.kind_class }}">{{ e.kind | capitalize }}</span>
+      {% endif %}
+    </div>
+  </article>
+{%- endmacro %}
