@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "partials/_lesson.html" import slot_card %}
+{% from "teacher/_macros.html" import res_tile %}
 {% block title %}Главная{% endblock %}
 {% block header %}<p class="header__title">Кабинет преподавателя</p>{% endblock %}
 {% block content %}
 <div class="page">
   <div class="page__head">
     <div>
-      <h1 class="title-1">Добро пожаловать, {{ viewer.teacher.full_name.split()[1:2] | join(" ") }}</h1>
+      <h1 class="title-1">{% set fio = viewer.teacher.full_name.split() %}Добро пожаловать, {{ fio[1] if fio | length > 1 else fio[0] }}</h1>
       <p class="muted">Рабочее место сотрудника и преподавателя</p>
     </div>
   </div>
@@ -44,8 +45,8 @@
   <section class="dash-block">
     <div class="dash-block__header"><h2 class="dash-title">Преподавателю</h2></div>
     <div class="res-grid">
-      {% for title, sub, color, href in [("Мои курсы", "журнал баллов и ведомости", "#DF2935", "/t/courses"), ("Домашние задания", "проверка и сроки", "#B8520C", "/t/homework"), ("Расписание", "занятия на неделю", "#447ABC", "/t/schedule"), ("Учебная нагрузка", "часы по дисциплинам", "#7A5BC4", "/s/workload"), ("Конкурс ППС", "заявки и сроки", "#3F6FA8", "/s/pps")] %}
-        <a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+      {% for title, sub, color, href in work %}
+        {{ res_tile(title, sub, color, href) }}
       {% endfor %}
     </div>
   </section>
@@ -54,7 +55,7 @@
     <div class="dash-block__header"><h2 class="dash-title">Ресурсы Академии</h2><a class="dash-link" href="/t/services" aria-label="Все сервисы">{{ icon("arrow") }}</a></div>
     <div class="res-grid">
       {% for title, sub, color, href in resources %}
-        <a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+        {{ res_tile(title, sub, color, href) }}
       {% endfor %}
     </div>
   </section>

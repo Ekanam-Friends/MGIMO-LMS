@@ -20,7 +20,7 @@ from app.grades import service as grades
 from app.models.grades import AssessmentKind, ControlForm, FinalResult
 from app.web import schedule_view as sv
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
-from app.web.nav import SERVICES, TEACHER_RESOURCES
+from app.web.nav import SERVICES, TEACHER_RESOURCES, TEACHER_WORK
 from app.web.views import _parse_day, render, templates, today
 
 router = APIRouter(prefix="/t")
@@ -90,8 +90,8 @@ async def teacher_home(request: Request, viewer: Viewer = Depends(teacher_viewer
                       key=lambda c: c.next_due)
     lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, now, now)).get(now, [])
     return render(request, "teacher/home.html", viewer, cards=cards, due_soon=due_soon, lessons=lessons,
-                  resources=TEACHER_RESOURCES, today_date=now,
-                  students_total=sum(c.students for c in cards))
+                  resources=TEACHER_RESOURCES, work=TEACHER_WORK, today_date=now,
+                  students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
 
 
 @router.get("/services", response_class=HTMLResponse)
@@ -111,7 +111,7 @@ async def courses(request: Request, year: str | None = None, viewer: Viewer = De
     activity = await grades.recent_teacher_activity(db, viewer.teacher_id)
     return render(request, "teacher/courses.html", viewer, cards=cards, years=years, shown=shown,
                   current_year=current_year, due_soon=due_soon, activity=activity,
-                  students_total=sum(c.students for c in cards))
+                  students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
 
 
 @router.get("/courses/{course_id}", response_class=HTMLResponse)

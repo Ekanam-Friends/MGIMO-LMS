@@ -16,3 +16,8 @@
   </span>
   {% if label %}<span class="meter__label">{{ value | pts }} / {{ max | pts }}</span>{% endif %}
 {%- endmacro %}
+
+{# Плитка-ссылка «ресурса» (главная и «Сервисы Академии»). #}
+{% macro res_tile(title, sub, color, href) -%}
+<a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+{%- endmacro %}

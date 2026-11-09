@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "teacher/_macros.html" import crumbs %}
+{% from "teacher/_macros.html" import crumbs, res_tile %}
 {% block title %}Сервисы Академии{% endblock %}
 {% block header %}{{ crumbs([("Сервисы Академии", none)]) }}{% endblock %}
 {% block content %}
@@ -10,7 +10,7 @@
     <h2 class="dash-title">Ресурсы</h2>
     <div class="res-grid">
       {% for title, sub, color, href in resources %}
-        <a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+        {{ res_tile(title, sub, color, href) }}
       {% endfor %}
     </div>
   </section>
