@@ -162,3 +162,22 @@ async def test_dean_has_no_bell_but_own_cabinet(client):
     assert "Новое объявление" in page and 'id="bell"' not in page
     assert (await client.get("/", follow_redirects=False)).headers["location"] == "/d/announcements"
     assert (await client.get("/profile")).status_code == 200
+
+
+async def test_double_read_is_not_an_error(client):
+    csrf = await login(client, "anna")
+    for _ in range(2):  # двойной клик / два запроса подряд
+        r = await client.post("/notifications/read/grade/1", headers={"X-CSRF-Token": csrf})
+        assert r.status_code == 204
+
+
+async def test_read_all_clears_more_than_one_page(client):
+    from app.notifications.service import LIMIT
+    sf = client._transport.app.state.session_factory
+    async with sf() as s:
+        s.add_all([GradeEvent(student_id=1, course_id=1, kind="score", text=f"Балл {n}", created_at=utcnow())
+                   for n in range(LIMIT + 5)])
+        await s.commit()
+    csrf = await login(client, "anna")
+    await client.post("/notifications/read-all", headers={"X-CSRF-Token": csrf})
+    assert ">0<" in (await client.get("/notifications/badge")).text

@@ -53,7 +53,7 @@
     {% for a in mine %}
       <article class="notif-own">
         <p><strong>{{ a.title }}</strong> <small class="muted">· {{ a.created_at.strftime("%d.%m.%Y %H:%M") }} ·
-          {% if a.audience == "all" %}всем{% elif a.audience == "faculty" %}{{ a.faculty_name }}{% else %}группа {{ a.group_id }}{% endif %}</small></p>
+          {% if a.audience == "all" %}всем{% elif a.audience == "faculty" %}{{ a.faculty_name }}{% else %}группа {{ a.group.number }}{% endif %}</small></p>
         {% if a.body %}<p class="muted">{{ a.body }}</p>{% endif %}
       </article>
     {% else %}<p class="muted">Вы ещё ничего не отправляли.</p>{% endfor %}

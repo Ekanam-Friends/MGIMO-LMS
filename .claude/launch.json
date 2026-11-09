@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lms",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--port",
+        "8010"
+      ],
+      "port": 8010
+    },
+    {
+      "name": "lms-pr29",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd /d ..\\MGIMO-LMS-pr29 && ..\\MGIMO-LMS\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --port 8011"
+      ],
+      "port": 8011
+    },
+    {
+      "name": "lms-notif",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set DATABASE_URL=sqlite+aiosqlite:///C:/Users/Dell/AppData/Local/Temp/claude/ca09381bcb8204a9/b0ae046f-1b4f-441f-b1e5-e0870296ce49/scratchpad/notif.db&& set COOKIE_SECURE=false&& .venv\\Scripts\\python.exe -m uvicorn app.main:app --port 8012"
+      ],
+      "port": 8012
+    }
+  ]
+}

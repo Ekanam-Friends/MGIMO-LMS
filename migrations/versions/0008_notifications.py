@@ -42,7 +42,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['user_id'], ['users.id']),
         sa.PrimaryKeyConstraint('user_id', 'key'),
     )
-    op.create_index('ix_notification_reads_user', 'notification_reads', ['user_id'])
 
 
 def downgrade() -> None:

@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from sqlalchemy import and_, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.service import utcnow
@@ -30,6 +31,7 @@ from app.models.certificates import CertificateKind, EventKind, PaperStatus, Req
 from app.models.notifications import Audience, Source
 
 LIMIT = 30
+ALL_LIMIT = 1000
 HORIZON = timedelta(days=45)
 KINDS = {"ann", "cert", "grade"}
 TITLE_MAX = 200
@@ -56,7 +58,7 @@ class Item:
         return Source.TITLES[self.source]
 
 
-async def _announcements(db: AsyncSession, student: Student | None, since: datetime) -> list[Item]:
+async def _announcements(db: AsyncSession, student: Student | None, since: datetime, limit: int) -> list[Item]:
     q = select(Announcement).where(Announcement.created_at >= since)
     if student is not None:
         cond = [Announcement.audience == Audience.ALL]
@@ -70,7 +72,7 @@ async def _announcements(db: AsyncSession, student: Student | None, since: datet
     else:
         # Преподаватель: общие объявления деканата и вуза (адресные — студентам).
         q = q.where(Announcement.audience == Audience.ALL, Announcement.source != Source.TEACHER)
-    rows = (await db.scalars(q.order_by(Announcement.created_at.desc()).limit(LIMIT))).all()
+    rows = (await db.scalars(q.order_by(Announcement.created_at.desc()).limit(limit))).all()
     return [Item("ann", a.id, a.source, a.title, a.body, a.created_at) for a in rows]
 
 
@@ -91,37 +93,38 @@ def _cert_item(ev: CertificateRequestEvent, req: CertificateRequest) -> Item | N
     return Item("cert", ev.id, Source.DEAN, title, body, ev.created_at, href)
 
 
-async def _certificates(db: AsyncSession, student_id: int, since: datetime) -> list[Item]:
+async def _certificates(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
     rows = (await db.execute(
         select(CertificateRequestEvent, CertificateRequest)
         .join(CertificateRequest, CertificateRequest.id == CertificateRequestEvent.request_id)
         .where(CertificateRequest.student_id == student_id, CertificateRequestEvent.created_at >= since)
-        .order_by(CertificateRequestEvent.created_at.desc()).limit(LIMIT * 2)
+        .order_by(CertificateRequestEvent.created_at.desc()).limit(limit * 2)
     )).all()
     return [i for ev, req in rows if (i := _cert_item(ev, req))]
 
 
-async def _grades(db: AsyncSession, student_id: int, since: datetime) -> list[Item]:
+async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
     rows = (await db.execute(
         select(GradeEvent, Discipline.name)
         .join(Course, Course.id == GradeEvent.course_id)
         .join(Discipline, Discipline.id == Course.discipline_id)
         .where(GradeEvent.student_id == student_id, GradeEvent.created_at >= since)
-        .order_by(GradeEvent.created_at.desc()).limit(LIMIT)
+        .order_by(GradeEvent.created_at.desc()).limit(limit)
     )).all()
     return [Item("grade", ev.id, Source.TEACHER, f"{name}: {ev.text}", "", ev.created_at, "/grades")
             for ev, name in rows]
 
 
-async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None) -> list[Item]:
+async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None,
+               limit: int = LIMIT) -> list[Item]:
     """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного."""
     since = (now or utcnow()) - HORIZON
-    items = await _announcements(db, student, since)
+    items = await _announcements(db, student, since, limit)
     if student is not None:
-        items += await _certificates(db, student.id, since)
-        items += await _grades(db, student.id, since)
+        items += await _certificates(db, student.id, since, limit)
+        items += await _grades(db, student.id, since, limit)
     items.sort(key=lambda i: i.created_at, reverse=True)
-    items = items[:LIMIT]
+    items = items[:limit]
     if items:
         read = set((await db.scalars(
             select(NotificationRead.key).where(NotificationRead.user_id == user.id,
@@ -132,17 +135,26 @@ async def feed(db: AsyncSession, user: User, student: Student | None, *, now: da
     return items
 
 
+async def _remember(db: AsyncSession, user_id: int, key: str) -> None:
+    """Отметить прочитанным. Повторная отметка (двойной клик, два запроса сразу) — не ошибка."""
+    try:
+        async with db.begin_nested():
+            db.add(NotificationRead(user_id=user_id, key=key, read_at=utcnow()))
+    except IntegrityError:
+        pass
+
+
 async def mark_read(db: AsyncSession, user_id: int, kind: str, ref: int) -> None:
-    key = f"{kind}:{ref}"
-    if kind in KINDS and await db.get(NotificationRead, (user_id, key)) is None:
-        db.add(NotificationRead(user_id=user_id, key=key, read_at=utcnow()))
+    if kind in KINDS:
+        await _remember(db, user_id, f"{kind}:{ref}")
         await db.commit()
 
 
 async def mark_all_read(db: AsyncSession, user: User, student: Student | None) -> None:
-    for i in await feed(db, user, student):
+    """Все непрочитанные за горизонт, а не только те, что влезают в ленту из LIMIT."""
+    for i in await feed(db, user, student, limit=ALL_LIMIT):
         if i.unread:
-            db.add(NotificationRead(user_id=user.id, key=i.key, read_at=utcnow()))
+            await _remember(db, user.id, i.key)
     await db.commit()
 
 

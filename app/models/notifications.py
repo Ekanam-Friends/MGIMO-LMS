@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
@@ -44,6 +44,8 @@ class Announcement(Base):
     """Для audience=group: группа, которой адресовано (преподаватель — только своим)."""
     created_at: Mapped[datetime] = mapped_column(DateTime, index=True)
 
+    group = relationship("StudyGroup", lazy="joined")
+
 
 class NotificationRead(Base):
     """Что пользователь уже открыл. `key` — «ann:12», «cert:7», «grade:31»."""
@@ -53,5 +55,3 @@ class NotificationRead(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
     key: Mapped[str] = mapped_column(String(40), primary_key=True)
     read_at: Mapped[datetime] = mapped_column(DateTime)
-
-    __table_args__ = (Index("ix_notification_reads_user", "user_id"),)
