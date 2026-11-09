@@ -234,3 +234,60 @@ async def test_teacher_pages_render(client):
         assert r.status_code == 200, path
         assert "концепт для конкурса" in r.text.lower(), path
         assert "Кабинет преподавателя" in r.text or "преподавателя" in r.text, path
+
+
+# --- исправления после ревью PR #29 ---
+
+
+async def test_final_error_shown_without_htmx(client):
+    csrf = await login(client, "teacher")
+    r = await client.post("/t/courses/1/final", data={"csrf": csrf, "student_id": "1", "result": "5", "exam_points": "40"})
+    assert r.status_code == 303 and "error=" in r.headers["location"]
+    page = await client.get(r.headers["location"])
+    assert "Нет допуска" in page.text
+
+
+async def test_score_comment_kept_by_cell_and_cleared_explicitly(client):
+    from app.grades import service as grades
+    async with client.sf() as s:  # type: ignore[attr-defined]
+        await grades.set_score(s, 1, 1, 1, 1, "5", comment="списано")
+        await grades.set_score(s, 1, 1, 1, 1, "6")  # ячейка журнала комментарий не шлёт — он остаётся
+        sc = await s.scalar(select(Score).where(Score.assessment_id == 1, Score.student_id == 1))
+        assert sc.points == 6 and sc.comment == "списано"
+        await grades.set_score(s, 1, 1, 1, 1, "6", comment="")  # явная пустая строка стирает
+        assert sc.comment == ""
+        await s.commit()
+
+
+async def test_parallel_insert_of_same_cell_updates_instead_of_500(client):
+    from app.grades import service as grades
+    async with client.sf() as s:  # type: ignore[attr-defined]
+        # «Параллельный» запрос уже вставил балл в эту ячейку, а наш его ещё не видел.
+        s.add(Score(assessment_id=1, student_id=1, points=3, comment="", graded_by=1, graded_at=utcnow()))
+        await s.flush()
+        row = await grades._insert_score(s, 1, 1, 7, None, 1)
+        assert row is not None and row.points == 3  # вернулась существующая строка, без IntegrityError
+        await s.commit()
+
+
+async def test_deleted_homework_is_announced(client):
+    csrf = await login(client, "teacher")
+    r = await client.post("/t/courses/1/assessments", data={
+        "csrf": csrf, "kind": "homework", "title": "Лишнее ДЗ", "max_points": "10",
+        "due_date": (date.today() + timedelta(days=5)).isoformat()})
+    aid = r.headers["location"].split("/assessments/")[1].split("?")[0]
+    r = await client.post(f"/t/courses/1/assessments/{aid}/delete", data={"csrf": csrf})
+    assert r.status_code == 303
+    async with client.sf() as s:  # type: ignore[attr-defined]
+        texts = (await s.scalars(select(GradeEvent.text).where(GradeEvent.student_id == 1))).all()
+    assert any("«Лишнее ДЗ» отменено" in t for t in texts)
+
+
+async def test_max_points_parsed_like_points(client):
+    csrf = await login(client, "teacher")
+    base = {"csrf": csrf, "kind": "test", "title": "Тест", "due_date": ""}
+    for bad in ["0", "101", "abc", "nan"]:
+        r = await client.post("/t/courses/1/assessments", data={**base, "max_points": bad})
+        assert r.status_code == 400 and "Максимум баллов" in r.text, bad
+    r = await client.post("/t/courses/1/assessments", data={**base, "max_points": " 7,5 "})
+    assert r.status_code == 303

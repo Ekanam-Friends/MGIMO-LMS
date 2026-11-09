@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 
 from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.service import utcnow
@@ -82,14 +83,16 @@ def _card(row) -> CourseCard:
     return CourseCard(course=course, discipline=discipline, group=group or "", teacher=teacher or "")
 
 
-async def _roster(db: AsyncSession, course_id: int) -> list[Student]:
-    rows = await db.scalars(
+async def _roster(db: AsyncSession, course_id: int, student_id: int | None = None) -> list[Student]:
+    q = (
         select(Student)
         .join(CourseEnrollment, CourseEnrollment.student_id == Student.id)
         .where(CourseEnrollment.course_id == course_id)
         .order_by(Student.full_name)
     )
-    return list(rows.all())
+    if student_id is not None:
+        q = q.where(Student.id == student_id)
+    return list((await db.scalars(q)).all())
 
 
 async def current_points(db: AsyncSession, course_id: int, student_ids: list[int] | None = None) -> dict[int, float]:
@@ -129,7 +132,8 @@ def _event(db: AsyncSession, student_id: int, course_id: int, kind: str, text: s
     db.add(GradeEvent(student_id=student_id, course_id=course_id, kind=kind, text=text[:500], created_at=utcnow()))
 
 
-def _parse_points(raw: str | float | None, max_points: float) -> float | None:
+def _parse_number(raw: str | float | None, *, what: str, lo: float, hi: float, lo_inclusive: bool = True) -> float | None:
+    """Число из поля формы: запятая или точка, пусто — None. Не число или вне диапазона — ValidationError."""
     if raw is None:
         return None
     if isinstance(raw, str):
@@ -139,17 +143,25 @@ def _parse_points(raw: str | float | None, max_points: float) -> float | None:
         try:
             raw = float(raw)
         except ValueError:
-            raise ValidationError("Баллы — это число, например 7 или 7,5")
+            raise ValidationError(f"{what} — это число, например 7 или 7,5")
     value = float(raw)
-    if value != value or value < 0 or value > max_points:  # value != value — NaN
-        raise ValidationError(f"Баллы — от 0 до {scale.fmt_points(max_points)}")
-    return round(value * 2) / 2  # шаг полбалла
+    too_low = value < lo if lo_inclusive else value <= lo
+    if value != value or too_low or value > hi:  # value != value — NaN
+        raise ValidationError(f"{what} — от {scale.fmt_points(lo)} до {scale.fmt_points(hi)}")
+    return value
+
+
+def _parse_points(raw: str | float | None, max_points: float) -> float | None:
+    value = _parse_number(raw, what="Баллы", lo=0, hi=max_points)
+    return None if value is None else round(value * 2) / 2  # шаг полбалла
 
 
 # --- преподаватель: список курсов ---
 
 
-async def teacher_courses(db: AsyncSession, teacher_id: int, academic_year: str | None = None) -> list[CourseCard]:
+async def teacher_courses(db: AsyncSession, teacher_id: int, academic_year: str | None = None,
+                          today: date | None = None) -> list[CourseCard]:
+    today = today or date.today()
     q = _course_query().where(Course.teacher_id == teacher_id)
     if academic_year:
         q = q.where(Course.academic_year == academic_year)
@@ -157,15 +169,13 @@ async def teacher_courses(db: AsyncSession, teacher_id: int, academic_year: str 
     if not cards:
         return []
     ids = [c.course.id for c in cards]
-    today = date.today()
     students = dict((await db.execute(
         select(CourseEnrollment.course_id, func.count()).where(CourseEnrollment.course_id.in_(ids))
         .group_by(CourseEnrollment.course_id)
     )).all())
-    stats = {cid: (n, maxsum) for cid, n, maxsum in (await db.execute(
-        select(Assessment.course_id, func.count(), func.sum(Assessment.max_points))
-        .where(Assessment.course_id.in_(ids)).group_by(Assessment.course_id)
-    )).all()}
+    counts = dict((await db.execute(
+        select(Assessment.course_id, func.count()).where(Assessment.course_id.in_(ids)).group_by(Assessment.course_id)
+    )).all())
     graded = {cid: (n, pts, mx) for cid, n, pts, mx in (await db.execute(
         select(Assessment.course_id, func.count(Score.id), func.sum(Score.points), func.sum(Assessment.max_points))
         .join(Score, Score.assessment_id == Assessment.id)
@@ -182,7 +192,7 @@ async def teacher_courses(db: AsyncSession, teacher_id: int, academic_year: str 
     for c in cards:
         cid = c.course.id
         c.students = int(students.get(cid, 0))
-        c.assessments, _ = stats.get(cid, (0, 0))
+        c.assessments = int(counts.get(cid, 0))
         c.graded, pts, mx = graded.get(cid, (0, 0, 0))
         if mx:
             c.avg_percent = round(100 * float(pts or 0) / float(mx), 1)
@@ -236,7 +246,10 @@ class Journal:
         return [r for r in self.rows if r.possible and r.current < 0.55 * r.possible]
 
 
-async def journal(db: AsyncSession, teacher_id: int, course_id: int) -> Journal | None:
+async def journal(db: AsyncSession, teacher_id: int, course_id: int, today: date | None = None,
+                  *, student_id: int | None = None) -> Journal | None:
+    """Журнал курса. `student_id` — только одна строка (ответ HTMX после сохранения итога)."""
+    today = today or date.today()
     card = await get_course(db, teacher_id, course_id)
     if card is None:
         return None
@@ -244,17 +257,17 @@ async def journal(db: AsyncSession, teacher_id: int, course_id: int) -> Journal 
         select(Assessment).where(Assessment.course_id == course_id)
         .order_by(Assessment.position, Assessment.due_date, Assessment.id)
     )).all())
-    students = await _roster(db, course_id)
+    students = await _roster(db, course_id, student_id)
     rows = {s.id: JournalRow(student=s) for s in students}
     if assessments and rows:
-        for sc in (await db.scalars(select(Score).where(Score.assessment_id.in_([a.id for a in assessments])))).all():
+        sq = select(Score).where(Score.assessment_id.in_([a.id for a in assessments]), Score.student_id.in_(list(rows)))
+        for sc in (await db.scalars(sq)).all():
             row = rows.get(sc.student_id)
             if row is not None:
                 row.scores[sc.assessment_id] = sc
                 row.current += sc.points
-    finals = await _latest_finals(db, [course_id])
+    finals = await _latest_finals(db, [course_id], student_id)
     form = card.course.control_form
-    today = date.today()
     for r in rows.values():
         r.possible = sum(a.max_points for a in assessments if counts_now(a, a.id in r.scores, today))
         r.final = finals.get((course_id, r.student.id))
@@ -288,12 +301,9 @@ async def create_assessment(
         raise ValidationError("Название — не длиннее 200 символов")
     if len(description) > 5000:
         raise ValidationError("Описание — не длиннее 5000 символов")
-    try:
-        mp = float(str(max_points).replace(",", "."))
-    except ValueError:
-        raise ValidationError("Максимум баллов — число")
-    if not 0 < mp <= 100:
-        raise ValidationError("Максимум баллов — от 0 до 100")
+    mp = _parse_number(max_points, what="Максимум баллов", lo=0, hi=100, lo_inclusive=False)
+    if mp is None:
+        raise ValidationError("Укажите максимум баллов")
     due: date | None
     if isinstance(due_date, str):
         try:
@@ -325,6 +335,12 @@ async def delete_assessment(db: AsyncSession, teacher_id: int, course_id: int, a
         raise Locked("Ведомость закрыта")
     await db.execute(delete(Score).where(Score.assessment_id == a.id))
     await db.delete(a)
+    # «Новое задание» и баллы по нему уже в ленте студентов, а GradeEvent не ссылается на задание,
+    # поэтому вместо удаления старых записей сообщаем об отмене.
+    if card is not None:
+        for s in await _roster(db, course_id):
+            _event(db, s.id, course_id, GradeEventKind.HOMEWORK,
+                   f"{card.discipline}: задание «{a.title}» отменено, баллы по нему сняты")
     return True
 
 
@@ -337,9 +353,11 @@ async def _enrolled(db: AsyncSession, course_id: int, student_id: int) -> bool:
 
 async def set_score(
     db: AsyncSession, teacher_id: int, course_id: int, assessment_id: int, student_id: int,
-    points: str | float | None, comment: str = "",
+    points: str | float | None, comment: str | None = None,
 ) -> tuple[Score | None, float] | None:
     """Ставит, меняет или (пустое значение) удаляет балл. Возвращает (балл, новый накоп студента).
+
+    comment=None — комментарий не меняется (ячейка журнала его не отправляет), "" — стирается.
 
     None — курс не свой, точки нет в курсе или студент не записан в ведомость (экран отвечает 404).
     """
@@ -356,23 +374,40 @@ async def set_score(
         if existing is not None:
             await db.delete(existing)
         score = None
-    elif existing is None:
-        score = Score(assessment_id=a.id, student_id=student_id, points=value, comment=comment[:500],
-                      graded_by=teacher_id, graded_at=utcnow())
-        db.add(score)
     else:
-        changed = existing.points != value
-        existing.points, existing.comment = value, comment[:500] or existing.comment
-        existing.graded_by, existing.graded_at = teacher_id, utcnow()
-        score = existing
-        if not changed:
-            await db.flush()
-            return score, (await current_points(db, course_id, [student_id])).get(student_id, 0.0)
+        if existing is None:
+            # Параллельный запрос мог вставить ту же ячейку — тогда обновляем его строку.
+            existing = await _insert_score(db, a.id, student_id, value, comment, teacher_id)
+        if existing is None:
+            score = await db.scalar(select(Score).where(Score.assessment_id == a.id, Score.student_id == student_id))
+        else:
+            changed = existing.points != value
+            existing.points = value
+            if comment is not None:
+                existing.comment = comment[:500]
+            existing.graded_by, existing.graded_at = teacher_id, utcnow()
+            score = existing
+            if not changed:
+                await db.flush()
+                return score, (await current_points(db, course_id, [student_id])).get(student_id, 0.0)
     await db.flush()
     if score is not None:
         _event(db, student_id, course_id, GradeEventKind.SCORE,
                f"{card.discipline}: «{a.title}» — {scale.fmt_points(value)} из {scale.fmt_points(a.max_points)}")
     return score, (await current_points(db, course_id, [student_id])).get(student_id, 0.0)
+
+
+async def _insert_score(db: AsyncSession, assessment_id: int, student_id: int, value: float,
+                        comment: str | None, teacher_id: int) -> Score | None:
+    """Вставляет балл в savepoint. None — вставлено. Если ту же ячейку уже вставил параллельный
+    запрос (uq_scores_assessment_student), возвращает его строку вместо ошибки 500."""
+    try:
+        async with db.begin_nested():
+            db.add(Score(assessment_id=assessment_id, student_id=student_id, points=value,
+                         comment=(comment or "")[:500], graded_by=teacher_id, graded_at=utcnow()))
+        return None
+    except IntegrityError:
+        return await db.scalar(select(Score).where(Score.assessment_id == assessment_id, Score.student_id == student_id))
 
 
 async def set_final(
@@ -399,15 +434,16 @@ async def set_final(
             raise Locked("Ведомость закрыта — итог меняется только пересдачей")
         if latest.attempt >= 3:
             raise ValidationError("Использованы все три попытки — дальше решает комиссия деканата")
-        fg = FinalGrade(course_id=course_id, student_id=student_id, attempt=latest.attempt + 1, current_points=current,
-                        exam_points=exam, total_points=total, result=result, teacher_id=teacher_id, graded_on=today)
-        db.add(fg)
-        label = f"пересдача {fg.attempt - 1}"
+        attempt: int | None = latest.attempt + 1
+        label = f"пересдача {latest.attempt}"
     elif latest is None:
-        fg = FinalGrade(course_id=course_id, student_id=student_id, attempt=1, current_points=current,
+        attempt, label = 1, ControlForm.TITLES[form].lower()
+    else:
+        attempt = None
+    if attempt is not None:
+        fg = FinalGrade(course_id=course_id, student_id=student_id, attempt=attempt, current_points=current,
                         exam_points=exam, total_points=total, result=result, teacher_id=teacher_id, graded_on=today)
         db.add(fg)
-        label = ControlForm.TITLES[form].lower()
     else:
         fg = latest
         fg.current_points, fg.exam_points, fg.total_points = current, exam, total
@@ -419,8 +455,8 @@ async def set_final(
     return fg
 
 
-async def close_course(db: AsyncSession, teacher_id: int, course_id: int) -> Course | None:
-    j = await journal(db, teacher_id, course_id)
+async def close_course(db: AsyncSession, teacher_id: int, course_id: int, today: date | None = None) -> Course | None:
+    j = await journal(db, teacher_id, course_id, today)
     if j is None:
         return None
     if j.locked:
@@ -442,8 +478,9 @@ class HomeworkItem:
     students: int
 
 
-async def teacher_homework(db: AsyncSession, teacher_id: int, academic_year: str) -> list[HomeworkItem]:
-    cards = {c.course.id: c for c in await teacher_courses(db, teacher_id, academic_year)}
+async def teacher_homework(db: AsyncSession, teacher_id: int, academic_year: str,
+                           today: date | None = None) -> list[HomeworkItem]:
+    cards = {c.course.id: c for c in await teacher_courses(db, teacher_id, academic_year, today)}
     if not cards:
         return []
     items = (await db.scalars(
@@ -479,6 +516,8 @@ class StudentCourse:
     possible: float = 0.0
     earned: float = 0.0
     """Баллы и максимум только по точкам, которые уже можно было сдать (см. counts_now)."""
+    today: date = field(default_factory=date.today)
+    """Дата, на которую собрана зачётка (record_book): от неё считаются сроки ДЗ."""
 
     @property
     def percent(self) -> float | None:
@@ -486,9 +525,8 @@ class StudentCourse:
 
     @property
     def homework_due(self) -> list[StudentAssessment]:
-        today = date.today()
         return [a for a in self.assessments if a.assessment.kind == AssessmentKind.HOMEWORK and a.score is None
-                and a.assessment.due_date and a.assessment.due_date >= today]
+                and a.assessment.due_date and a.assessment.due_date >= self.today]
 
     @property
     def debt(self) -> bool:
@@ -564,7 +602,7 @@ async def record_book(db: AsyncSession, student_id: int, today: date | None = No
             possible=sum(x.assessment.max_points for x in now), earned=sum(x.score.points for x in now if x.score),
             card=c, assessments=lst, current=sum(x.score.points for x in lst if x.score),
             planned_max=sum(x.assessment.max_points for x in lst), current_max=scale.current_max(c.course.control_form),
-            final=finals.get((c.course.id, student_id)), attempts=int(attempts.get(c.course.id, 0)),
+            final=finals.get((c.course.id, student_id)), attempts=int(attempts.get(c.course.id, 0)), today=today,
         )
         by_sem[(c.course.semester, c.course.academic_year)].append(sc)
     semesters = [Semester(n, y, lst) for (n, y), lst in sorted(by_sem.items(), reverse=True)]
@@ -593,10 +631,6 @@ async def record_book(db: AsyncSession, student_id: int, today: date | None = No
         .order_by(GradeEvent.created_at.desc(), GradeEvent.id.desc()).limit(events)
     )).all())
     return RecordBook(current=current, past=past, gpa=gpa, debts=debts, next_exam=next_exam, events=recent)
-
-
-async def teacher_for_user(db: AsyncSession, teacher_id: int | None) -> Teacher | None:
-    return await db.get(Teacher, teacher_id) if teacher_id else None
 
 
 async def recent_teacher_activity(db: AsyncSession, teacher_id: int, limit: int = 6) -> list[tuple[datetime, str]]:

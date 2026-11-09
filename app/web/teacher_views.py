@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -28,24 +29,28 @@ templates.env.globals.update(scale=scale, ControlForm=ControlForm, FinalResult=F
 templates.env.filters["pts"] = scale.fmt_points
 
 
-async def teacher_viewer(viewer: Viewer = Depends(current_viewer)) -> Viewer:
+def _require_teacher(viewer: Viewer) -> Viewer:
+    """Единственная проверка роли для /t: не преподаватель — 404, как чужой адрес."""
     if viewer.teacher is None:
         raise HTTPException(status_code=404)
     return viewer
+
+
+async def teacher_viewer(viewer: Viewer = Depends(current_viewer)) -> Viewer:
+    return _require_teacher(viewer)
 
 
 async def teacher_csrf(viewer: Viewer = Depends(check_csrf)) -> Viewer:
-    if viewer.teacher is None:
-        raise HTTPException(status_code=404)
-    return viewer
+    return _require_teacher(viewer)
 
 
 def _is_htmx(request: Request) -> bool:
     return bool(request.headers.get("HX-Request"))
 
 
-async def _journal_or_404(db: AsyncSession, viewer: Viewer, course_id: int) -> grades.Journal:
-    j = await grades.journal(db, viewer.teacher_id, course_id)
+async def _journal_or_404(db: AsyncSession, viewer: Viewer, course_id: int,
+                         student_id: int | None = None) -> grades.Journal:
+    j = await grades.journal(db, viewer.teacher_id, course_id, today(), student_id=student_id)
     if j is None:
         raise HTTPException(status_code=404)
     return j
@@ -63,7 +68,7 @@ async def teacher_root() -> Response:
 async def courses(request: Request, year: str | None = None, viewer: Viewer = Depends(teacher_viewer),
                   db: AsyncSession = Depends(get_db)) -> HTMLResponse:
     current_year = scale.academic_year(today())
-    all_cards = await grades.teacher_courses(db, viewer.teacher_id)
+    all_cards = await grades.teacher_courses(db, viewer.teacher_id, today=today())
     years = sorted({c.course.academic_year for c in all_cards}, reverse=True) or [current_year]
     shown = year if year in years else (current_year if current_year in years else years[0])
     cards = [c for c in all_cards if c.course.academic_year == shown]
@@ -84,7 +89,7 @@ async def course_journal(request: Request, course_id: int, viewer: Viewer = Depe
 @router.post("/courses/{course_id}/scores", response_class=HTMLResponse)
 async def score_save(
     request: Request, course_id: int, assessment_id: int = Form(...), student_id: int = Form(...),
-    points: str = Form(""), comment: str = Form(""), back: str = Form(""),
+    points: str = Form(""), comment: str | None = Form(None), back: str = Form(""),
     viewer: Viewer = Depends(teacher_csrf), db: AsyncSession = Depends(get_db),
 ) -> Response:
     assessment = await grades.get_assessment(db, viewer.teacher_id, course_id, assessment_id)
@@ -171,12 +176,13 @@ async def assessment_delete(course_id: int, assessment_id: int, viewer: Viewer =
 @router.get("/homework", response_class=HTMLResponse)
 async def homework(request: Request, viewer: Viewer = Depends(teacher_viewer),
                    db: AsyncSession = Depends(get_db)) -> HTMLResponse:
-    items = await grades.teacher_homework(db, viewer.teacher_id, scale.academic_year(today()))
     t = today()
+    items = await grades.teacher_homework(db, viewer.teacher_id, scale.academic_year(t), t)
     upcoming = sorted([i for i in items if i.assessment.due_date and i.assessment.due_date >= t],
                       key=lambda i: i.assessment.due_date)
     to_check = [i for i in items if i.assessment.due_date and i.assessment.due_date < t and i.submitted < i.students]
-    done = [i for i in items if i not in upcoming and i not in to_check]
+    shown = {i.assessment.id for i in upcoming} | {i.assessment.id for i in to_check}
+    done = [i for i in items if i.assessment.id not in shown]
     return render(request, "teacher/homework.html", viewer, upcoming=upcoming, to_check=to_check, done=done)
 
 
@@ -198,7 +204,7 @@ async def final_save(
     error = None
     try:
         fg = await grades.set_final(db, viewer.teacher_id, course_id, student_id, result=result,
-                                    exam_points=exam_points or None)
+                                    exam_points=exam_points or None, on=today())
     except grades.ValidationError as e:
         error = str(e)
     else:
@@ -206,19 +212,20 @@ async def final_save(
             raise HTTPException(status_code=404)
         await db.commit()
     if not _is_htmx(request):
-        return RedirectResponse(f"/t/courses/{course_id}/final", status_code=303)
-    j = await _journal_or_404(db, viewer, course_id)
-    row = next((r for r in j.rows if r.student.id == student_id), None)
-    if row is None:
+        # Без HTMX ошибку несёт адрес: final_sheet показывает её над ведомостью.
+        suffix = f"?error={quote(error)}" if error else ""
+        return RedirectResponse(f"/t/courses/{course_id}/final{suffix}", status_code=303)
+    j = await _journal_or_404(db, viewer, course_id, student_id)  # только строка этого студента
+    if not j.rows:
         raise HTTPException(status_code=404)
-    return render(request, "teacher/_final_row.html", viewer, j=j, r=row, error=error, saved=error is None)
+    return render(request, "teacher/_final_row.html", viewer, j=j, r=j.rows[0], error=error, saved=error is None)
 
 
 @router.post("/courses/{course_id}/close")
 async def course_close(request: Request, course_id: int, viewer: Viewer = Depends(teacher_csrf),
                        db: AsyncSession = Depends(get_db)) -> Response:
     try:
-        course = await grades.close_course(db, viewer.teacher_id, course_id)
+        course = await grades.close_course(db, viewer.teacher_id, course_id, today())
     except grades.ValidationError as e:
         j = await _journal_or_404(db, viewer, course_id)
         resp = render(request, "teacher/final.html", viewer, j=j, error=str(e))

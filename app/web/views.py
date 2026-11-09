@@ -236,7 +236,7 @@ async def profile(request: Request, viewer: Viewer = Depends(current_viewer), db
     group = None
     if viewer.student and viewer.student.study_group_id:
         group = await db.get(StudyGroup, viewer.student.study_group_id)
-    teacher_courses = await grades.teacher_courses(db, viewer.teacher.id) if viewer.teacher else []
+    teacher_courses = await grades.teacher_courses(db, viewer.teacher.id, today=today()) if viewer.teacher else []
     return render(request, "profile.html", viewer, student=viewer.student, group=group,
                   teacher_courses=teacher_courses, **await _telegram_ctx(request, viewer, db))
 
