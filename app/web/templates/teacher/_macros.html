@@ -1,7 +1,7 @@
 {% from "_icons.html" import icon %}
 {# Хлебные крошки кабинета преподавателя. items — список (title, href|None). #}
 {% macro crumbs(items) -%}
-<nav class="breadcr"><a href="/t/courses" aria-label="Мои курсы">{{ icon("cap", 18) }}</a>
+<nav class="breadcr"><a href="/t/home" aria-label="Главная">{{ icon("home", 18) }}</a>
   {%- for title, href in items %}{{ icon("chev-right", 16) }}{% if href %}<a href="{{ href }}">{{ title }}</a>{% else %}<span>{{ title }}</span>{% endif %}{% endfor %}</nav>
 {%- endmacro %}
 
@@ -15,4 +15,9 @@
     <span class="meter__bar" style="width: {{ [pct, 100] | min }}%"></span>
   </span>
   {% if label %}<span class="meter__label">{{ value | pts }} / {{ max | pts }}</span>{% endif %}
+{%- endmacro %}
+
+{# Плитка-ссылка «ресурса» (главная и «Сервисы Академии»). #}
+{% macro res_tile(title, sub, color, href) -%}
+<a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
 {%- endmacro %}
