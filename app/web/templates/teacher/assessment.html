@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import crumbs %}
+{% block title %}{{ a.title }}{% endblock %}
+{% block header %}{{ crumbs([(j.card.group, "/t/courses/" ~ j.card.course.id), (a.title, none)]) }}{% endblock %}
+{% block content %}
+<div class="page page--narrow">
+  {% if created %}<p class="alert alert--ok" role="status">Задание создано{% if a.kind == "homework" %}, студенты получили уведомление{% endif %}. Ставьте баллы прямо здесь.</p>{% endif %}
+  <div>
+    <p class="muted">{{ j.card.discipline }} · {{ j.card.group }} · {{ AssessmentKind.TITLES.get(a.kind) }}</p>
+    <h1 class="title-2">{{ a.title }}</h1>
+  </div>
+  <section class="panel">
+    <dl class="props">
+      <dt>Максимум</dt><dd>{{ a.max_points | pts }} баллов</dd>
+      {% if a.due_date %}<dt>{{ "Срок сдачи" if a.kind == "homework" else "Дата" }}</dt><dd>{{ a.due_date | ddmmyyyy }}</dd>{% endif %}
+      <dt>Проверено</dt><dd>{{ graded }} из {{ j.rows | length }}</dd>
+    </dl>
+    {% if a.description %}<p class="dean-msg">{{ a.description }}</p>{% endif %}
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">Баллы</h2>
+    {% if j.rows %}
+    <ul class="grade-list">
+      {% for r in j.rows %}
+        <li class="grade-list__item">
+          <span class="grade-list__name">{{ r.student.full_name }}<small class="muted">накоп: <span id="total-{{ r.student.id }}" class="total">{{ r.current | pts }}</span></small></span>
+          {% with score = r.scores.get(a.id), student_id = r.student.id, course_id = j.card.course.id, raw = none, error = none, saved = false, oob = false, locked = j.locked %}{% include "teacher/_score_cell.html" %}{% endwith %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">В ведомости нет студентов.</p>{% endif %}
+    <p class="page__note">Сохраняется само при выходе из поля. Из {{ a.max_points | pts }}.</p>
+  </section>
+
+  {% if not j.locked %}
+  <form method="post" action="/t/courses/{{ j.card.course.id }}/assessments/{{ a.id }}/delete"
+        onsubmit="return confirm('Удалить задание вместе со всеми баллами за него?')">
+    <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+    <button class="link-btn link-btn--danger" type="submit">Удалить задание</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

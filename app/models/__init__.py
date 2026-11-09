@@ -6,6 +6,15 @@ from app.models.certificates import (
     Student,
     StudentReply,
 )
+from app.models.grades import (
+    Assessment,
+    Course,
+    CourseEnrollment,
+    Discipline,
+    FinalGrade,
+    GradeEvent,
+    Score,
+)
 from app.models.schedule import (
     Faculty,
     ImportRun,
@@ -19,6 +28,13 @@ from app.models.schedule import (
 from app.models.telegram import BotCursor, BotNotice, TelegramLink, TelegramLinkCode
 
 __all__ = [
+    "Assessment",
+    "Course",
+    "CourseEnrollment",
+    "Discipline",
+    "FinalGrade",
+    "GradeEvent",
+    "Score",
     "BotCursor",
     "BotNotice",
     "TelegramLink",

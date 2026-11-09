@@ -1,0 +1,15 @@
+{# Ячейка балла: поле ввода, сохраняется при изменении (HTMX), без перезагрузки страницы.
+   После ответа сервера — новая ячейка + обновлённый накоп студента (hx-swap-oob). #}
+{% set value = raw if raw is not none else (score.points | pts if score else "") %}
+<div class="score{% if error %} score--error{% elif saved %} score--saved{% endif %}" id="s-{{ a.id }}-{{ student_id }}">
+  {% if locked %}
+    <span class="score__ro">{{ value or "—" }}</span>
+  {% else %}
+  <input class="score__input" name="points" value="{{ value }}" inputmode="decimal" autocomplete="off"
+         aria-label="Баллы за «{{ a.title }}», максимум {{ a.max_points | pts }}"
+         hx-post="/t/courses/{{ course_id }}/scores" hx-trigger="change" hx-target="closest .score" hx-swap="outerHTML"
+         hx-vals='{"assessment_id": {{ a.id }}, "student_id": {{ student_id }}}'>
+  {% endif %}
+  {% if error %}<span class="score__msg" role="alert">{{ error }}</span>{% endif %}
+</div>
+{% if oob %}<span id="total-{{ student_id }}" class="total" hx-swap-oob="true">{{ current | pts }}</span>{% endif %}

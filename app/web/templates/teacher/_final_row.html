@@ -1,0 +1,36 @@
+{% from "teacher/_macros.html" import result_badge, progress %}
+{% set c = j.card.course %}
+{% set locked_row = j.locked and not (r.final and r.final.result in FinalResult.NEGATIVE and r.final.attempt < 3) %}
+<li class="final-row{% if error %} final-row--error{% elif saved %} final-row--saved{% endif %}" id="f-{{ r.student.id }}">
+  <div class="final-row__who">
+    <p class="final-row__name">{{ r.student.full_name }}</p>
+    <p class="final-row__meta">накоп {{ progress(r.current, j.current_max) }}
+      {% if j.is_exam %}{% if r.admitted %}<span class="badge badge--green">допуск</span>{% else %}<span class="badge badge--grey">до допуска {{ (scale.ADMISSION_MIN - r.current) | pts }} б.</span>{% endif %}{% endif %}
+      {% if r.final and r.final.attempt > 1 %}<span class="badge badge--orange">пересдача {{ r.final.attempt - 1 }}</span>{% endif %}
+    </p>
+  </div>
+  {% if locked_row %}
+    <div class="final-row__done">{{ result_badge(r.final.result if r.final else none) }}{% if r.final %} <span class="muted">{{ r.final.total_points | pts }} б. · {{ r.final.graded_on | ddmmyyyy }}</span>{% endif %}</div>
+  {% else %}
+  <form class="final-row__form" method="post" action="/t/courses/{{ c.id }}/final"
+        hx-post="/t/courses/{{ c.id }}/final" hx-target="closest .final-row" hx-swap="outerHTML">
+    <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+    <input type="hidden" name="student_id" value="{{ r.student.id }}">
+    {% if j.is_exam %}
+    <label class="field field--tiny"><span class="field__label">Экзамен, из {{ scale.EXAM_MAX | pts }}</span>
+      <input class="field__input" name="exam_points" inputmode="decimal" value="{{ r.final.exam_points | pts if r.final and r.final.exam_points is not none else '' }}"></label>
+    {% endif %}
+    {% set hint = not j.is_exam or (r.final and r.final.exam_points is not none) %}
+    {% set current_choice = r.final.result if r.final and not j.locked else none %}
+    <label class="field field--tiny"><span class="field__label">{{ "Пересдача" if j.locked else "Итог" }}</span>
+      <select class="field__input" name="result" required>
+        {% if current_choice is none %}<option value="" selected disabled>Выберите</option>{% endif %}
+        {% for code in scale.allowed_results(c.control_form) %}
+          <option value="{{ code }}"{% if code == current_choice %} selected{% endif %}>{{ FinalResult.TITLES[code] }}{% if hint and code == r.suggested %} ★{% endif %}</option>
+        {% endfor %}
+      </select></label>
+    <button class="btn btn--ghost btn--small" type="submit">{{ "Сохранить" if r.final and not j.locked else "Выставить" }}</button>
+  </form>
+  {% endif %}
+  {% if error %}<p class="final-row__msg" role="alert">{{ error }}</p>{% elif saved %}<p class="final-row__msg final-row__msg--ok" role="status">Сохранено, студент увидит итог в зачётке</p>{% endif %}
+</li>

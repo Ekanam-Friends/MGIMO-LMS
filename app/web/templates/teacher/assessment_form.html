@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "teacher/_macros.html" import crumbs %}
+{% block title %}Новое задание{% endblock %}
+{% block header %}{{ crumbs([(j.card.group, "/t/courses/" ~ j.card.course.id), ("Новое задание", none)]) }}{% endblock %}
+{% block content %}
+<div class="page page--narrow">
+  <div>
+    <p class="muted">{{ j.card.discipline }} · {{ j.card.group }}</p>
+    <h1 class="title-2">Новое задание</h1>
+  </div>
+  <section class="panel">
+    {% if error %}<p class="alert alert--error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="/t/courses/{{ j.card.course.id }}/assessments" class="form">
+      <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+      <fieldset class="radio-list radio-list--row">
+        <legend class="field__label">Тип</legend>
+        {% for code, title in AssessmentKind.TITLES.items() %}
+          <label class="radio"><input type="radio" name="kind" value="{{ code }}"{% if form.kind == code %} checked{% endif %}><span>{{ title }}</span></label>
+        {% endfor %}
+      </fieldset>
+      <label class="field">
+        <span class="field__label">Название</span>
+        <input class="field__input" name="title" value="{{ form.title }}" maxlength="200" required placeholder="Например: Эссе «Свобода слова в цифровую эпоху»">
+      </label>
+      <label class="field">
+        <span class="field__label">Что сделать (видят студенты)</span>
+        <textarea class="field__input" name="description" rows="5" maxlength="5000" placeholder="Задание, требования к оформлению, ссылки на материалы">{{ form.description }}</textarea>
+      </label>
+      <div class="form__row">
+        <label class="field field--short">
+          <span class="field__label">Максимум баллов</span>
+          <input class="field__input" name="max_points" value="{{ form.max_points }}" inputmode="decimal" required>
+        </label>
+        <label class="field field--short">
+          <span class="field__label">Срок сдачи</span>
+          <input class="field__input" type="date" name="due_date" value="{{ form.due_date }}">
+        </label>
+      </div>
+      <p class="page__note">Уже распределено {{ j.planned_max | pts }} из {{ j.current_max | pts }} баллов накопа. У домашнего задания срок обязателен — студенты получат уведомление.</p>
+      <button class="btn btn--primary" type="submit">Создать задание</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

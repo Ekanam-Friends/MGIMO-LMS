@@ -17,6 +17,7 @@ from app.db.base import Base
 class Role:
     STUDENT = "student"
     STAFF = "staff"
+    TEACHER = "teacher"
 
 
 class User(Base):
@@ -30,6 +31,10 @@ class User(Base):
         ForeignKey("students.id"), nullable=True, unique=True
     )
     """Для роли student — чья это учётка. Все запросы к данным студента фильтруются по нему."""
+    teacher_id: Mapped[int | None] = mapped_column(
+        ForeignKey("teachers.id"), nullable=True, unique=True
+    )
+    """Для роли teacher — какой преподаватель из `teachers`. Ведомости фильтруются по нему."""
     created_at: Mapped[datetime] = mapped_column(DateTime)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 

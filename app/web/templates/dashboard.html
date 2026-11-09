@@ -37,22 +37,35 @@
     </div>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Текущая успеваемость</h2><a class="dash-link" href="/s/grades" aria-label="Успеваемость">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">Текущая успеваемость</h2><a class="dash-link" href="/grades" aria-label="Успеваемость">{{ icon("arrow") }}</a></div>
       <div class="dashboard__row dashboard__row--grades">
-        <div class="box box--placeholder">
+        <a class="box" href="/grades">
           <p class="box__title">Результаты по дисциплинам текущего семестра</p>
-          <div class="skeleton-bars" aria-hidden="true"><span style="width:62%"></span><span style="width:18%"></span><span style="width:40%"></span><span style="width:75%"></span></div>
-          <p class="box__note">Подключится вместе с разделом «Успеваемость»</p>
-        </div>
+          {% set courses = (book.current.courses if book.current else []) | selectattr("percent", "ne", none) | list %}
+          {% if courses %}
+          <ul class="mini-bars">
+            {% for c in courses | sort(attribute="percent") %}{% if loop.index <= 5 %}
+              <li><span class="mini-bars__name">{{ c.card.discipline }}</span>
+                <span class="meter meter--{{ scale.percent_tone(c.percent) }}"><span class="meter__bar" style="width: {{ [c.percent, 100] | min }}%"></span></span>
+                <span class="mini-bars__val">{{ c.percent | round | int }}%</span></li>
+            {% endif %}{% endfor %}
+          </ul>
+          <p class="box__note">Доля набранных баллов от возможного на сегодня · сначала слабые места</p>
+          {% else %}
+          <p class="box__note">Преподаватели ещё не выставили баллы в этом семестре</p>
+          {% endif %}
+        </a>
         <div class="dashboard__stack">
-          <div class="box box--placeholder">
-            <p class="box__title">Статистика по посещениям</p>
-            <p class="box__note">Нет источника данных</p>
-          </div>
-          <div class="box box--placeholder">
+          <a class="box" href="/grades#debts">
+            <p class="box__title">Академические долги</p>
+            {% if book.debts %}<p class="big-num big-num--red">{{ book.debts | length }}</p><p class="box__note">{{ book.debts[0].card.discipline }}{% if book.debts | length > 1 %} и ещё {{ book.debts | length - 1 }}{% endif %}</p>
+            {% else %}<p class="big-num big-num--green">0</p><p class="box__note">Долгов нет</p>{% endif %}
+          </a>
+          <a class="box" href="/grades#record">
             <p class="box__title">Средний балл</p>
-            <div class="gauge" aria-hidden="true"><span>—</span></div>
-          </div>
+            {% set g = book.gpa %}
+            <div class="gauge{% if g %} gauge--on{% endif %}" style="--p: {{ ((g - 2) / 3 * 100) | round if g else 0 }}" aria-label="Средний балл {{ g or 'нет' }}"><span>{{ "%.2f" | format(g) | replace(".", ",") if g else "—" }}</span></div>
+          </a>
         </div>
       </div>
     </section>

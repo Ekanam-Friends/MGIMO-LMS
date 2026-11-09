@@ -3,6 +3,7 @@
   <ul class="lesson-card__details">
     {% if l.auditorium %}<li>{{ icon("door", 16) }}<span>{{ l.auditorium }}</span></li>{% endif %}
     {% if l.building %}<li>{{ icon("pin", 16) }}<span>{{ l.building }}</span></li>{% endif %}
+    {% if l.groups %}<li class="lesson-card__groups">{{ icon("user", 16) }}<span>{{ l.groups[:6] | join(", ") }}{% if l.groups | length > 6 %} и ещё {{ l.groups | length - 6 }}{% endif %}</span></li>{% endif %}
     {% for t in l.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}
     {% if l.subgroup %}<li class="lesson-card__muted">{{ l.subgroup }}</li>{% endif %}
   </ul>

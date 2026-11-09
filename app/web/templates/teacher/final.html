@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "teacher/_macros.html" import crumbs %}
+{% block title %}Итоговая ведомость{% endblock %}
+{% block header %}{{ crumbs([(j.card.group, "/t/courses/" ~ j.card.course.id), ("Итоговая ведомость", none)]) }}{% endblock %}
+{% block content %}
+{% set c = j.card.course %}
+{% set missing = j.rows | selectattr("final", "none") | list %}
+<div class="page page--narrow">
+  <div>
+    <p class="muted">{{ j.card.discipline }} · {{ j.card.group }} · {{ j.card.form_title }}</p>
+    <h1 class="title-2">Итоговая ведомость</h1>
+  </div>
+  {% if error %}<p class="alert alert--error" role="alert">{{ error }}</p>{% endif %}
+  <p class="alert">
+    {% if j.is_exam %}Накоп до {{ scale.current_max(c.control_form) | pts }} + экзамен до {{ scale.EXAM_MAX | pts }}. Допуск — от {{ scale.ADMISSION_MIN | pts }} баллов накопа.
+    {% elif c.control_form == "credit" %}«Зачтено» — от {{ scale.PASS_MIN | pts }} баллов из 100.
+    {% else %}Оценка по сумме баллов из 100.{% endif %}
+    Шкала: 85+ «отлично», 70+ «хорошо», 55+ «удовлетворительно». ★ — итог, который следует из баллов.
+  </p>
+  {% if j.rows %}
+  <ul class="final-list">
+    {% for r in j.rows %}{% with error = none, saved = false %}{% include "teacher/_final_row.html" %}{% endwith %}{% endfor %}
+  </ul>
+  {% if not j.locked %}
+  <section class="panel">
+    <h2 class="panel__title">Закрыть ведомость</h2>
+    <p>После закрытия баллы и итоги не меняются, а студентам с неудовлетворительным итогом можно выставить только пересдачу.
+      {% if missing %}<br><strong>Итог не выставлен у {{ missing | length }} из {{ j.rows | length }}.</strong>{% endif %}</p>
+    <form method="post" action="/t/courses/{{ c.id }}/close" onsubmit="return confirm('Закрыть ведомость? Изменить итоги после этого будет нельзя.')">
+      <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+      <button class="btn btn--primary" type="submit"{% if missing %} disabled{% endif %}>Закрыть ведомость</button>
+    </form>
+  </section>
+  {% endif %}
+  {% else %}<section class="panel empty"><p class="empty__title">В ведомости нет студентов</p></section>{% endif %}
+</div>
+{% endblock %}

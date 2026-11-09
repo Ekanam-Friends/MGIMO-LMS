@@ -20,14 +20,17 @@ from app.auth import service as auth
 from app.bot import ics
 from app.bot import link as tg_link
 from app.certificates import service as certs
+from app.grades import scale
+from app.grades import service as grades
 from app.models import StudyGroup
 from app.models.certificates import CertificateKind, RequestStatus
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
-from app.web.nav import MENU, SERVICES, STUBS, TABBAR
+from app.web.nav import MENU, SERVICES, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
-templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, sv=sv, KINDS=CertificateKind.TITLES)
+templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, TEACHER_MENU=TEACHER_MENU, TEACHER_TABBAR=TEACHER_TABBAR,
+                             sv=sv, KINDS=CertificateKind.TITLES)
 
 router = APIRouter()
 
@@ -80,7 +83,7 @@ async def login(
     cfg = request.app.state.settings
     token = await auth.open_session(db, user, ttl=timedelta(days=cfg.session_days))
     await db.commit()
-    resp = RedirectResponse("/", status_code=303)
+    resp = RedirectResponse("/t/courses" if user.teacher_id else "/", status_code=303)
     resp.set_cookie(
         COOKIE_NAME, token, max_age=cfg.session_days * 86400, httponly=True,
         secure=cfg.cookie_secure, samesite="lax", path="/",
@@ -114,12 +117,16 @@ async def _day_widget_ctx(db: AsyncSession, viewer: Viewer, day: date) -> dict:
 async def dashboard(
     request: Request, d: str | None = None, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)
 ) -> HTMLResponse:
+    if viewer.teacher is not None:
+        return RedirectResponse("/t/courses", status_code=303)
     if viewer.student is None:
         return render(request, "staff.html", viewer)
     day = _parse_day(d, today())
     requests = (await certs.list_requests(db, viewer.student_id))[:2]
+    book = await grades.record_book(db, viewer.student_id, today(), events=0)
     return render(
-        request, "dashboard.html", viewer, requests=requests, certs=certs, **await _day_widget_ctx(db, viewer, day)
+        request, "dashboard.html", viewer, requests=requests, certs=certs, book=book, scale=scale,
+        **await _day_widget_ctx(db, viewer, day)
     )
 
 
@@ -148,6 +155,16 @@ async def schedule(
     )
 
 
+# --- успеваемость (зачётка) ---
+
+
+@router.get("/grades", response_class=HTMLResponse)
+async def grades_page(request: Request, viewer: Viewer = Depends(current_viewer),
+                      db: AsyncSession = Depends(get_db)) -> HTMLResponse:
+    book = await grades.record_book(db, viewer.student_id, today())
+    return render(request, "grades.html", viewer, book=book, scale=scale, today=today())
+
+
 # --- профиль ---
 
 
@@ -156,8 +173,9 @@ async def profile(request: Request, viewer: Viewer = Depends(current_viewer), db
     group = None
     if viewer.student and viewer.student.study_group_id:
         group = await db.get(StudyGroup, viewer.student.study_group_id)
+    teacher_courses = await grades.teacher_courses(db, viewer.teacher.id) if viewer.teacher else []
     return render(request, "profile.html", viewer, student=viewer.student, group=group,
-                  **await _telegram_ctx(request, viewer, db))
+                  teacher_courses=teacher_courses, **await _telegram_ctx(request, viewer, db))
 
 
 async def _telegram_ctx(request: Request, viewer: Viewer, db: AsyncSession) -> dict:
