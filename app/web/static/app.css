@@ -620,3 +620,12 @@ textarea.field__input { resize: vertical; }
 .res-tile:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
 @media (max-width: 1023px) { .teacher-home { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .res-grid { grid-template-columns: 1fr 1fr; } .res-tile { padding: 10px 12px; } }
+
+/* Форма объявления деканата: поля показываются по выбранной аудитории (без :has — видны все) */
+.form:has(#aud) [data-aud] { display: none; }
+.form:has(#aud [value="faculty"]:checked) [data-aud="faculty"],
+.form:has(#aud [value="stream"]:checked) [data-aud="stream"],
+.form:has(#aud [value="group"]:checked) [data-aud="group"],
+.form:has(#aud [value="student"]:checked) [data-aud="student"] { display: flex; }
+.student-results { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; }
+.student-results__item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }

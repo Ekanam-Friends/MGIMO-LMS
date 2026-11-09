@@ -27,6 +27,9 @@ class Audience:
     ALL = "all"
     FACULTY = "faculty"
     GROUP = "group"
+    STREAM = "stream"
+    """Поток = программа (`students.speciality`) + курс."""
+    STUDENT = "student"
 
 
 class Announcement(Base):
@@ -42,9 +45,16 @@ class Announcement(Base):
     """Для audience=faculty: название как в `students.faculty_name`."""
     group_id: Mapped[int | None] = mapped_column(ForeignKey("study_groups.id"), nullable=True)
     """Для audience=group: группа, которой адресовано (преподаватель — только своим)."""
+    program: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    """Для audience=stream: программа, как в `students.speciality`."""
+    course: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    """Для audience=stream: номер курса."""
+    student_id: Mapped[int | None] = mapped_column(ForeignKey("students.id"), nullable=True)
+    """Для audience=student: адресат."""
     created_at: Mapped[datetime] = mapped_column(DateTime, index=True)
 
     group = relationship("StudyGroup", lazy="joined")
+    student = relationship("Student", lazy="joined")
 
 
 class NotificationRead(Base):

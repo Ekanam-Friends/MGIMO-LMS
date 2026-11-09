@@ -68,6 +68,10 @@ async def _announcements(db: AsyncSession, student: Student | None, since: datet
         if student.study_group_id is not None:
             cond.append(and_(Announcement.audience == Audience.GROUP,
                              Announcement.group_id == student.study_group_id))
+        if student.speciality:
+            cond.append(and_(Announcement.audience == Audience.STREAM, Announcement.program == student.speciality,
+                             Announcement.course == student.course))
+        cond.append(and_(Announcement.audience == Audience.STUDENT, Announcement.student_id == student.id))
         q = q.where(or_(*cond))
     else:
         # Преподаватель: общие объявления деканата и вуза (адресные — студентам).
@@ -172,6 +176,29 @@ async def faculty_names(db: AsyncSession) -> list[str]:
     )).all())
 
 
+async def programs(db: AsyncSession) -> list[str]:
+    """Программы для адресации потока: как в `students.speciality`."""
+    return list((await db.scalars(
+        select(Student.speciality).where(Student.speciality != "").distinct().order_by(Student.speciality)
+    )).all())
+
+
+async def search_students(db: AsyncSession, raw: str, limit: int = 8) -> list[tuple[Student, str]]:
+    """Поиск адресата по ФИО (только для сотрудника деканата). Регистр: SQLite не понижает кириллицу,
+    поэтому перебираем типичные написания, а не `lower()`."""
+    q = " ".join(raw.split())
+    if len(q) < 2:
+        return []
+    forms = {q, q.lower(), q.upper(), q.capitalize(), q.title()}
+    rows = (await db.execute(
+        select(Student, StudyGroup.number)
+        .outerjoin(StudyGroup, StudyGroup.id == Student.study_group_id)
+        .where(or_(*[Student.full_name.contains(f) for f in forms]))
+        .order_by(Student.full_name).limit(limit)
+    )).all()
+    return [(s, num or "—") for s, num in rows]
+
+
 async def find_group(db: AsyncSession, raw: str) -> StudyGroup | None:
     raw = raw.strip()
     if not raw:
@@ -186,7 +213,9 @@ class AnnouncementError(ValueError):
 
 
 async def create(db: AsyncSession, *, user: User, source: str, title: str, body: str,
-                 audience: str, faculty_name: str | None = None, group: StudyGroup | None = None) -> Announcement:
+                 audience: str, faculty_name: str | None = None, group: StudyGroup | None = None,
+                 program: str | None = None, course: int | None = None,
+                 student: Student | None = None) -> Announcement:
     title, body = title.strip(), body.strip()
     if not title:
         raise AnnouncementError("Укажите заголовок.")
@@ -194,7 +223,7 @@ async def create(db: AsyncSession, *, user: User, source: str, title: str, body:
         raise AnnouncementError(f"Заголовок — до {TITLE_MAX} знаков, текст — до {BODY_MAX}.")
     if source not in Source.TITLES or (source == Source.TEACHER) != (user.role == Role.TEACHER):
         raise AnnouncementError("Недопустимый отправитель.")
-    if audience not in (Audience.ALL, Audience.FACULTY, Audience.GROUP):
+    if audience not in (Audience.ALL, Audience.FACULTY, Audience.GROUP, Audience.STREAM, Audience.STUDENT):
         raise AnnouncementError("Недопустимая аудитория.")
     if audience == Audience.FACULTY and not faculty_name:
         raise AnnouncementError("Выберите факультет.")
@@ -205,10 +234,17 @@ async def create(db: AsyncSession, *, user: User, source: str, title: str, body:
             raise AnnouncementError("Выберите одну из своих групп.")
     if audience == Audience.GROUP and group is None:
         raise AnnouncementError("Такой группы нет. Укажите номер как «1МО-01».")
+    if audience == Audience.STREAM and (not program or course is None or not 1 <= course <= 6):
+        raise AnnouncementError("Для потока укажите программу и курс.")
+    if audience == Audience.STUDENT and student is None:
+        raise AnnouncementError("Выберите студента из результатов поиска.")
     row = Announcement(
         source=source, author_user_id=user.id, title=title, body=body, audience=audience,
         faculty_name=faculty_name if audience == Audience.FACULTY else None,
-        group_id=group.id if audience == Audience.GROUP and group else None, created_at=utcnow(),
+        group_id=group.id if audience == Audience.GROUP and group else None,
+        program=program if audience == Audience.STREAM else None,
+        course=course if audience == Audience.STREAM else None,
+        student_id=student.id if audience == Audience.STUDENT and student else None, created_at=utcnow(),
     )
     db.add(row)
     await db.commit()

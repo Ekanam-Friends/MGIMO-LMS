@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import res_tile %}
+{% block title %}Главная{% endblock %}
+{% block header %}<p class="header__title">Кабинет деканата</p>{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h1 class="title-1">Добро пожаловать</h1>
+      <p class="muted">Рабочее место сотрудника деканата</p>
+    </div>
+  </div>
+
+  <section class="dash-block">
+    <div class="dash-block__header"><h2 class="dash-title">Деканат</h2></div>
+    <div class="res-grid">
+      {% for title, sub, color, href in work %}{{ res_tile(title, sub, color, href) }}{% endfor %}
+    </div>
+  </section>
+
+  <section class="dash-block">
+    <div class="dash-block__header"><h2 class="dash-title">Мои объявления</h2><a class="dash-link" href="/d/announcements" aria-label="Объявления">{{ icon("arrow") }}</a></div>
+    {% if mine %}
+      <ul class="panel timeline">
+        {% for a in mine %}<li><span class="timeline__date">{{ a.created_at.strftime("%d.%m.%Y %H:%M") }}</span><span>{{ a.title }}</span></li>{% endfor %}
+      </ul>
+    {% else %}
+      <p class="panel muted">Вы ещё ничего не отправляли.</p>
+    {% endif %}
+  </section>
+
+  <section class="dash-block">
+    <div class="dash-block__header"><h2 class="dash-title">Ресурсы Академии</h2><a class="dash-link" href="/d/services" aria-label="Все сервисы">{{ icon("arrow") }}</a></div>
+    <div class="res-grid">
+      {% for title, sub, color, href in resources %}{{ res_tile(title, sub, color, href) }}{% endfor %}
+    </div>
+  </section>
+  <p class="page__note">Структура — по странице «Сотрудник» ЛК РАНХиГС. Сервисы — концепт, без настоящих адресов.</p>
+</div>
+{% endblock %}

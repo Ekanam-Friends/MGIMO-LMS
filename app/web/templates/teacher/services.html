@@ -2,7 +2,7 @@
 {% from "_icons.html" import icon %}
 {% from "teacher/_macros.html" import crumbs, res_tile %}
 {% block title %}Сервисы Академии{% endblock %}
-{% block header %}{{ crumbs([("Сервисы Академии", none)]) }}{% endblock %}
+{% block header %}{{ crumbs([("Сервисы Академии", none)], home_href | default("/t/home")) }}{% endblock %}
 {% block content %}
 <div class="page">
   <h1 class="title-1">Сервисы Академии</h1>

@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.auth import Role
-from app.models import StudyGroup
+from app.models import Student, StudyGroup
 from app.models.notifications import Audience, Source
 from app.notifications import service as notes
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
@@ -84,6 +84,7 @@ async def _form_ctx(db: AsyncSession, viewer: Viewer, mode: str, **extra) -> dic
            "error": None, "sent": False, "values": {}, **extra}
     if mode == "staff":
         ctx["faculties"] = await notes.faculty_names(db)
+        ctx["programs"] = await notes.programs(db)
     else:
         ctx["groups"] = await notes.teacher_groups(db, viewer.teacher_id)
     return ctx
@@ -99,17 +100,23 @@ async def staff_form(request: Request, sent: int = 0, viewer: Viewer = Depends(s
 async def staff_send(
     request: Request, title: str = Form(""), body: str = Form(""), source: str = Form(Source.DEAN),
     audience: str = Form(Audience.ALL), faculty: str = Form(""), group: str = Form(""),
+    program: str = Form(""), course: int = Form(0), student_id: int = Form(0),
     viewer: Viewer = Depends(staff_csrf), db: AsyncSession = Depends(get_db),
 ) -> Response:
-    values = {"title": title, "body": body, "source": source, "audience": audience, "faculty": faculty, "group": group}
+    values = {"title": title, "body": body, "source": source, "audience": audience, "faculty": faculty,
+              "group": group, "program": program, "course": course or None, "student_id": student_id}
     try:
         if source == Source.TEACHER:
             raise notes.AnnouncementError("Недопустимый отправитель.")
         grp = await notes.find_group(db, group) if audience == Audience.GROUP else None
+        stu = await db.get(Student, student_id) if audience == Audience.STUDENT and student_id else None
         await notes.create(db, user=viewer.user, source=source, title=title, body=body, audience=audience,
-                           faculty_name=faculty or None, group=grp)
+                           faculty_name=faculty or None, group=grp, program=program or None,
+                           course=course or None, student=stu)
     except notes.AnnouncementError as e:
-        resp = render(request, "announce.html", viewer, **await _form_ctx(db, viewer, "staff", error=str(e), values=values))
+        picked = await db.get(Student, student_id) if student_id else None
+        resp = render(request, "announce.html", viewer,
+                      **await _form_ctx(db, viewer, "staff", error=str(e), values=values, picked=picked))
         resp.status_code = 400
         return resp
     return RedirectResponse("/d/announcements?sent=1", status_code=303)
