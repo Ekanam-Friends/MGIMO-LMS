@@ -4,7 +4,7 @@
 Бриф, требования и критерии — в [README.md](README.md). Принятые решения —
 в [docs/decisions/](docs/decisions/), начни с `0001-architecture.md`.
 
-## Стек
+## Стек 
 
 FastAPI + PostgreSQL + Jinja2 + HTMX. Telegram-бот на aiogram. LLM — GigaChat или YandexGPT,
 вызовы только с бэкенда. Деплой — docker-compose на VPS за общим Caddy.
