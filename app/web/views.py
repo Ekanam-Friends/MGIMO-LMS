@@ -27,10 +27,11 @@ from app.models.certificates import CertificateKind, RequestStatus
 from app.web import calendar_view as cv
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
-from app.web.nav import MENU, SERVICES, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
+from app.web.nav import MENU, SERVICES, STAFF_MENU, STAFF_TABBAR, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, TEACHER_MENU=TEACHER_MENU, TEACHER_TABBAR=TEACHER_TABBAR,
+                             STAFF_MENU=STAFF_MENU, STAFF_TABBAR=STAFF_TABBAR,
                              sv=sv, cv=cv, KINDS=CertificateKind.TITLES)
 # Версия стилей в адресе: после выкладки браузер не держит старый app.css из кэша.
 _CSS = Path(__file__).parent / "static" / "app.css"
@@ -136,7 +137,7 @@ async def dashboard(
     if viewer.teacher is not None:
         return RedirectResponse("/t/courses", status_code=303)
     if viewer.student is None:
-        return render(request, "staff.html", viewer)
+        return RedirectResponse("/d/announcements", status_code=303)
     day = _parse_day(d, today())
     requests = (await certs.list_requests(db, viewer.student_id))[:2]
     book = await grades.record_book(db, viewer.student_id, today(), events=0)

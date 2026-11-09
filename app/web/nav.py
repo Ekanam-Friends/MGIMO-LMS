@@ -35,12 +35,23 @@ TEACHER_MENU = [
     {"title": "Мои курсы", "icon": "cap", "href": "/t/courses"},
     {"title": "Домашние задания", "icon": "book", "href": "/t/homework"},
     {"title": "Расписание", "icon": "calendar", "href": "/t/schedule"},
+    {"title": "Объявления", "icon": "chat", "href": "/t/announcements"},
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 TEACHER_TABBAR = [
     {"title": "Курсы", "icon": "cap", "href": "/t/courses"},
     {"title": "Задания", "icon": "book", "href": "/t/homework"},
     {"title": "Расписание", "icon": "calendar", "href": "/t/schedule"},
+    {"title": "Профиль", "icon": "user", "href": "/profile"},
+]
+
+# Кабинет деканата (решение 0008): объявления студентам; заявки на справки — в Pyrus.
+STAFF_MENU = [
+    {"title": "Объявления", "icon": "chat", "href": "/d/announcements"},
+    {"title": "Профиль", "icon": "user", "href": "/profile"},
+]
+STAFF_TABBAR = [
+    {"title": "Объявления", "icon": "chat", "href": "/d/announcements"},
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 
@@ -68,8 +79,6 @@ STUBS = {
     "tickets": {"title": "Обращения", "text": "Вопросы в деканат со статусами.", "plan": "Кандидат на ту же интеграцию с Pyrus, что и справки."},
     "info": {"title": "Справочная информация", "text": "Памятки и ответы на частые вопросы.",
              "plan": "Тексты отсюда же станут базой FAQ для ИИ-ассистента."},
-    "notifications": {"title": "Уведомления", "text": "Изменения расписания и статусы заявок.",
-                      "plan": "Telegram-бот уже присылает их (решение 0005, подключение — в профиле и в «Сервисах»). Здесь будет та же лента в кабинете: журналы lesson_changes и certificate_request_events."},
 }
 
 # Страница «Сервисы»: ссылки на системы вуза — концепт, без настоящих адресов.

@@ -1,0 +1,11 @@
+<div class="bell__head">
+  <strong>Уведомления</strong>
+  {% if items | selectattr("unread") | list %}
+  <button type="button" class="link-btn" hx-post="/notifications/read-all" hx-target="#bell-panel" hx-swap="innerHTML">Прочитать всё</button>
+  {% endif %}
+</div>
+<div class="bell__list">
+  {% for it in items %}{% include "partials/_notif_item.html" %}
+  {% else %}<p class="bell__empty">Пока ничего нового.</p>{% endfor %}
+</div>
+<a class="bell__all" href="/notifications">Все уведомления</a>
