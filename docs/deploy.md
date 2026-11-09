@@ -68,9 +68,11 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 ## Корпус для ИИ-ассистента (RAG)
 
 Решение [0007](decisions/0007-rag-assistant-infra.md). Это делает **root** один раз; Келли
-после этого работает через `deploy` и `run app.<модуль>`. выполнено, кроме шага 1: папка `/opt/mgimo-lms/data/regulations` создана 2026-11-10, в ней
-27 PDF студенческих положений и `manifest.csv` (URL, хэши, наличие текстового слоя). Монтирования
-в контейнеры, ключей и сертификата пока нет.
+после этого работает через `deploy`, `run app.<модуль>` и `corpus`.
+
+Состояние на 2026-11-10: шаги 1 и 2 выполнены (папка `/opt/mgimo-lms/data/regulations` с 27 PDF и
+`manifest.csv`, монтирование `/data` в `web` и `bot`, команда `corpus` в обёртке). Не сделаны шаги 3 и 4:
+ключей LLM и сертификата на сервере пока нет, выход к провайдеру не проверен.
 
 1. Папка корпуса. Контейнеры работают под uid 1000 (`lms`), поэтому папка принадлежит ему:
 
@@ -168,14 +170,11 @@ DEPLOY_HOST=kelli@195.24.71.184 sh scripts/deploy.sh
 ssh -t kelli@195.24.71.184 psql
 ssh kelli@195.24.71.184 corpus ls                      # корпус положений для ассистента
 ssh kelli@195.24.71.184 corpus put x.pdf < x.pdf        # записать файл (до 50 МБ, плоская папка)
+ssh kelli@195.24.71.184 corpus rm x.pdf                 # удалить файл корпуса
 ```
 
 `corpus` работает только с `/opt/mgimo-lms/data/regulations` (решение [0007](decisions/0007-rag-assistant-infra.md)):
-имена по белому списку, ссылок и вложенных путей нет. Файл больше 50 МБ обрезается молча — проверять размер до отправки.
-
-Корпус положений для ассистента (решение [0007](decisions/0007-rag-assistant-infra.md)):
-`ssh kelli@195.24.71.184 corpus ls`, `corpus put <имя> < файл`, `corpus rm <имя>` — одна плоская
-папка `/opt/mgimo-lms/data/regulations`, имена по белому списку, до 50 МБ на файл.
+имена по белому списку, ссылок и вложенных путей нет. Файл больше 50 МБ команда отклоняет с ошибкой.
 
 Обновить обёртку: `scp scripts/server/mgimo-lms* root@…:/tmp/` и `install -m 755` в
 `/usr/local/bin`. Отозвать: `userdel -r kelli`, удалить `71-kelli-mgimo-lms.conf` и
