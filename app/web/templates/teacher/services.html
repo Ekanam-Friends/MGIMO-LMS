@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "teacher/_macros.html" import crumbs, res_tile %}
+{% block title %}Сервисы Академии{% endblock %}
+{% block header %}{{ crumbs([("Сервисы Академии", none)]) }}{% endblock %}
+{% block content %}
+<div class="page">
+  <h1 class="title-1">Сервисы Академии</h1>
+  <section class="dash-block">
+    <h2 class="dash-title">Ресурсы</h2>
+    <div class="res-grid">
+      {% for title, sub, color, href in resources %}
+        {{ res_tile(title, sub, color, href) }}
+      {% endfor %}
+    </div>
+  </section>
+  <section class="dash-block">
+    <h2 class="dash-title">Мои сервисы</h2>
+    <div class="services">
+      {% for name, color, text in services %}
+        <a class="service" href="/s/info" title="{{ text }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+      {% endfor %}
+    </div>
+  </section>
+  <p class="page__note">Ссылки ведут на разделы-каркасы: настоящих систем вуза в прототипе нет.</p>
+</div>
+{% endblock %}

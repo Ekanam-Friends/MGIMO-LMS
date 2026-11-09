@@ -20,6 +20,7 @@ from app.grades import service as grades
 from app.models.grades import AssessmentKind, ControlForm, FinalResult
 from app.web import schedule_view as sv
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
+from app.web.nav import SERVICES, TEACHER_RESOURCES, TEACHER_WORK
 from app.web.views import _parse_day, render, templates, today
 
 router = APIRouter(prefix="/t")
@@ -27,6 +28,18 @@ router = APIRouter(prefix="/t")
 templates.env.globals.update(scale=scale, ControlForm=ControlForm, FinalResult=FinalResult,
                              AssessmentKind=AssessmentKind)
 templates.env.filters["pts"] = scale.fmt_points
+
+
+def staff_card(teacher) -> dict:
+    """Кадровая карточка для профиля (решение 0008). В БД у преподавателя только вымышленное ФИО,
+    остальное — детерминированные вымышленные значения из id: миграции и реальные данные не нужны."""
+    return {"position": "преподаватель", "role": "педагогический работник",
+            "unit": f"Кафедра № {teacher.id % 9 + 1} (вымышленная)",
+            "employment": "Основное место работы", "rate": "1,0 ставки (40-час. 5 дней)",
+            "tab_no": f"ТН-{teacher.id:05d}", "since": "01.09.2024"}
+
+
+templates.env.globals["staff_card"] = staff_card
 
 
 def _require_teacher(viewer: Viewer) -> Viewer:
@@ -61,7 +74,29 @@ async def _journal_or_404(db: AsyncSession, viewer: Viewer, course_id: int,
 
 @router.get("", include_in_schema=False)
 async def teacher_root() -> Response:
-    return RedirectResponse("/t/courses", status_code=303)
+    return RedirectResponse("/t/home", status_code=303)
+
+
+# --- главная «сотрудника» и сервисы (решение 0008) ---
+
+
+@router.get("/home", response_class=HTMLResponse)
+async def teacher_home(request: Request, viewer: Viewer = Depends(teacher_viewer),
+                       db: AsyncSession = Depends(get_db)) -> HTMLResponse:
+    now = today()
+    cards = [c for c in await grades.teacher_courses(db, viewer.teacher_id, today=now)
+             if c.course.academic_year == scale.academic_year(now)]
+    due_soon = sorted((c for c in cards if c.next_due and c.next_due <= now + timedelta(days=7)),
+                      key=lambda c: c.next_due)
+    lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, now, now)).get(now, [])
+    return render(request, "teacher/home.html", viewer, cards=cards, due_soon=due_soon, lessons=lessons,
+                  resources=TEACHER_RESOURCES, work=TEACHER_WORK, today_date=now,
+                  students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
+
+
+@router.get("/services", response_class=HTMLResponse)
+async def teacher_services(request: Request, viewer: Viewer = Depends(teacher_viewer)) -> HTMLResponse:
+    return render(request, "teacher/services.html", viewer, resources=TEACHER_RESOURCES, services=SERVICES)
 
 
 @router.get("/courses", response_class=HTMLResponse)
@@ -76,7 +111,7 @@ async def courses(request: Request, year: str | None = None, viewer: Viewer = De
     activity = await grades.recent_teacher_activity(db, viewer.teacher_id)
     return render(request, "teacher/courses.html", viewer, cards=cards, years=years, shown=shown,
                   current_year=current_year, due_soon=due_soon, activity=activity,
-                  students_total=sum(c.students for c in cards))
+                  students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
 
 
 @router.get("/courses/{course_id}", response_class=HTMLResponse)
