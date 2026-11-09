@@ -16,6 +16,7 @@ from app.models.grades import (
     GradeEvent,
     Score,
 )
+from app.models.notifications import Announcement, NotificationRead
 from app.models.schedule import (
     Faculty,
     ImportRun,
@@ -29,6 +30,8 @@ from app.models.schedule import (
 from app.models.telegram import BotCursor, BotNotice, TelegramLink, TelegramLinkCode
 
 __all__ = [
+    "Announcement",
+    "NotificationRead",
     "Activity",
     "ActivitySignup",
     "ElectiveChoice",

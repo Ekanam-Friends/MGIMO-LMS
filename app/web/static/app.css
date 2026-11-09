@@ -567,6 +567,49 @@ textarea.field__input { resize: vertical; }
 .ev-pop__title { font-size: 18px; line-height: 24px; }
 .ev-pop .lesson-card__details { font-size: 14px; }
 
+/* --- колокольчик и уведомления (решение 0009) --- */
+.bell { position: relative; }
+.header__bell { position: relative; background: none; border: 0; padding: 4px; cursor: pointer; display: inline-grid; place-items: center; }
+.bell__badge {
+  position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center;
+}
+.bell__badge[hidden] { display: none; }
+.bell__panel {
+  position: absolute; top: calc(100% + 12px); right: -60px; width: 400px; max-height: min(70vh, 560px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-l);
+  box-shadow: 0 12px 32px rgba(23, 21, 32, .18); z-index: 50; display: flex; flex-direction: column; overflow: hidden;
+}
+.bell__panel[hidden] { display: none; }
+.bell__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.bell__list { overflow-y: auto; flex: 1; }
+.bell__empty { padding: 24px 16px; color: var(--muted); text-align: center; }
+.bell__all { display: block; padding: 12px 16px; border-top: 1px solid var(--line); text-align: center; color: var(--accent); font-weight: 600; }
+
+.notif { --src: var(--muted); border-bottom: 1px solid var(--line); border-left: 4px solid var(--src); background: var(--surface); }
+.notif:last-child { border-bottom: 0; }
+.notif--dean { --src: var(--accent); }
+.notif--teacher { --src: var(--blue); }
+.notif--university { --src: var(--violet); }
+.notif--unread { background: var(--accent-soft); }
+.notif__head { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 12px 14px; }
+.notif__head::-webkit-details-marker { display: none; }
+.notif__src { grid-column: 1 / 2; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--src); }
+.notif__time { grid-column: 2 / 3; grid-row: 1; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.notif__title { grid-column: 1 / 3; font-weight: 600; overflow-wrap: anywhere; }
+.notif[open] .notif__title { white-space: normal; }
+.notif__body { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; white-space: pre-line; overflow-wrap: anywhere; }
+.notif__body p { margin: 0; }
+.notif__link { color: var(--accent); font-weight: 600; align-self: flex-start; }
+.notif-page { padding: 0; overflow: hidden; gap: 0; }
+.notif-own { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.notif-own p { margin: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .bell { position: static; }
+  .bell__panel { position: fixed; top: 60px; left: 8px; right: 8px; width: auto; max-height: calc(100vh - 140px); }
+}
+
 /* Кабинет преподавателя: главная «сотрудника» (решение 0008) */
 .teacher-home { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; align-items: start; }
 .res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }

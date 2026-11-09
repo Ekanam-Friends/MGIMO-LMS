@@ -25,6 +25,8 @@ from app.certificates.webhook import router as pyrus_router
 from app.core.config import Settings, get_settings
 from app.db.session import make_engine, make_session_factory
 from app.web.deps import LoginRequired
+from app.web.notification_views import router as notif_router
+from app.web.notification_views import staff_router, teacher_router as teacher_ann_router
 from app.web.teacher_views import router as teacher_router
 from app.web.views import router as web_router
 
@@ -90,6 +92,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(pyrus_router)
     app.include_router(web_router)
     app.include_router(teacher_router)
+    app.include_router(notif_router)
+    app.include_router(staff_router)
+    app.include_router(teacher_ann_router)
     return app
 
 
