@@ -111,6 +111,11 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
    таймаут — доступа нет, нужен прокси (как для Telegram). Для YandexGPT адрес —
    `https://llm.api.cloud.yandex.net`.
 
+   Результат 2026-11-10 из контейнера `web`: GigaChat (`ngw.devices.sberbank.ru:9443`,
+   `gigachat.devices.sberbank.ru`) достижим, но `CERTIFICATE_VERIFY_FAILED` — нужен корневой сертификат
+   Минцифры в `data/ca/` и `GIGACHAT_CA_BUNDLE`; YandexGPT достижим (404 на корне — норма);
+   `mgimo.ru` отвечает 200, но это страница-проверка, не документ.
+
 5. Файлы с mgimo.ru Келли кладёт в `/data/regulations` (внутри контейнера) или скачивает
    скриптом через `run app.<модуль>`. Корпус в git не попадает (`/data/` в `.gitignore`).
 
