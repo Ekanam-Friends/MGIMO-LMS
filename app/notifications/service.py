@@ -198,6 +198,11 @@ async def create(db: AsyncSession, *, user: User, source: str, title: str, body:
         raise AnnouncementError("Недопустимая аудитория.")
     if audience == Audience.FACULTY and not faculty_name:
         raise AnnouncementError("Выберите факультет.")
+    if source == Source.TEACHER:
+        # Инвариант домена: преподаватель пишет только группам, у которых ведёт курс.
+        own_ids = {g.id for g in await teacher_groups(db, user.teacher_id)}
+        if audience != Audience.GROUP or group is None or group.id not in own_ids:
+            raise AnnouncementError("Выберите одну из своих групп.")
     if audience == Audience.GROUP and group is None:
         raise AnnouncementError("Такой группы нет. Укажите номер как «1МО-01».")
     row = Announcement(

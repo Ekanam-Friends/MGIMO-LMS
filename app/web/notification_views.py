@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.auth import Role
+from app.models import StudyGroup
 from app.models.notifications import Audience, Source
 from app.notifications import service as notes
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
@@ -129,12 +130,9 @@ async def teacher_send(
 ) -> Response:
     values = {"title": title, "body": body, "group_id": group_id}
     try:
-        # Группа — только из тех, у кого преподаватель ведёт курс: чужой id → ошибка, а не рассылка.
-        mine = {g.id: g for g in await notes.teacher_groups(db, viewer.teacher_id)}
-        if group_id not in mine:
-            raise notes.AnnouncementError("Выберите одну из своих групп.")
+        group = await db.get(StudyGroup, group_id)  # право писать этой группе проверяет сервис
         await notes.create(db, user=viewer.user, source=Source.TEACHER, title=title, body=body,
-                           audience=Audience.GROUP, group=mine[group_id])
+                           audience=Audience.GROUP, group=group)
     except notes.AnnouncementError as e:
         resp = render(request, "announce.html", viewer, **await _form_ctx(db, viewer, "teacher", error=str(e), values=values))
         resp.status_code = 400
