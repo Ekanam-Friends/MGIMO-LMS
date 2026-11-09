@@ -87,7 +87,7 @@ async def login(
     cfg = request.app.state.settings
     token = await auth.open_session(db, user, ttl=timedelta(days=cfg.session_days))
     await db.commit()
-    resp = RedirectResponse("/t/courses" if user.teacher_id else "/", status_code=303)
+    resp = RedirectResponse("/t/home" if user.teacher_id else "/", status_code=303)
     resp.set_cookie(
         COOKIE_NAME, token, max_age=cfg.session_days * 86400, httponly=True,
         secure=cfg.cookie_secure, samesite="lax", path="/",
@@ -134,7 +134,7 @@ async def dashboard(
     request: Request, d: str | None = None, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)
 ) -> HTMLResponse:
     if viewer.teacher is not None:
-        return RedirectResponse("/t/courses", status_code=303)
+        return RedirectResponse("/t/home", status_code=303)
     if viewer.student is None:
         return render(request, "staff.html", viewer)
     day = _parse_day(d, today())

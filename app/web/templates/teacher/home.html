@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% from "partials/_lesson.html" import slot_card %}
+{% block title %}Главная{% endblock %}
+{% block header %}<p class="header__title">Кабинет преподавателя</p>{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page__head">
+    <div>
+      <h1 class="title-1">Добро пожаловать, {{ viewer.teacher.full_name.split()[1:2] | join(" ") }}</h1>
+      <p class="muted">Рабочее место сотрудника и преподавателя</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="stat__num">{{ lessons | length }}</span><span class="stat__label">занятий сегодня</span></div>
+    <div class="stat"><span class="stat__num">{{ cards | length }}</span><span class="stat__label">ведомостей</span></div>
+    <div class="stat"><span class="stat__num">{{ students_total }}</span><span class="stat__label">студентов</span></div>
+    <div class="stat{% if due_soon %} stat--warn{% endif %}"><span class="stat__num">{{ due_soon | length }}</span><span class="stat__label">сроков ДЗ на неделе</span></div>
+  </div>
+
+  <div class="teacher-home">
+    <section class="dash-block">
+      <div class="dash-block__header"><h2 class="dash-title">Сегодня</h2><a class="dash-link" href="/t/schedule" aria-label="Расписание">{{ icon("arrow") }}</a></div>
+      {% if lessons %}
+        {% for slot in lessons %}{{ slot_card(slot) }}{% endfor %}
+      {% else %}
+        <p class="panel muted">Сегодня занятий нет.</p>
+      {% endif %}
+    </section>
+
+    <section class="dash-block">
+      <div class="dash-block__header"><h2 class="dash-title">Требует внимания</h2><a class="dash-link" href="/t/homework" aria-label="Домашние задания">{{ icon("arrow") }}</a></div>
+      {% if due_soon %}
+        <ul class="panel timeline">
+          {% for c in due_soon %}<li><span class="timeline__date">до {{ c.next_due | ddmmyyyy }}</span><a href="/t/courses/{{ c.course.id }}">{{ c.discipline }}, {{ c.group }}</a></li>{% endfor %}
+        </ul>
+      {% else %}
+        <p class="panel muted">Ближайших сроков сдачи заданий нет.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="dash-block">
+    <div class="dash-block__header"><h2 class="dash-title">Преподавателю</h2></div>
+    <div class="res-grid">
+      {% for title, sub, color, href in [("Мои курсы", "журнал баллов и ведомости", "#DF2935", "/t/courses"), ("Домашние задания", "проверка и сроки", "#B8520C", "/t/homework"), ("Расписание", "занятия на неделю", "#447ABC", "/t/schedule"), ("Учебная нагрузка", "часы по дисциплинам", "#7A5BC4", "/s/workload"), ("Конкурс ППС", "заявки и сроки", "#3F6FA8", "/s/pps")] %}
+        <a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="dash-block">
+    <div class="dash-block__header"><h2 class="dash-title">Ресурсы Академии</h2><a class="dash-link" href="/t/services" aria-label="Все сервисы">{{ icon("arrow") }}</a></div>
+    <div class="res-grid">
+      {% for title, sub, color, href in resources %}
+        <a class="res-tile" href="{{ href }}" style="background:{{ color }}"><span class="res-tile__title">{{ title }}</span><span class="res-tile__sub">{{ sub }}</span></a>
+      {% endfor %}
+    </div>
+  </section>
+  <p class="page__note">Структура — по странице «Сотрудник» ЛК РАНХиГС. Сервисы — концепт, без настоящих адресов.</p>
+</div>
+{% endblock %}

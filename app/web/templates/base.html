@@ -13,7 +13,7 @@
 <body{% if viewer %} hx-headers='{"X-CSRF-Token": "{{ viewer.csrf }}"}'{% endif %}>
 <div class="concept-bar" role="note">Концепт для конкурса MGIMO×AI Challenge — не официальный сервис. Все данные вымышленные.</div>
 {% if viewer %}
-{% set nav_menu = TEACHER_MENU if viewer.teacher else MENU %}{% set nav_tabbar = TEACHER_TABBAR if viewer.teacher else TABBAR %}{% set home = "/t/courses" if viewer.teacher else "/" %}
+{% set nav_menu = TEACHER_MENU if viewer.teacher else MENU %}{% set nav_tabbar = TEACHER_TABBAR if viewer.teacher else TABBAR %}{% set home = "/t/home" if viewer.teacher else "/" %}
 <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden>
 <div class="layout">
   <aside class="menu" aria-label="Разделы">
