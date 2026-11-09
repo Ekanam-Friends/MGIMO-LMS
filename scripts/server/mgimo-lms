@@ -27,6 +27,9 @@ usage() {
                                run app.schedule.import_ruz --full --group 24МЖ-02
   shell [web|bot]              sh внутри контейнера (нужен ssh -t)
   psql                         psql к базе проекта (нужен ssh -t)
+  corpus ls                    файлы корпуса положений (/opt/mgimo-lms/data/regulations)
+  corpus put <имя>             записать файл из stdin: ssh ... corpus put x.pdf < x.pdf
+  corpus rm <имя>              удалить файл корпуса
 EOF
 }
 
@@ -92,6 +95,42 @@ case "$cmd" in
     dc exec $(tty_flag) "$svc" sh ;;
 
   psql) dc exec $(tty_flag) db psql -U lms -d lms ;;
+
+  corpus)
+    # Корпус положений для ассистента (решение 0007). Одна плоская папка, имена по белому
+    # списку, без ссылок и вложенных путей, не больше 50 МБ на файл.
+    CDIR=/opt/mgimo-lms/data/regulations
+    sub=${1:-}; [ $# -gt 0 ] && shift
+    [ -d "$CDIR" ] || { echo "Нет папки $CDIR — её создаёт root (docs/deploy.md)" >&2; exit 4; }
+    okname() {
+      case "$1" in
+        ""|.*|*[!A-Za-z0-9._-]*) return 1 ;;
+      esac
+      case "$1" in
+        *.pdf|*.docx|*.doc|*.txt|*.html|*.json|*.md|*.csv) return 0 ;;
+      esac
+      return 1
+    }
+    case "$sub" in
+      ls) ls -l --time-style=long-iso "$CDIR" ;;
+      put)
+        name=${1:-}
+        okname "$name" || { echo "Недопустимое имя (буквы, цифры . _ -; расширение pdf/docx/doc/txt/html/json/md/csv)" >&2; exit 2; }
+        [ ! -L "$CDIR/$name" ] || { echo "Это ссылка, перезаписывать нельзя" >&2; exit 2; }
+        tmp=$(mktemp "$CDIR/.upload.XXXXXX")
+        trap 'rm -f "$tmp"' EXIT
+        head -c 52428800 > "$tmp"
+        [ -s "$tmp" ] || { echo "Пустой файл" >&2; exit 2; }
+        chown 1000:1000 "$tmp"; chmod 644 "$tmp"
+        mv -f "$tmp" "$CDIR/$name"
+        echo "Записано: $name ($(wc -c < "$CDIR/$name") байт)" ;;
+      rm)
+        name=${1:-}
+        okname "$name" || { echo "Недопустимое имя" >&2; exit 2; }
+        [ -f "$CDIR/$name" ] && [ ! -L "$CDIR/$name" ] || { echo "Нет такого файла" >&2; exit 2; }
+        rm -- "$CDIR/$name"; echo "Удалено: $name" ;;
+      *) echo "corpus ls | put <имя> | rm <имя>" >&2; exit 2 ;;
+    esac ;;
 
   help|-h|--help) usage ;;
   *) echo "Неизвестная команда: $cmd" >&2; usage >&2; exit 2 ;;
