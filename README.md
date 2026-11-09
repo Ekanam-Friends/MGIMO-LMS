@@ -149,7 +149,7 @@ docs/
 
 ## Команда
 
-Ekanam & Friends: Legpopov (капитан), kelleshh, raxlin4ik.
+Ekanam & Friends: Legpopov, kelleshh, raxlin4ik.
 
 ## Лицензии и ограничения
 
