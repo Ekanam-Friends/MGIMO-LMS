@@ -1,0 +1,1 @@
+<span id="bell-badge" class="bell__badge" {% if not count %}hidden {% endif %}hx-get="/notifications/badge" hx-target="this" hx-trigger="notif-changed from:body" hx-swap="outerHTML" aria-label="Непрочитанных: {{ count }}">{{ "9+" if count > 9 else count }}</span>

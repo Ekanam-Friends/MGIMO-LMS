@@ -104,11 +104,23 @@ HX = {"HX-Request": "true"}
 
 async def test_teacher_lands_on_own_courses(client):
     r = await client.post("/login", data={"login": "teacher", "password": PASSWORD})
-    assert r.headers["location"] == "/t/courses"
+    assert r.headers["location"] == "/t/home"
     page = await client.get("/t/courses")
     assert "Своя дисциплина" in page.text and "Секретная дисциплина Бориса" not in page.text
     assert "концепт для конкурса" in page.text.lower()
-    assert (await client.get("/")).headers["location"] == "/t/courses"
+    assert (await client.get("/")).headers["location"] == "/t/home"
+
+
+async def test_teacher_home_is_employee_page(client):
+    """Главная преподавателя — «сотрудник» + блок «Преподавателю»; профиль с кадровой карточкой."""
+    await login(client, "teacher")
+    home = (await client.get("/t/home")).text
+    assert "Ресурсы Академии" in home and "Преподавателю" in home and "Мои курсы" in home
+    assert "Секретная дисциплина Бориса" not in home
+    profile = (await client.get("/profile")).text
+    assert "Информация о сотруднике" in profile and "Табельный номер" in profile
+    for slug in ("workload", "pps", "kedo", "hr-certificates"):
+        assert (await client.get(f"/s/{slug}")).status_code == 200, slug
 
 
 async def test_foreign_course_is_404(client):
@@ -120,7 +132,7 @@ async def test_foreign_course_is_404(client):
 
 async def test_student_has_no_teacher_pages(client):
     await login(client, "anna")
-    for path in ["/t/courses", "/t/courses/1", "/t/homework", "/t/schedule"]:
+    for path in ["/t/home", "/t/services", "/t/courses", "/t/courses/1", "/t/homework", "/t/schedule"]:
         assert (await client.get(path)).status_code == 404, path
 
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% block title %}Профиль{% endblock %}
-{% block header %}<nav class="breadcr"><a href="{{ '/t/courses' if viewer.teacher else '/' }}" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
+{% block header %}<nav class="breadcr"><a href="{{ '/t/home' if viewer.teacher else '/' }}" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
   <h1 class="title-1">Профиль</h1>
@@ -30,14 +30,43 @@
   <section class="panel profile">
     <div class="profile__head">
       <span class="avatar avatar--big">{{ viewer.teacher.full_name[:1] }}</span>
-      <div><p class="profile__name">{{ viewer.teacher.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }} · преподаватель</p></div>
+      <div><p class="profile__name">{{ viewer.teacher.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }} · сотрудник, преподаватель</p></div>
     </div>
+    {% set sc = staff_card(viewer.teacher) %}
+    <h2 class="panel__title">Информация о сотруднике</h2>
+    <dl class="props">
+      <dt>Должность</dt><dd>{{ sc.position }}</dd>
+      <dt>Подразделение</dt><dd>{{ sc.unit }}</dd>
+      <dt>Статус занятости</dt><dd>{{ sc.employment }}</dd>
+      <dt>График работы</dt><dd>{{ sc.rate }}</dd>
+      <dt>Табельный номер</dt><dd>{{ sc.tab_no }}</dd>
+      <dt>Работает с</dt><dd>{{ sc.since }}</dd>
+    </dl>
+    <h2 class="panel__title">Преподавателю</h2>
     <dl class="props">
       <dt>Ведомостей</dt><dd>{{ teacher_courses | length }}</dd>
       <dt>Групп</dt><dd>{{ teacher_courses | map(attribute="group") | unique | list | length }}</dd>
       <dt>Дисциплины</dt><dd>{{ teacher_courses | map(attribute="discipline") | unique | sort | join(", ") or "—" }}</dd>
     </dl>
-    <p class="page__note">ФИО вымышленное: при импорте расписания каждому преподавателю РУЗ присваивается сгенерированное имя.</p>
+    <p class="page__note">Должность, подразделение и табельный номер вымышленные. ФИО вымышленное: при импорте расписания каждому преподавателю РУЗ присваивается сгенерированное имя.</p>
+  </section>
+  {% elif viewer.user.role == "staff" %}
+  <section class="panel profile">
+    <div class="profile__head">
+      <span class="avatar avatar--big">Д</span>
+      <div><p class="profile__name">Сотрудник деканата</p><p class="muted">Логин: {{ viewer.user.login }} · сотрудник</p></div>
+    </div>
+    {% set sc = staff_card(viewer.user, "специалист деканата", "Деканат") %}
+    <h2 class="panel__title">Информация о сотруднике</h2>
+    <dl class="props">
+      <dt>Должность</dt><dd>{{ sc.position }}</dd>
+      <dt>Подразделение</dt><dd>{{ sc.unit }}</dd>
+      <dt>Статус занятости</dt><dd>{{ sc.employment }}</dd>
+      <dt>График работы</dt><dd>{{ sc.rate }}</dd>
+      <dt>Табельный номер</dt><dd>{{ sc.tab_no }}</dd>
+      <dt>Работает с</dt><dd>{{ sc.since }}</dd>
+    </dl>
+    <p class="page__note">Должность, подразделение и табельный номер вымышленные.</p>
   </section>
   {% else %}
     <p class="alert">Учётная запись сотрудника: студенческих данных нет.</p>
