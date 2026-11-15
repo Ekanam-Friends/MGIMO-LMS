@@ -137,7 +137,7 @@ async def dashboard(
     if viewer.teacher is not None:
         return RedirectResponse("/t/home", status_code=303)
     if viewer.student is None:
-        return RedirectResponse("/d/announcements", status_code=303)
+        return RedirectResponse("/d/home", status_code=303)
     day = _parse_day(d, today())
     requests = (await certs.list_requests(db, viewer.student_id))[:2]
     book = await grades.record_book(db, viewer.student_id, today(), events=0)

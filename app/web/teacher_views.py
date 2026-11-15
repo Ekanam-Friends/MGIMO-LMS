@@ -30,13 +30,14 @@ templates.env.globals.update(scale=scale, ControlForm=ControlForm, FinalResult=F
 templates.env.filters["pts"] = scale.fmt_points
 
 
-def staff_card(teacher) -> dict:
-    """Кадровая карточка для профиля (решение 0008). В БД у преподавателя только вымышленное ФИО,
-    остальное — детерминированные вымышленные значения из id: миграции и реальные данные не нужны."""
-    return {"position": "преподаватель", "role": "педагогический работник",
-            "unit": f"Кафедра № {teacher.id % 9 + 1} (вымышленная)",
+def staff_card(person, position: str = "преподаватель", unit: str | None = None) -> dict:
+    """Кадровая карточка для профиля (решения 0008, 0010). В БД у сотрудника нет кадровых полей,
+    остальное — детерминированные вымышленные значения из id (преподавателя или учётной записи):
+    миграции и реальные данные не нужны."""
+    return {"position": position, "role": "педагогический работник",
+            "unit": unit or f"Кафедра № {person.id % 9 + 1} (вымышленная)",
             "employment": "Основное место работы", "rate": "1,0 ставки (40-час. 5 дней)",
-            "tab_no": f"ТН-{teacher.id:05d}", "since": "01.09.2024"}
+            "tab_no": f"ТН-{person.id:05d}", "since": "01.09.2024"}
 
 
 templates.env.globals["staff_card"] = staff_card

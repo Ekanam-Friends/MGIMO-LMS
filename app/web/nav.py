@@ -30,6 +30,13 @@ MENU = [
     {"title": "Справочная информация", "icon": "chat", "href": "/s/info"},
 ]
 
+# Общая часть меню «сотрудника» (решение 0008): кадровые сервисы одинаковы у преподавателя и деканата.
+HR_MENU = {"title": "Кадровые сервисы", "icon": "office", "children": [
+    {"title": "Заказ справок", "href": "/s/hr-certificates"},
+    {"title": "КЭДО", "href": "/s/kedo"},
+    {"title": "Отпуск, больничный, командировки", "href": "/s/hr-info"},
+]}
+
 # Кабинет преподавателя (решения 0007, 0008): «сотрудник» (общая часть, как в ЛК РАНХиГС
 # my.ranepa.ru/lk/employee) + группа «Преподавателю» с рабочими разделами.
 TEACHER_MENU = [
@@ -43,11 +50,7 @@ TEACHER_MENU = [
         {"title": "Конкурс ППС", "href": "/s/pps"},
     ]},
     {"title": "Сервисы Академии", "icon": "grid", "href": "/t/services"},
-    {"title": "Кадровые сервисы", "icon": "office", "children": [
-        {"title": "Заказ справок", "href": "/s/hr-certificates"},
-        {"title": "КЭДО", "href": "/s/kedo"},
-        {"title": "Отпуск, больничный, командировки", "href": "/s/hr-info"},
-    ]},
+    HR_MENU,
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 TEACHER_TABBAR = [
@@ -57,13 +60,21 @@ TEACHER_TABBAR = [
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 
-# Кабинет деканата (решение 0009): объявления студентам; заявки на справки — в Pyrus.
+# Кабинет деканата (решения 0009, 0010): всё, что у сотрудника (главная, сервисы, кадровые сервисы,
+# профиль), плюс группа «Деканат» с адресными объявлениями. Заявки на справки — в Pyrus.
 STAFF_MENU = [
-    {"title": "Объявления", "icon": "chat", "href": "/d/announcements"},
+    {"title": "Главная", "icon": "home", "href": "/d/home"},
+    {"title": "Деканат", "icon": "chat", "children": [
+        {"title": "Объявления", "href": "/d/announcements"},
+    ]},
+    {"title": "Сервисы Академии", "icon": "grid", "href": "/d/services"},
+    HR_MENU,
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 STAFF_TABBAR = [
+    {"title": "Главная", "icon": "home", "href": "/d/home"},
     {"title": "Объявления", "icon": "chat", "href": "/d/announcements"},
+    {"title": "Сервисы", "icon": "grid", "href": "/d/services"},
     {"title": "Профиль", "icon": "user", "href": "/profile"},
 ]
 
@@ -143,6 +154,11 @@ TEACHER_RESOURCES = [
 ]
 
 # Главная преподавателя: плитки блока «Преподавателю» (те же разделы, что в TEACHER_MENU).
+# Деканат: рабочие плитки главной (решение 0010).
+STAFF_WORK = [
+    ("Объявления", "студенту, группе, потоку, факультету", "#DF2935", "/d/announcements"),
+]
+
 TEACHER_WORK = [
     ("Мои курсы", "журнал баллов и ведомости", "#DF2935", "/t/courses"),
     ("Домашние задания", "проверка и сроки", "#B8520C", "/t/homework"),

@@ -1,7 +1,7 @@
 {% from "_icons.html" import icon %}
 {# Хлебные крошки кабинета преподавателя. items — список (title, href|None). #}
-{% macro crumbs(items) -%}
-<nav class="breadcr"><a href="/t/home" aria-label="Главная">{{ icon("home", 18) }}</a>
+{% macro crumbs(items, home="/t/home") -%}
+<nav class="breadcr"><a href="{{ home }}" aria-label="Главная">{{ icon("home", 18) }}</a>
   {%- for title, href in items %}{{ icon("chev-right", 16) }}{% if href %}<a href="{{ href }}">{{ title }}</a>{% else %}<span>{{ title }}</span>{% endif %}{% endfor %}</nav>
 {%- endmacro %}
 

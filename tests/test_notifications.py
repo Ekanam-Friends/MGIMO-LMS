@@ -33,8 +33,8 @@ async def client(tmp_path):
             Teacher(id=1, ruz_oid=1, full_name="Преподавателев Пётр Вымышленович"),
             Teacher(id=2, ruz_oid=2, full_name="Другов Дмитрий Выдуманович"),
             Discipline(id=1, name="Тестовая дисциплина"),
-            Student(id=1, full_name="Тестова Анна Вымышленовна", record_book="Т-1", study_group_id=10, faculty_name="Фак А"),
-            Student(id=2, full_name="Примеров Борис Выдуманович", record_book="Т-2", study_group_id=20, faculty_name="Фак Б"),
+            Student(id=1, full_name="Тестова Анна Вымышленовна", record_book="Т-1", study_group_id=10, faculty_name="Фак А", speciality="Программа А", course=2),
+            Student(id=2, full_name="Примеров Борис Выдуманович", record_book="Т-2", study_group_id=20, faculty_name="Фак Б", speciality="Программа Б", course=2),
         ])
         await s.flush()
         s.add_all([
@@ -160,7 +160,7 @@ async def test_dean_has_no_bell_but_own_cabinet(client):
     await login(client, "dean")
     page = (await client.get("/d/announcements")).text
     assert "Новое объявление" in page and 'id="bell"' not in page
-    assert (await client.get("/", follow_redirects=False)).headers["location"] == "/d/announcements"
+    assert (await client.get("/", follow_redirects=False)).headers["location"] == "/d/home"
     assert (await client.get("/profile")).status_code == 200
 
 
@@ -181,3 +181,48 @@ async def test_read_all_clears_more_than_one_page(client):
     csrf = await login(client, "anna")
     await client.post("/notifications/read-all", headers={"X-CSRF-Token": csrf})
     assert ">0<" in (await client.get("/notifications/badge")).text
+
+
+async def test_stream_and_student_announcements_reach_only_addressees(client):
+    csrf = await login(client, "dean")
+    assert (await send_staff(client, csrf, title="Поток А-2", audience="stream", program="Программа А", course="2")).status_code == 303
+    assert (await send_staff(client, csrf, title="Поток А-3", audience="stream", program="Программа А", course="3")).status_code == 303
+    assert (await send_staff(client, csrf, title="Лично Борису", audience="student", student_id="2")).status_code == 303
+    await client.post("/logout", data={"csrf": csrf})
+    await login(client, "anna")
+    panel = (await client.get("/notifications/panel")).text
+    assert "Поток А-2" in panel and "Поток А-3" not in panel and "Лично Борису" not in panel
+    await client.post("/logout", data={"csrf": await _csrf(client)})
+    await login(client, "boris")
+    panel = (await client.get("/notifications/panel")).text
+    assert "Лично Борису" in panel and "Поток А-2" not in panel
+
+
+async def test_stream_and_student_need_their_fields(client):
+    csrf = await login(client, "dean")
+    r = await send_staff(client, csrf, audience="stream", program="Программа А")
+    assert r.status_code == 400 and "программу и курс" in r.text
+    r = await send_staff(client, csrf, audience="student", student_id="999")
+    assert r.status_code == 400 and "Выберите студента" in r.text
+
+
+async def test_dean_has_employee_cabinet(client):
+    await login(client, "dean")
+    for path in ("/d/home", "/d/services", "/profile", "/s/kedo", "/s/hr-certificates"):
+        assert (await client.get(path)).status_code == 200, path
+    home = (await client.get("/d/home")).text
+    assert "Ресурсы Академии" in home and "Объявления" in home
+    assert "Табельный номер" in (await client.get("/profile")).text
+
+
+async def test_student_search_is_dean_only(client):
+    await login(client, "dean")
+    found = (await client.get("/d/students/search", params={"student_q": "Примеров"})).text
+    assert "Примеров Борис" in found and "Тестова" not in found
+    assert "Примеров Борис" in (await client.get("/d/students/search", params={"student_q": "примеров"})).text
+    await client.post("/logout", data={"csrf": await _csrf(client)})
+    for who in ("anna", "teacher"):
+        await login(client, who)
+        for path in ("/d/home", "/d/services", "/d/students/search?student_q=Прим"):
+            assert (await client.get(path)).status_code == 404, (who, path)
+        await client.post("/logout", data={"csrf": await _csrf(client)})
