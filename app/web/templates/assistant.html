@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}ИИ-ассистент деканата{% endblock %}
+{% block header %}<p class="header__title">ИИ-ассистент деканата</p>{% endblock %}
+{% block content %}
+<div class="page assistant" id="assistant" data-csrf="{{ viewer.csrf }}">
+  <header class="assistant__intro">
+    <span class="badge badge--grey">Публичные положения МГИМО</span>
+    <h1 class="title-1">Разберёмся, как действовать</h1>
+    <p>Задайте вопрос своими словами. В ответе — выдержки из положений, шаги и ссылки на страницы оригинала.</p>
+    <p class="muted">Вопрос и найденные выдержки обрабатывает GigaChat. Не вводите ФИО, медицинские сведения и другие личные данные. Ассистент не видит ваши оценки и заявки и не отправляет документы.</p>
+  </header>
+  {% if not enabled %}<div class="panel" role="status">Ассистент пока не подключён. Вы можете обратиться в деканат через раздел справок.</div>{% endif %}
+  <div class="assistant__examples" aria-label="Примеры вопросов">
+    {% for question in ["Как оформить академический отпуск?", "Кому положена материальная помощь?", "Как заселиться в общежитие?"] %}
+    <button type="button" class="assistant__example"{% if not enabled %} disabled{% endif %}>{{ question }}</button>
+    {% endfor %}
+  </div>
+  <div id="assistant-messages" class="assistant__messages" role="log" aria-label="Диалог с ассистентом" aria-live="polite"></div>
+  <form id="assistant-form" class="panel assistant__form">
+    <label for="assistant-question">Ваш вопрос</label>
+    <textarea id="assistant-question" name="question" rows="3" minlength="3" maxlength="2000" required placeholder="Например: какие документы нужны для академического отпуска?"{% if not enabled %} disabled{% endif %}></textarea>
+    <div class="assistant__actions">
+      <label>Редакция на дату <input id="assistant-date" type="date" aria-describedby="assistant-date-help"></label>
+      <button class="btn btn--primary" id="assistant-send" type="submit"{% if not enabled %} disabled{% endif %}>Найти ответ</button>
+      <button class="btn" id="assistant-clear" type="button">Очистить диалог</button>
+    </div>
+    <p id="assistant-date-help" class="muted">Без даты — текущая редакция. Исторический ответ возможен только при наличии проверенного архива.</p>
+    <p id="assistant-progress" role="status" class="muted"></p>
+  </form>
+</div>
+<link rel="stylesheet" href="/static/assistant.css">
+<script src="/static/assistant.js" defer></script>
+{% endblock %}

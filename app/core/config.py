@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,6 +56,18 @@ class Settings(BaseSettings):
     """Сколько живёт одноразовый код привязки из профиля."""
     bot_import_hours: int = 6
     """Как часто бот перечитывает РУЗ по группам подключённых студентов (0 — не перечитывает)."""
+
+    # Ассистент по публичным документам: только GigaChat, никаких данных профиля.
+    llm_provider: str = ""
+    gigachat_auth_key: SecretStr = SecretStr("")
+    gigachat_scope: str = "GIGACHAT_API_PERS"
+    gigachat_model: str = "GigaChat-2"
+    gigachat_ca_bundle: str = ""
+    llm_embedding_model: str = ""
+    rag_corpus_dir: str = "/data/regulations"
+    rag_top_k: int = Field(default=5, ge=1, le=6)
+    rag_max_source_age_days: int = Field(default=30, ge=1, le=365)
+    rag_requests_per_minute: int = Field(default=6, ge=1, le=30)
 
     @property
     def bot_link_enabled(self) -> bool:

@@ -1,0 +1,90 @@
+/* История только в памяти вкладки. Никакого HTML из ответов модели и localStorage. */
+(() => {
+  const root = document.getElementById('assistant');
+  if (!root) return;
+  const form = document.getElementById('assistant-form');
+  const input = document.getElementById('assistant-question');
+  const day = document.getElementById('assistant-date');
+  const send = document.getElementById('assistant-send');
+  const clear = document.getElementById('assistant-clear');
+  const log = document.getElementById('assistant-messages');
+  const progress = document.getElementById('assistant-progress');
+  const history = [];
+  let busy = false;
+  const labels = {answer:'Подтверждённые выдержки',partial:'Частичный ответ',clarify:'Нужно уточнение',not_found:'Нет подтверждения',error:'Не удалось проверить ответ',unavailable:'Ассистент недоступен',busy:'Подождите немного'};
+  function el(tag, text, parent) {
+    const node = document.createElement(tag);
+    if (text) node.textContent = text;
+    if (parent) parent.append(node);
+    return node;
+  }
+  function source(parent, row) {
+    const details = el('details', '', parent);
+    el('summary', `${row.title} · ${row.clause} · стр. ${row.page}`, details);
+    const quote = el('blockquote', '', details);
+    el('mark', row.text, quote);
+    // Дополнительная клиентская проверка; сервер формирует ссылку из метаданных корпуса.
+    try {
+      const url = new URL(row.url);
+      if (url.protocol === 'https:' && (url.hostname === 'mgimo.ru' || url.hostname.endsWith('.mgimo.ru')) && !url.username && !url.password) {
+        const a = el('a', `Открыть оригинал · стр. ${row.page}`, details);
+        a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      }
+    } catch (_) { /* непроверяемая ссылка не показывается */ }
+    const meta = el('p', `Редакция: ${row.revision}. Действует с ${row.effective_from}. Источник проверен ${row.checked_at}.`, details);
+    meta.className = 'assistant__meta';
+  }
+  function show(data) {
+    const article = el('article', '', log); article.className = 'assistant__message';
+    el('h2', labels[data.status] || labels.error, article);
+    el('p', data.message || 'Повторите запрос позднее.', article);
+    if (data.summary) {
+      el('h3', 'Краткий ответ · выдержка', article);
+      el('p', data.summary.text, article); source(article, data.summary);
+    }
+    if (data.steps?.length) {
+      el('h3', 'Шаги по положениям', article);
+      const list = el('ol', '', article);
+      for (const step of data.steps) {
+        const li = el('li', '', list); el('p', step.text, li);
+        for (const [key, label] of [['responsible','Кто'],['deadline','Срок'],['form','Бланк']]) {
+          if (step[key]) el('p', `${label}: ${step[key]}`, li);
+        }
+        source(li, step);
+      }
+    }
+    if (data.snapshot) {
+      const meta = el('p', `Нормы на ${data.as_of}. Снимок корпуса: ${data.snapshot.slice(0,12)}. Наличие более новых норм ограничено датой проверки источников.`, article);
+      meta.className = 'assistant__meta';
+    }
+    if (data.dropped_steps) el('p', `Не прошли проверку: ${data.dropped_steps}. Полнота ответа ограничена.`, article);
+    article.scrollIntoView({block:'nearest', behavior:'smooth'});
+  }
+  root.querySelectorAll('.assistant__example').forEach(button => button.addEventListener('click', () => { input.value = button.textContent; input.focus(); }));
+  clear.addEventListener('click', () => { if (busy) return; history.length = 0; log.replaceChildren(); input.value = ''; progress.textContent = ''; input.focus(); });
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if (busy || question.length < 3 || send.disabled) return;
+    busy = true; send.disabled = true; clear.disabled = true;
+    input.disabled = true; day.disabled = true;
+    progress.textContent = 'Ищем положения и проверяем применимость. Это может занять до минуты.';
+    const user = el('article', '', log); user.className = 'assistant__message assistant__message--user';
+    el('p', question, user);
+    const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 80000);
+    try {
+      const response = await fetch('/s/assistant/ask', {method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token':root.dataset.csrf},
+        credentials:'same-origin', redirect:'error', signal:controller.signal,
+        body:JSON.stringify({question, history:history.slice(-4), as_of:day.value || null})});
+      if (!response.ok && response.status !== 429) throw new Error();
+      const data = await response.json(); show(data);
+      if (['answer','partial','clarify'].includes(data.status)) {history.push(question); if(history.length > 4) history.shift();}
+      if (!['error','unavailable','busy'].includes(data.status)) input.value = '';
+    } catch (_) {
+      show({status:'error', message:'Не удалось получить ответ. Проверьте соединение и вход в кабинет. Вопрос сохранён в поле ввода.'});
+    } finally {
+      clearTimeout(timer); busy = false; send.disabled = false; clear.disabled = false;
+      input.disabled = false; day.disabled = false; progress.textContent = ''; input.focus();
+    }
+  });
+})();

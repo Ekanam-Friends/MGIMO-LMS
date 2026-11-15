@@ -20,6 +20,9 @@ from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.certificates.pyrus_client import PyrusClient
+from app.assistant.provider import GigaChat
+from app.assistant.service import Assistant
+from app.web.assistant_views import router as assistant_router
 from app.certificates.service import CertificateSync
 from app.certificates.webhook import router as pyrus_router
 from app.core.config import Settings, get_settings
@@ -50,6 +53,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         cfg = settings or get_settings()
         app.state.settings = cfg
+        provider = None
+        if cfg.llm_provider == "gigachat" and cfg.gigachat_auth_key.get_secret_value():
+            try:
+                provider = GigaChat(cfg.gigachat_auth_key.get_secret_value(), cfg.gigachat_scope,
+                                    cfg.gigachat_model, cfg.gigachat_ca_bundle)
+            except (OSError, ValueError):
+                log.error("Ассистент отключён: проверьте сертификат GigaChat")
+        app.state.assistant = Assistant(cfg, provider)
         engine = make_engine(cfg.database_url)
         app.state.session_factory = make_session_factory(engine)
         app.state.certificate_sync = None
@@ -69,6 +80,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
+            await app.state.assistant.aclose()
             if loop_task is not None:
                 loop_task.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
@@ -91,6 +103,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=Path(__file__).parent / "web" / "static"), name="static")
     app.include_router(pyrus_router)
+    app.include_router(assistant_router)
     app.include_router(web_router)
     app.include_router(teacher_router)
     app.include_router(notif_router)
