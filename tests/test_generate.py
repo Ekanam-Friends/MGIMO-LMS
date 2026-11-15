@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from datetime import date, datetime, time
 
-from sqlalchemy import func, select
+import pytest
+from sqlalchemy import event, func, select
 
 from app.db.base import Base
 from app.db.session import make_engine, make_session_factory
-from app.generate.run import generate
+from app.auth.service import hash_password
+from app.generate.run import generate, reset
 from app.grades import service as grades
 from app.models import (
     CourseEnrollment,
@@ -24,6 +26,7 @@ from app.models import (
 )
 from app.models.auth import Role, User
 from app.models.grades import Course
+from app.models.notifications import Announcement, Audience, NotificationRead, Source
 
 TODAY = date(2026, 11, 9)
 
@@ -92,3 +95,60 @@ async def test_generate_is_idempotent_and_realistic(tmp_path):
         assert len(book.past) == 4 and book.current is not None
         assert len(book.debts) == 1  # демо-профиль student2
     await engine.dispose()
+
+
+@pytest.mark.parametrize("with_reads", [False, True])
+async def test_reset_removes_generated_addressees_but_keeps_other_announcements(tmp_path, with_reads):
+    engine = make_engine(f"sqlite+aiosqlite:///{tmp_path / 'reset.db'}")
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def enable_foreign_keys(connection, _):
+        connection.execute("PRAGMA foreign_keys=ON")
+
+    try:
+        async with engine.begin() as connection:
+            await connection.run_sync(Base.metadata.create_all)
+        sf = make_session_factory(engine)
+        now = datetime(2026, 11, 15)
+        async with sf() as db:
+            db.add_all([
+                Student(id=1, full_name="Примеров Иван Вымышленович", record_book="ГЕН-1"),
+                Student(id=2, full_name="Тестова Анна Выдумановна", record_book="ДЕМО-2"),
+            ])
+            await db.flush()
+            password_hash = hash_password("test-only-password")
+            db.add_all([
+                User(id=1, login="generated", student_id=1, role=Role.STUDENT,
+                     password_hash=password_hash, created_at=now),
+                User(id=2, login="dean", role=Role.STAFF, password_hash=password_hash, created_at=now),
+            ])
+            await db.flush()
+            db.add_all([
+                Announcement(id=1, source=Source.DEAN, author_user_id=2, title="Сгенерированному",
+                             audience=Audience.STUDENT, student_id=1, created_at=now),
+                Announcement(id=2, source=Source.DEAN, author_user_id=2, title="Демо-студенту",
+                             audience=Audience.STUDENT, student_id=2, created_at=now),
+                Announcement(id=3, source=Source.DEAN, author_user_id=2, title="Всем",
+                             audience=Audience.ALL, created_at=now),
+            ])
+            if with_reads:
+                db.add_all([
+                    NotificationRead(user_id=1, key="ann:1", read_at=now),
+                    NotificationRead(user_id=2, key="ann:3", read_at=now),
+                ])
+            await db.commit()
+
+        async with sf() as db:
+            await reset(db)
+            await db.commit()
+            # Повторный сброс безопасен; объявления другим адресатам сохраняются.
+            await reset(db)
+            await db.commit()
+        async with sf() as db:
+            assert list((await db.scalars(select(Student.id))).all()) == [2]
+            assert list((await db.scalars(select(User.id))).all()) == [2]
+            assert list((await db.scalars(select(Announcement.id).order_by(Announcement.id))).all()) == [2, 3]
+            reads = (await db.execute(select(NotificationRead.user_id, NotificationRead.key))).all()
+            assert reads == ([(2, "ann:3")] if with_reads else [])
+    finally:
+        await engine.dispose()
