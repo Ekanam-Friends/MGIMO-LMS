@@ -20,6 +20,12 @@ from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.certificates.pyrus_client import PyrusClient
+from app.assistant.provider import GigaChat
+from app.assistant.bootstrap import create_assistant
+from app.web.assistant_views import router as assistant_router
+from app.assistant.documents import DocumentProcessor
+from app.web.document_views import DocumentBodyLimit, router as document_router
+from app.web.document_notice_views import router as document_notice_router
 from app.certificates.service import CertificateSync
 from app.certificates.webhook import router as pyrus_router
 from app.core.config import Settings, get_settings
@@ -50,6 +56,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         cfg = settings or get_settings()
         app.state.settings = cfg
+        provider = None
+        if cfg.llm_provider == "gigachat" and cfg.gigachat_auth_key.get_secret_value():
+            try:
+                provider = GigaChat(cfg.gigachat_auth_key.get_secret_value(), cfg.gigachat_scope,
+                                    cfg.gigachat_model, cfg.gigachat_ca_bundle,
+                                    translation_model=cfg.gigachat_translation_model)
+            except (OSError, ValueError):
+                log.error("Ассистент отключён: проверьте сертификат GigaChat")
+        app.state.assistant = create_assistant(cfg, provider)
         engine = make_engine(cfg.database_url)
         app.state.session_factory = make_session_factory(engine)
         app.state.certificate_sync = None
@@ -66,9 +81,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 loop_task = asyncio.create_task(_sync_loop(app.state.certificate_sync, cfg.pyrus_sync_interval))
         else:
             log.warning("Pyrus не настроен (PYRUS_LOGIN / PYRUS_SECURITY_KEY / PYRUS_FORM_ID) — заявки копятся в очереди")
+        document_processor = DocumentProcessor(app.state.session_factory, cfg)
+        document_task = asyncio.create_task(document_processor.run())
         try:
             yield
         finally:
+            document_processor.stop.set()
+            await document_task
+            await app.state.assistant.aclose()
             if loop_task is not None:
                 loop_task.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
@@ -78,6 +98,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await engine.dispose()
 
     app = FastAPI(title="MGIMO-LMS (концепт для конкурса)", lifespan=lifespan)
+    app.add_middleware(DocumentBodyLimit)
 
     @app.get("/healthz")
     async def healthz() -> dict:
@@ -91,6 +112,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=Path(__file__).parent / "web" / "static"), name="static")
     app.include_router(pyrus_router)
+    app.include_router(assistant_router)
+    app.include_router(document_router)
+    app.include_router(document_notice_router)
     app.include_router(web_router)
     app.include_router(teacher_router)
     app.include_router(notif_router)

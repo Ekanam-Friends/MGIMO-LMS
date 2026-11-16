@@ -17,13 +17,14 @@ WORKDIR /app
 COPY pyproject.toml ./
 # Ставим только зависимости: сам пакет удаляем, код берётся из /app (рабочий каталог),
 # вместе с шаблонами и статикой.
-RUN mkdir app && touch app/__init__.py && pip install . && pip uninstall -y mgimo-lms && rm -rf app build
+RUN mkdir app && touch app/__init__.py && pip install '.[rag]' && pip uninstall -y mgimo-lms && rm -rf app build
 
 COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini ./
 
-RUN useradd --create-home --uid 1000 lms && chown -R lms:lms /app
+RUN useradd --create-home --uid 1000 lms && mkdir -p /data/regulations \
+    && chown -R lms:lms /app /data/regulations
 USER lms
 
 EXPOSE 8000

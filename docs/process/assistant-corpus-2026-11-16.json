@@ -1,0 +1,198 @@
+{
+  "snapshot": "f3fc4f2d3f2b06141a82c2d4f844d0f9e5bf5cf0997e39793820f7547cc06c0b",
+  "published_at": "2026-11-16",
+  "model": null,
+  "chunks": 862,
+  "verification_status": "snapshot",
+  "documents": [
+    {
+      "file": "000423.pdf",
+      "status": "snapshot",
+      "chunks": 5,
+      "pages": 4,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000427.pdf",
+      "status": "snapshot",
+      "chunks": 123,
+      "pages": 16,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000428.pdf",
+      "status": "snapshot",
+      "chunks": 24,
+      "pages": 7,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000453.pdf",
+      "status": "snapshot",
+      "chunks": 16,
+      "pages": 4,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000456.pdf",
+      "status": "snapshot",
+      "chunks": 15,
+      "pages": 4,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000457.pdf",
+      "status": "snapshot",
+      "chunks": 52,
+      "pages": 13,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "000631.pdf",
+      "status": "snapshot",
+      "chunks": 30,
+      "pages": 5,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "003143.pdf",
+      "status": "snapshot",
+      "chunks": 28,
+      "pages": 7,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "003256.pdf",
+      "status": "snapshot",
+      "chunks": 28,
+      "pages": 8,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "003325.pdf",
+      "status": "snapshot",
+      "chunks": 69,
+      "pages": 20,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004028.pdf",
+      "status": "snapshot",
+      "chunks": 91,
+      "pages": 23,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004029.pdf",
+      "status": "snapshot",
+      "chunks": 38,
+      "pages": 36,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004030.pdf",
+      "status": "snapshot",
+      "chunks": 40,
+      "pages": 8,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004577.pdf",
+      "status": "snapshot",
+      "chunks": 18,
+      "pages": 12,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004580.pdf",
+      "status": "snapshot",
+      "chunks": 7,
+      "pages": 3,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004667.pdf",
+      "status": "snapshot",
+      "chunks": 5,
+      "pages": 2,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004712.pdf",
+      "status": "snapshot",
+      "chunks": 5,
+      "pages": 2,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004776.pdf",
+      "status": "snapshot",
+      "chunks": 31,
+      "pages": 10,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004777.pdf",
+      "status": "snapshot",
+      "chunks": 50,
+      "pages": 17,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004778.pdf",
+      "status": "snapshot",
+      "chunks": 4,
+      "pages": 1,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004782.pdf",
+      "status": "snapshot",
+      "chunks": 13,
+      "pages": 2,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004813.pdf",
+      "status": "snapshot",
+      "chunks": 4,
+      "pages": 2,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004817.pdf",
+      "status": "snapshot",
+      "chunks": 120,
+      "pages": 48,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004825.pdf",
+      "status": "snapshot",
+      "chunks": 6,
+      "pages": 1,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "004873.pdf",
+      "status": "snapshot",
+      "chunks": 33,
+      "pages": 5,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "005891.pdf",
+      "status": "snapshot",
+      "chunks": 3,
+      "pages": 1,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    },
+    {
+      "file": "005892.pdf",
+      "status": "snapshot",
+      "chunks": 4,
+      "pages": 2,
+      "reason": "Даты действия и полная сверка OCR не подтверждены"
+    }
+  ]
+}
