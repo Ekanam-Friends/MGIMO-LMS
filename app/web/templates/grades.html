@@ -1,47 +1,47 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "teacher/_macros.html" import result_badge, progress %}
-{% block title %}Успеваемость{% endblock %}
-{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Успеваемость</span></nav>{% endblock %}
+{% block title %}{{ _('Успеваемость') }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="{{ _('Главная') }}">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ _('Успеваемость') }}</span></nav>{% endblock %}
 {% block content %}
 {% set cur = book.current %}
 {% set due = [] %}
 {% if cur %}{% for c in cur.courses %}{% for a in c.homework_due %}{% set _ = due.append((a, c)) %}{% endfor %}{% endfor %}{% endif %}
 <div class="page">
-  <h1 class="title-1">Успеваемость</h1>
+  <h1 class="title-1">{{ _('Успеваемость') }}</h1>
 
   <div class="stats">
-    <div class="stat"><span class="stat__num">{{ "%.2f" | format(book.gpa) | replace(".", ",") if book.gpa else "—" }}</span><span class="stat__label">средний балл по зачётке</span></div>
+    <div class="stat"><span class="stat__num">{{ "%.2f" | format(book.gpa) | replace(".", ",") if book.gpa else "—" }}</span><span class="stat__label">{{ _('средний балл по зачётке') }}</span></div>
     <a class="stat{% if book.debts %} stat--warn{% endif %}" href="#debts"><span class="stat__num">{{ book.debts | length }}</span><span class="stat__label">{{ "академических долгов" if book.debts else "долгов нет" }}</span></a>
-    <div class="stat"><span class="stat__num">{{ (book.current_percent | round | int ~ " %") if book.current_percent is not none else "—" }}</span><span class="stat__label">набрано от возможного в семестре</span></div>
+    <div class="stat"><span class="stat__num">{{ (book.current_percent | round | int ~ " %") if book.current_percent is not none else "—" }}</span><span class="stat__label">{{ _('набрано от возможного в семестре') }}</span></div>
     <div class="stat"><span class="stat__num stat__num--sm">{{ book.next_exam[0] | ddmmyyyy if book.next_exam else "—" }}</span><span class="stat__label">{{ ("ближайший экзамен: " ~ book.next_exam[1]) if book.next_exam else "экзаменов в расписании пока нет" }}</span></div>
   </div>
 
   {% if book.debts %}
   <section class="panel panel--accent" id="debts">
-    <h2 class="panel__title">Академические долги</h2>
+    <h2 class="panel__title">{{ _('Академические долги') }}</h2>
     <ul class="debt-list">
       {% for c in book.debts %}
-        <li><span><strong>{{ c.card.discipline }}</strong> · {{ c.card.form_title }} · {{ c.card.course.semester }}-й семестр</span>
-          <span>{{ result_badge(c.final.result) }} <small class="muted">попыток: {{ c.attempts }} из 3 · {{ c.card.teacher or "преподаватель не назначен" }}</small></span></li>
+        <li><span><strong>{{ c.card.discipline }}</strong> · {{ c.card.form_title }} · {{ c.card.course.semester }}{{ _('-й семестр') }}</span>
+          <span>{{ result_badge(c.final.result) }} <small class="muted">{{ _('попыток:') }} {{ c.attempts }} {{ _('из 3 ·') }} {{ c.card.teacher or "преподаватель не назначен" }}</small></span></li>
       {% endfor %}
     </ul>
-    <p class="page__note">Пересдачу назначает деканат; заявление на пересдачу появится в разделе «Заявления».</p>
+    <p class="page__note">{{ _('Пересдачу назначает деканат; заявление на пересдачу появится в разделе «Заявления».') }}</p>
   </section>
   {% endif %}
 
   {% if due %}
   <section class="panel">
-    <h2 class="panel__title">Скоро сдавать</h2>
+    <h2 class="panel__title">{{ _('Скоро сдавать') }}</h2>
     <ul class="hw-list">
       {% for a, c in due | sort(attribute="0.assessment.due_date") %}
         <li>
           <details class="hw hw--student">
             <summary>
               <span class="hw__date{% if (a.assessment.due_date - today).days <= 2 %} hw__date--hot{% endif %}">{{ a.assessment.due_date.strftime("%d.%m") }}</span>
-              <span class="hw__body"><span class="hw__title">{{ a.assessment.title }}</span><small class="muted">{{ c.card.discipline }} · до {{ a.assessment.max_points | pts }} б.</small></span>
+              <span class="hw__body"><span class="hw__title">{{ a.assessment.title }}</span><small class="muted">{{ c.card.discipline }} {{ _('· до') }} {{ a.assessment.max_points | pts }} {{ _('б.') }}</small></span>
             </summary>
-            {% if a.assessment.description %}<p class="dean-msg">{{ a.assessment.description }}</p>{% else %}<p class="muted">Преподаватель не добавил описание.</p>{% endif %}
+            {% if a.assessment.description %}<p class="dean-msg">{{ a.assessment.description }}</p>{% else %}<p class="muted">{{ _('Преподаватель не добавил описание.') }}</p>{% endif %}
           </details>
         </li>
       {% endfor %}
@@ -50,7 +50,7 @@
   {% endif %}
 
   <section class="dash-block">
-    <h2 class="dash-title">{% if cur %}Текущий семестр <small class="muted">{{ cur.title }}</small>{% else %}Текущий семестр{% endif %}</h2>
+    <h2 class="dash-title">{% if cur %}{{ _('Текущий семестр') }} <small class="muted">{{ cur.title }}</small>{% else %}{{ _('Текущий семестр') }}{% endif %}</h2>
     {% if cur %}
     <div class="course-grid">
       {% for c in cur.courses | sort(attribute="card.discipline") %}
@@ -64,8 +64,8 @@
             <p class="course-card__meta">{{ icon("teacher", 14) }} {{ c.card.teacher or "преподаватель не назначен" }}</p>
             <div class="course-card__progress">{{ progress(c.current, c.current_max) }}</div>
             <p class="course-card__meta">
-              {% if c.possible %}{{ c.percent | round | int }} % от возможного на сегодня{% elif c.planned_max %}сроки сдачи ещё впереди{% else %}заданий пока нет{% endif %}
-              {% if c.card.course.control_form == "exam" and c.planned_max %} · {% if c.current >= scale.ADMISSION_MIN %}<span class="ok-text">допуск есть</span>{% else %}до допуска {{ (scale.ADMISSION_MIN - c.current) | pts }} б.{% endif %}{% endif %}
+              {% if c.possible %}{{ c.percent | round | int }} {{ _('% от возможного на сегодня') }}{% elif c.planned_max %}{{ _('сроки сдачи ещё впереди') }}{% else %}{{ _('заданий пока нет') }}{% endif %}
+              {% if c.card.course.control_form == "exam" and c.planned_max %} · {% if c.current >= scale.ADMISSION_MIN %}<span class="ok-text">{{ _('допуск есть') }}</span>{% else %}{{ _('до допуска') }} {{ (scale.ADMISSION_MIN - c.current) | pts }} {{ _('б.') }}{% endif %}{% endif %}
             </p>
           </summary>
           {% if c.assessments %}
@@ -77,18 +77,18 @@
               {% endfor %}
             </tbody>
           </table>
-          {% else %}<p class="muted">Преподаватель ещё не добавил контрольные точки.</p>{% endif %}
+          {% else %}<p class="muted">{{ _('Преподаватель ещё не добавил контрольные точки.') }}</p>{% endif %}
         </details>
       {% endfor %}
     </div>
     {% else %}
-      <section class="panel empty"><p class="empty__title">Ведомостей текущего семестра пока нет</p><p class="muted">Они появятся, когда деканат откроет семестр.</p></section>
+      <section class="panel empty"><p class="empty__title">{{ _('Ведомостей текущего семестра пока нет') }}</p><p class="muted">{{ _('Они появятся, когда деканат откроет семестр.') }}</p></section>
     {% endif %}
   </section>
 
   {% if book.events %}
   <section class="panel">
-    <h2 class="panel__title">Новое в успеваемости</h2>
+    <h2 class="panel__title">{{ _('Новое в успеваемости') }}</h2>
     <ul class="timeline">
       {% for e in book.events %}<li><span class="timeline__date">{{ e.created_at | ddmmyyyy }}</span><span>{{ e.text }}</span></li>{% endfor %}
     </ul>
@@ -96,13 +96,13 @@
   {% endif %}
 
   <section class="dash-block" id="record">
-    <h2 class="dash-title">Зачётная книжка</h2>
+    <h2 class="dash-title">{{ _('Зачётная книжка') }}</h2>
     {% for s in book.past %}
     <details class="panel"{% if loop.first %} open{% endif %}>
       <summary class="panel__title">{{ s.title }}</summary>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>Дисциплина</th><th>Форма</th><th>ЗЕ</th><th>Баллы</th><th>Оценка</th><th>Дата</th><th>Преподаватель</th></tr></thead>
+          <thead><tr><th>{{ _('Дисциплина') }}</th><th>{{ _('Форма') }}</th><th>{{ _('ЗЕ') }}</th><th>{{ _('Баллы') }}</th><th>{{ _('Оценка') }}</th><th>{{ _('Дата') }}</th><th>{{ _('Преподаватель') }}</th></tr></thead>
           <tbody>
           {% for c in s.courses %}
             <tr>
@@ -110,7 +110,7 @@
               <td data-label="Форма">{{ c.card.form_title }}</td>
               <td data-label="ЗЕ">{{ c.card.course.credits }}</td>
               <td data-label="Баллы">{{ c.final.total_points | pts if c.final else "—" }}</td>
-              <td data-label="Оценка">{{ result_badge(c.final.result if c.final else none) }}{% if c.attempts > 1 %} <small class="muted">с {{ c.attempts }}-й попытки</small>{% endif %}</td>
+              <td data-label="Оценка">{{ result_badge(c.final.result if c.final else none) }}{% if c.attempts > 1 %} <small class="muted">{{ _('с') }} {{ c.attempts }}{{ _('-й попытки') }}</small>{% endif %}</td>
               <td data-label="Дата">{{ c.final.graded_on | ddmmyyyy if c.final else "—" }}</td>
               <td data-label="Преподаватель">{{ c.card.teacher or "—" }}</td>
             </tr>
@@ -120,9 +120,9 @@
       </div>
     </details>
     {% else %}
-      <section class="panel empty"><p class="empty__title">Закрытых сессий ещё нет</p><p class="muted">После первой сессии здесь появятся итоговые оценки — как в бумажной зачётке.</p></section>
+      <section class="panel empty"><p class="empty__title">{{ _('Закрытых сессий ещё нет') }}</p><p class="muted">{{ _('После первой сессии здесь появятся итоговые оценки — как в бумажной зачётке.') }}</p></section>
     {% endfor %}
   </section>
-  <p class="page__note">Данные вымышленные. Шкала прототипа: накоп до 60 + экзамен до 40; 85+ «отлично», 70+ «хорошо», 55+ «удовлетворительно».</p>
+  <p class="page__note">{{ _('Данные вымышленные. Шкала прототипа: накоп до 60 + экзамен до 40; 85+ «отлично», 70+ «хорошо», 55+ «удовлетворительно».') }}</p>
 </div>
 {% endblock %}

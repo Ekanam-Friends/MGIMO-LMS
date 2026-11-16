@@ -27,6 +27,8 @@ from app.models import (
 from app.models.auth import Role, User
 from app.models.grades import Course
 from app.models.notifications import Announcement, Audience, NotificationRead, Source
+from app.models.document_notice import DocumentNotice, DocumentRecipient
+from app.models.knowledge import KnowledgeDocument
 
 TODAY = date(2026, 11, 9)
 
@@ -131,6 +133,15 @@ async def test_reset_removes_generated_addressees_but_keeps_other_announcements(
                 Announcement(id=3, source=Source.DEAN, author_user_id=2, title="Всем",
                              audience=Audience.ALL, created_at=now),
             ])
+            db.add(KnowledgeDocument(id=1, uploaded_by_user_id=2, title="Тестовый документ",
+                source_url="https://mgimo.ru/test.pdf", source_key="a" * 64,
+                revision="2026", filename="test.pdf", sha256="b" * 64, data=b"%PDF-test",
+                reviewed_public=True, status="published", uploaded_at=now))
+            await db.flush()
+            db.add(DocumentNotice(document_id=1, confirmed_by=2, confirmed_at=now))
+            await db.flush()
+            db.add_all([DocumentRecipient(document_id=1, student_id=sid, telegram_state="skipped")
+                        for sid in (1, 2)])
             if with_reads:
                 db.add_all([
                     NotificationRead(user_id=1, key="ann:1", read_at=now),
@@ -148,6 +159,8 @@ async def test_reset_removes_generated_addressees_but_keeps_other_announcements(
             assert list((await db.scalars(select(Student.id))).all()) == [2]
             assert list((await db.scalars(select(User.id))).all()) == [2]
             assert list((await db.scalars(select(Announcement.id).order_by(Announcement.id))).all()) == [2, 3]
+            assert list((await db.scalars(select(DocumentRecipient.student_id))).all()) == [2]
+            assert await db.get(KnowledgeDocument, 1) is not None
             reads = (await db.execute(select(NotificationRead.user_id, NotificationRead.key))).all()
             assert reads == ([(2, "ann:3")] if with_reads else [])
     finally:
