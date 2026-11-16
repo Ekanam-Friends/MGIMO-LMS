@@ -56,6 +56,14 @@
 
 Что сделано и что осталось — в разделе «Что умеет» ниже, подробности в Issues и на доске проекта.
 
+**Внутренний срок команды — до 19 ноября 2026:** завершить работы, чтобы оставить время
+на доработку документации и выступления. Дополнения по итогам МФТИ: юнит-экономика
+(`Legpopov`), RAG с API-моделью, проверка ответов по положениям и редакций на дату,
+финальная презентация в стиле МГИМО и оценка схемы из нескольких агентов —
+в [roadmap](ROADMAP.md) и [плане подготовки к финалу](docs/final-preparation.md).
+Туда же добавлен сценарий проверки обоснованности и законности действий в отношении
+студентов по локальным актам вуза и актам Минобрнауки.
+
 ## Что умеет
 
 Состояние на 10 ноября 2026. Цель — личный кабинет, где студент не стоит в очереди в деканат
@@ -95,12 +103,49 @@
 
 ## Как устроено
 
-```
-Браузер (HTMX)  ─┐
-                 ├─→  FastAPI  ─→  PostgreSQL
-Telegram (aiogram) ┘     │
-                         ├─→  GigaChat / YandexGPT   (ключ только на сервере)
-                         └─→  импорт открытого расписания МГИМО
+### Кабинет, бот и внешние сервисы
+
+Веб-кабинет и бот работают с общей базой через серверный код. Ассистент обращается
+к GigaChat с бэкенда; личные данные получает только в пределах серверной сессии.
+
+```mermaid
+flowchart TB
+    browser["Веб-кабинет<br/>Студент · преподаватель · деканат<br/>Jinja2 + HTMX"]
+    telegram["Telegram<br/>Расписание · статусы · уведомления"]
+
+    subgraph server["VPS · Docker Compose · секреты только на сервере"]
+        direction TB
+        caddy["Caddy<br/>HTTPS"]
+        web["FastAPI<br/>Сессии · роли · проверка доступа"]
+        bot["aiogram<br/>Отдельный процесс бота"]
+        db[("PostgreSQL<br/>Учебные данные · заявки · уведомления")]
+        importer["Импорт расписания<br/>Замена ФИО на вымышленные"]
+        assistant["ИИ-ассистент<br/>RAG + чтение данных студента"]
+    end
+
+    ruz["Открытое расписание МГИМО<br/>РУЗ"]
+    pyrus["Pyrus<br/>Согласование справок<br/>Статусы и готовый PDF"]
+    llm["GigaChat API<br/>Выбор и проверка выдержек"]
+
+    browser <-->|HTTPS| caddy
+    caddy <--> web
+    telegram <--> bot
+    web <--> db
+    bot <--> db
+    ruz --> importer --> db
+    web <-->|Заявки и статусы| pyrus
+    web --> assistant
+    assistant --> llm
+
+    classDef entry fill:#eff6ff,stroke:#60a5fa,color:#102a43
+    classDef service fill:#ffffff,stroke:#b8c9df,color:#102a43
+    classDef storage fill:#ecfdf5,stroke:#34d399,color:#064e3b
+    classDef planned fill:#fff7ed,stroke:#d97706,color:#7c2d12,stroke-dasharray:5 5
+    class browser,telegram entry
+    class caddy,web,bot,importer,ruz,pyrus service
+    class db storage
+    class assistant,llm service
+    style server fill:#f8fafc,stroke:#cbd5e1,color:#102a43
 ```
 
 - **Бэкенд** — Python, FastAPI, SQLAlchemy, Alembic. **Интерфейс** — серверные шаблоны Jinja2
@@ -116,6 +161,65 @@ Telegram (aiogram) ┘     │
 - **Деплой** — docker-compose на VPS за Caddy, HTTPS, домен `lms-university.ekanamfriends.ru`.
 
 Подробнее — в [docs/decisions/0001-architecture.md](docs/decisions/0001-architecture.md).
+
+### От документа — к проверяемому ответу
+
+**Рабочая RAG-цепочка.** Поиск по открытому корпусу и проверка выбранных выдержек
+через GigaChat API. В текущем развёртывании используется BM25 без эмбеддингов.
+Непроверенная актуальность загруженного снимка явно указывается в ответах.
+
+```mermaid
+flowchart TB
+    subgraph corpus["1 · ПОДГОТОВКА КОРПУСА"]
+        direction LR
+        sources["Официальные источники<br/>Локальные акты МГИМО<br/>Акты Минобрнауки"]
+        extract["Извлечение и разбор<br/>Текст · фрагменты · ссылки<br/>Реквизиты и сроки действия"]
+        index["27 PDF · 862 фрагмента<br/>Тексты и BM25<br/>Эмбеддинги отключены"]
+        sources --> extract --> index
+    end
+
+    subgraph question["2 · ОБРАБОТКА ВОПРОСА"]
+        direction LR
+        request["Вопрос в кабинете<br/>Дата актуальности<br/>Обстоятельства ситуации"]
+        retrieval["Поиск и применимость<br/>Релевантные фрагменты<br/>Проверка статуса редакции"]
+        generation["Ответ по источникам<br/>GigaChat API<br/>Выдержки · основания · ссылки"]
+        request --> retrieval --> generation
+    end
+
+    subgraph verification["3 · ПРОВЕРКА И РЕЗУЛЬТАТ"]
+        direction LR
+        check["Проверка обоснованности<br/>Утверждения и цитаты<br/>Редакции · противоречия"]
+        result["Результат в кабинете<br/>Ответ с доказательствами<br/>Уточнение или честный отказ"]
+        original["Документ и фрагмент<br/>Ссылка на источник<br/>Пункт / страница · редакция"]
+        check --> result --> original
+    end
+
+    quality["Контроль качества<br/>Эталонные вопросы и регрессии<br/>Ручная сверка · время · стоимость"]
+
+    index --> retrieval
+    generation --> check
+    quality -.-> retrieval
+    quality -.-> check
+
+    classDef document fill:#ffffff,stroke:#b8c9df,color:#102a43
+    classDef processing fill:#eff6ff,stroke:#60a5fa,color:#102a43
+    classDef output fill:#ecfdf5,stroke:#34d399,color:#064e3b
+    classDef evaluation fill:#fff7ed,stroke:#d97706,color:#7c2d12
+    class sources,extract,index,original document
+    class request,retrieval,generation,check processing
+    class result output
+    class quality evaluation
+    style corpus fill:#f8fafc,stroke:#cbd5e1,color:#102a43
+    style question fill:#f8fafc,stroke:#cbd5e1,color:#102a43
+    style verification fill:#f8fafc,stroke:#cbd5e1,color:#102a43
+```
+
+Ответ опирается на применимую норму и редакцию на выбранную дату. Если документов или
+обстоятельств недостаточно, система должна обозначить ограничение. Для проверки
+действий в отношении студента запланированы вымышленные кейсы и сверка с профильным
+экспертом. Подробности — в [roadmap](ROADMAP.md),
+[плане подготовки](docs/final-preparation.md) и
+[решении о качестве ответов](docs/decisions/0011-rag-answer-quality.md).
 
 ## Запуск
 
