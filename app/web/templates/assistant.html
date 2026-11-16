@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ _('ИИ-ассистент деканата') }}{% endblock %}
+{% block header %}<p class="header__title">{{ _('ИИ-ассистент деканата') }}</p>{% endblock %}
+{% block content %}
+<div class="assistant" id="assistant" data-csrf="{{ viewer.csrf }}" data-enabled="{{ 'true' if enabled else 'false' }}">
+  <div class="assistant__toolbar">
+    <div class="assistant__identity"><span class="assistant__online"></span><span>{{ _('Ваш помощник') }} <small>GigaChat</small></span></div>
+    <button class="assistant__new" id="assistant-clear" type="button" title="{{ _('Очистить диалог и отозвать доступ к оценкам') }}"><span aria-hidden="true">＋</span> {{ _('Новый чат') }}</button>
+  </div>
+  <p class="assistant__demo-notice">{{ _('Демонстрация: учебные данные вымышленные и обрабатываются GigaChat. В рабочей системе реальные данные студентов должны обрабатываться локальной моделью на сервере. Локальная модель в прототипе не развёрнута.') }}</p>
+  {% if viewer.user.role != 'student' and demo_access %}
+  <section class="assistant__student-picker" aria-label="{{ _('Выбор демо-студента') }}">
+    <label for="assistant-student-search">{{ _('Демо-студент') }}</label>
+    <input id="assistant-student-search" type="search" maxlength="100" placeholder="{{ _('Поиск по вымышленному имени') }}">
+    <select id="assistant-student" aria-label="{{ _('Демо-студент') }}"><option value="">{{ _('Только публичные НПА') }}</option></select>
+    <p id="assistant-student-status" role="status">{{ _('Выбор применяется к новой беседе. Для смены студента очистите чат.') }}</p>
+  </section>
+  {% endif %}
+  <div class="assistant__stage" id="assistant-stage">
+    <div class="assistant__welcome" id="assistant-welcome">
+      <header class="assistant__intro">
+        <div class="assistant__mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><path d="M16 3c0 8-5 13-13 13 8 0 13 5 13 13 0-8 5-13 13-13C21 16 16 11 16 3Z" stroke="currentColor" stroke-width="1.8"/><path d="M26 2v6M23 5h6" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <p class="assistant__eyebrow">{{ _('Меньше поисков. Больше ясности.') }}</p>
+        <h1>{{ _('Чем помочь сегодня?') }}</h1>
+        <p>{{ _('Разберёмся в положениях, посмотрим расписание') }}<br class="assistant__desktop-break"> {{ _('и найдём нужное в вашем кабинете.') }}</p>
+      </header>
+      {% if not enabled %}<div class="assistant__notice" role="status">{{ _('Ассистент пока не подключён. Обратитесь в деканат через раздел справок.') }}</div>{% endif %}
+      <section id="assistant-warning" class="assistant__warning" aria-labelledby="assistant-warning-title">
+        <h2 id="assistant-warning-title">{{ _('Перед началом беседы') }}</h2>
+        <p>{{ _('ИИ может ошибаться. Проверяйте важные ответы по документам и данным кабинета. Вопрос и необходимые записи обрабатывает GigaChat; доступ к оценкам разрешается отдельно. Не вводите ФИО, медицинские сведения и контакты.') }}</p>
+        <label><input id="assistant-acknowledged" type="checkbox"><span>{{ _('Я понимаю, что ИИ может ошибаться, и буду проверять важные ответы.') }}</span></label>
+        <button id="assistant-start" class="assistant__primary" type="button" disabled>{{ _('Понятно, начать беседу') }} {{ icon("arrow", 16) }}</button>
+        <p id="assistant-start-status" role="status"></p>
+      </section>
+      <div class="assistant__examples" aria-label="{{ _('Примеры вопросов') }}">
+        {% for question, glyph, caption in [("Как оформить академический отпуск?", "book", "Разобраться в положениях"), ("Какие у меня оценки?", "cap", "Посмотреть успеваемость"), ("Что у меня завтра по расписанию?", "calendar", "Спланировать день"), ("Какие статусы моих заявок?", "chat", "Проверить заявки")] %}
+        <button type="button" class="assistant__example" data-question="{{ question }}" disabled>{{ icon(glyph, 20) }}<span>{{ caption }}<small>{{ question }}</small></span>{{ icon("chev-right", 14) }}</button>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="assistant-messages" class="assistant__messages" role="log" aria-label="{{ _('Диалог с ассистентом') }}" aria-live="polite"></div>
+  </div>
+  <div class="assistant__composer-shell">
+    <form id="assistant-form" class="assistant__form">
+      <label class="assistant__sr" for="assistant-question">{{ _('Ваш вопрос') }}</label>
+      <textarea id="assistant-question" name="question" rows="2" minlength="3" maxlength="2000" required placeholder="{{ _('Спросите о своём обучении…') }}" disabled></textarea>
+      <div class="assistant__actions">
+        <details class="assistant__date-picker"><summary>{{ icon("clock", 16) }} {{ _('Редакция на дату') }}</summary><div><label for="assistant-date">{{ _('Дата нормы') }}</label><input id="assistant-date" type="date" aria-describedby="assistant-date-help" disabled><p id="assistant-date-help">{{ _('Без даты — текущая редакция. Исторический ответ требует проверенного архива.') }}</p></div></details>
+        <button id="assistant-send" type="submit" aria-label="{{ _('Найти ответ') }}" title="{{ _('Отправить вопрос · Enter') }}" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button>
+      </div>
+      <p id="assistant-progress" role="status" class="assistant__progress"></p>
+    </form>
+    <p class="assistant__footnote">{{ _('ИИ может ошибаться. Проверяйте важное.') }} <span>{{ _('Ассистент не создаёт и не отправляет заявки.') }}</span></p>
+  </div>
+</div>
+<link rel="stylesheet" href="/static/assistant.css?v=20261116-chat">
+<script src="/static/assistant.js?v=20261116-chat" defer></script>
+{% endblock %}

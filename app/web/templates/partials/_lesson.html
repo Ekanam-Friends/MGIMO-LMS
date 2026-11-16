@@ -3,7 +3,7 @@
   <ul class="lesson-card__details">
     {% if l.auditorium %}<li>{{ icon("door", 16) }}<span>{{ l.auditorium }}</span></li>{% endif %}
     {% if l.building %}<li>{{ icon("pin", 16) }}<span>{{ l.building }}</span></li>{% endif %}
-    {% if l.groups %}<li class="lesson-card__groups">{{ icon("user", 16) }}<span>{{ l.groups[:6] | join(", ") }}{% if l.groups | length > 6 %} и ещё {{ l.groups | length - 6 }}{% endif %}</span></li>{% endif %}
+    {% if l.groups %}<li class="lesson-card__groups">{{ icon("user", 16) }}<span>{{ l.groups[:6] | join(", ") }}{% if l.groups | length > 6 %} {{ _('и ещё') }} {{ l.groups | length - 6 }}{% endif %}</span></li>{% endif %}
     {% for t in l.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}
     {% if l.subgroup %}<li class="lesson-card__muted">{{ l.subgroup }}</li>{% endif %}
   </ul>
@@ -15,16 +15,16 @@
     {% if slot.grouped %}
       <h3 class="lesson-card__title">{{ first.discipline if slot.lessons | map(attribute='discipline') | unique | list | length == 1 else "Занятия по подгруппам" }}</h3>
       <details class="lesson-card__group">
-        <summary>{{ slot.lessons | length }} {{ "подгруппы" if slot.lessons | length < 5 else "подгрупп" }} — показать</summary>
+        <summary>{{ slot.lessons | length }} {{ "подгруппы" if slot.lessons | length < 5 else "подгрупп" }} {{ _('— показать') }}</summary>
         {% for l in slot.lessons %}
           <div class="lesson-card__sub">
-            <p class="lesson-card__subtitle">{{ l.discipline }}{% if l.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</p>
+            <p class="lesson-card__subtitle">{{ l.discipline }}{% if l.cancelled %} <span class="tag tag--red">{{ _('Отменено') }}</span>{% endif %}</p>
             {{ lesson_body(l) }}
           </div>
         {% endfor %}
       </details>
     {% else %}
-      <h3 class="lesson-card__title">{{ first.discipline }}{% if first.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</h3>
+      <h3 class="lesson-card__title">{{ first.discipline }}{% if first.cancelled %} <span class="tag tag--red">{{ _('Отменено') }}</span>{% endif %}</h3>
       {{ lesson_body(first) }}
     {% endif %}
     <div class="lesson-card__foot">

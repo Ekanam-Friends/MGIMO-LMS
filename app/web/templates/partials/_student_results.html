@@ -1,10 +1,10 @@
 {% if found %}
   <fieldset class="field student-results">
-    <legend class="field__label">Выберите студента</legend>
+    <legend class="field__label">{{ _('Выберите студента') }}</legend>
     {% for s, group in found %}
-      <label class="student-results__item"><input type="radio" name="student_id" value="{{ s.id }}"{% if loop.first and found | length == 1 %} checked{% endif %}> {{ s.full_name }} <small class="muted">· {{ group }}, {{ s.course }} курс</small></label>
+      <label class="student-results__item"><input type="radio" name="student_id" value="{{ s.id }}"{% if loop.first and found | length == 1 %} checked{% endif %}> {{ s.full_name }} <small class="muted">· {{ group }}, {{ s.course }} {{ _('курс') }}</small></label>
     {% endfor %}
   </fieldset>
 {% elif q | length >= 2 %}
-  <p class="muted">Никого не нашли. Проверьте написание.</p>
+  <p class="muted">{{ _('Никого не нашли. Проверьте написание.') }}</p>
 {% endif %}

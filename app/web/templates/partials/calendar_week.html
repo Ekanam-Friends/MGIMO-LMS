@@ -6,12 +6,12 @@
 <div id="cal-main" class="cal__main">
   <div class="cal__toolbar">
     <a class="week-nav__btn" href="?{{ 'week' if cal.size == 'full' else 'd' }}={{ cal.prev_week.isoformat() }}"
-       hx-get="/partials/calendar?week={{ cal.prev_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="Предыдущая неделя">{{ icon("chev-left", 18) }}</a>
+       hx-get="/partials/calendar?week={{ cal.prev_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="{{ _('Предыдущая неделя') }}">{{ icon("chev-left", 18) }}</a>
     <a class="week-nav__btn" href="?{{ 'week' if cal.size == 'full' else 'd' }}={{ cal.next_week.isoformat() }}"
-       hx-get="/partials/calendar?week={{ cal.next_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="Следующая неделя">{{ icon("chev-right", 18) }}</a>
+       hx-get="/partials/calendar?week={{ cal.next_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="{{ _('Следующая неделя') }}">{{ icon("chev-right", 18) }}</a>
     <span class="cal__label">{{ cal.days[0].day }} {{ sv.MONTHS_GEN[cal.days[0].month - 1] }} — {{ cal.days[-1].day }} {{ sv.MONTHS_GEN[cal.days[-1].month - 1] }} {{ cal.days[-1].year }}</span>
     <a class="btn btn--ghost btn--small" href="{{ '/schedule' if cal.size == 'full' else '/' }}"
-       hx-get="/partials/calendar?week={{ cal.today.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML">Сегодня</a>
+       hx-get="/partials/calendar?week={{ cal.today.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML">{{ _('Сегодня') }}</a>
   </div>
   <div class="cal__grid" style="--hours: {{ cal.hours | length }}">
     <div class="cal__corner"></div>

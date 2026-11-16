@@ -1,0 +1,5 @@
+# Изолированная сверка изображений страниц: рабочий контейнер не изменяется.
+FROM mgimo-lms-web:latest
+RUN pip install --no-cache-dir 'pymupdf>=1.24,<2'
+ENV PYTHONPATH=/app
+ENTRYPOINT ["python", "-u", "/audit_pages.py"]

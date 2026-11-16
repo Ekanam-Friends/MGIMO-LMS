@@ -478,12 +478,15 @@ async def enroll_missing(ctx: Ctx, g: StudyGroup, students: list[Student]) -> No
 
 
 async def reset(db: AsyncSession) -> None:
+    from app.models.document_notice import DocumentRecipient
+
     gen_students = select(Student.id).where(Student.record_book.like(f"{GEN_PREFIX}%"))
     gen_users = select(User.id).where(User.student_id.in_(gen_students))
     for stmt in (
         # Сначала зависимые уведомления: чужие адресаты и общие объявления сохраняются.
         delete(Announcement).where(Announcement.student_id.in_(gen_students)),
         delete(NotificationRead).where(NotificationRead.user_id.in_(gen_users)),
+        delete(DocumentRecipient).where(DocumentRecipient.student_id.in_(gen_students)),
         delete(GradeEvent), delete(FinalGrade), delete(Score), delete(Assessment), delete(CourseEnrollment),
         delete(Course), delete(AuthSession).where(AuthSession.user_id.in_(gen_users)),
         delete(User).where(User.student_id.in_(gen_students)), delete(Student).where(Student.id.in_(gen_students)),

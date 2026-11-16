@@ -1,75 +1,84 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}Профиль{% endblock %}
-{% block header %}<nav class="breadcr"><a href="{{ '/t/home' if viewer.teacher else '/' }}" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Профиль</span></nav>{% endblock %}
+{% block title %}{{ _('Профиль') }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="{{ '/t/home' if viewer.teacher else '/' }}" aria-label="{{ _('Главная') }}">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ _('Профиль') }}</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
-  <h1 class="title-1">Профиль</h1>
+  <h1 class="title-1">{{ _('Профиль') }}</h1>
   {% if student %}
+  <section class="panel">
+    <h2 class="panel__title">{{ _('Язык интерфейса и ассистента') }}</h2>
+    <form method="post" action="/profile/language" class="language-form">
+      <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+      <label for="interface-language">{{ _('Язык') }}</label>
+      <select id="interface-language" name="language">{% for code, title in LANGUAGES.items() %}<option value="{{ code }}"{% if interface_language(viewer) == code %} selected{% endif %}>{{ title }}</option>{% endfor %}</select>
+      <button type="submit" class="btn btn--primary">{{ _('Сохранить язык') }}</button>
+    </form>
+  </section>
   <section class="panel profile">
     <div class="profile__head">
       <span class="avatar avatar--big">{{ student.full_name[:1] }}</span>
-      <div><p class="profile__name">{{ student.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }}</p></div>
+      <div><p class="profile__name">{{ student.full_name }}</p><p class="muted">{{ _('Логин:') }} {{ viewer.user.login }}</p></div>
     </div>
     <dl class="props">
-      <dt>Факультет</dt><dd>{{ student.faculty_name or "—" }}</dd>
-      <dt>Курс</dt><dd>{{ student.course }}</dd>
-      <dt>Группа</dt><dd>{% if group %}{{ group.number }} ({{ group.name }}){% else %}—{% endif %}</dd>
-      <dt>Направление</dt><dd>{{ student.speciality or (group.speciality if group else "—") }}</dd>
-      {% if group and group.specialization %}<dt>Профиль</dt><dd>{{ group.specialization }}</dd>{% endif %}
-      <dt>Уровень</dt><dd>{{ student.level }}</dd>
-      <dt>Форма обучения</dt><dd>{{ student.form_of_education }}</dd>
-      <dt>Основа обучения</dt><dd>{{ student.education_basis }}</dd>
-      <dt>Номер зачётной книжки</dt><dd>{{ student.record_book }}</dd>
-      <dt>Приказ о зачислении</dt><dd>{{ student.enrollment_order or "—" }}</dd>
+      <dt>{{ _('Факультет') }}</dt><dd>{{ student.faculty_name or "—" }}</dd>
+      <dt>{{ _('Курс') }}</dt><dd>{{ student.course }}</dd>
+      <dt>{{ _('Группа') }}</dt><dd>{% if group %}{{ group.number }} ({{ group.name }}){% else %}—{% endif %}</dd>
+      <dt>{{ _('Направление') }}</dt><dd>{{ student.speciality or (group.speciality if group else "—") }}</dd>
+      {% if group and group.specialization %}<dt>{{ _('Профиль') }}</dt><dd>{{ group.specialization }}</dd>{% endif %}
+      <dt>{{ _('Уровень') }}</dt><dd>{{ student.level }}</dd>
+      <dt>{{ _('Форма обучения') }}</dt><dd>{{ student.form_of_education }}</dd>
+      <dt>{{ _('Основа обучения') }}</dt><dd>{{ student.education_basis }}</dd>
+      <dt>{{ _('Номер зачётной книжки') }}</dt><dd>{{ student.record_book }}</dd>
+      <dt>{{ _('Приказ о зачислении') }}</dt><dd>{{ student.enrollment_order or "—" }}</dd>
     </dl>
-    <p class="page__note">Данные вымышленные. В рабочей версии они приходили бы из 1С:Университет.</p>
+    <p class="page__note">{{ _('Данные вымышленные. В рабочей версии они приходили бы из 1С:Университет.') }}</p>
   </section>
   {% set back = "/profile" %}{% include "partials/_telegram.html" %}
   {% elif viewer.teacher %}
   <section class="panel profile">
     <div class="profile__head">
       <span class="avatar avatar--big">{{ viewer.teacher.full_name[:1] }}</span>
-      <div><p class="profile__name">{{ viewer.teacher.full_name }}</p><p class="muted">Логин: {{ viewer.user.login }} · сотрудник, преподаватель</p></div>
+      <div><p class="profile__name">{{ viewer.teacher.full_name }}</p><p class="muted">{{ _('Логин:') }} {{ viewer.user.login }} {{ _('· сотрудник, преподаватель') }}</p></div>
     </div>
     {% set sc = staff_card(viewer.teacher) %}
-    <h2 class="panel__title">Информация о сотруднике</h2>
+    <h2 class="panel__title">{{ _('Информация о сотруднике') }}</h2>
     <dl class="props">
-      <dt>Должность</dt><dd>{{ sc.position }}</dd>
-      <dt>Подразделение</dt><dd>{{ sc.unit }}</dd>
-      <dt>Статус занятости</dt><dd>{{ sc.employment }}</dd>
-      <dt>График работы</dt><dd>{{ sc.rate }}</dd>
-      <dt>Табельный номер</dt><dd>{{ sc.tab_no }}</dd>
-      <dt>Работает с</dt><dd>{{ sc.since }}</dd>
+      <dt>{{ _('Должность') }}</dt><dd>{{ sc.position }}</dd>
+      <dt>{{ _('Подразделение') }}</dt><dd>{{ sc.unit }}</dd>
+      <dt>{{ _('Статус занятости') }}</dt><dd>{{ sc.employment }}</dd>
+      <dt>{{ _('График работы') }}</dt><dd>{{ sc.rate }}</dd>
+      <dt>{{ _('Табельный номер') }}</dt><dd>{{ sc.tab_no }}</dd>
+      <dt>{{ _('Работает с') }}</dt><dd>{{ sc.since }}</dd>
     </dl>
-    <h2 class="panel__title">Преподавателю</h2>
+    <h2 class="panel__title">{{ _('Преподавателю') }}</h2>
     <dl class="props">
-      <dt>Ведомостей</dt><dd>{{ teacher_courses | length }}</dd>
-      <dt>Групп</dt><dd>{{ teacher_courses | map(attribute="group") | unique | list | length }}</dd>
-      <dt>Дисциплины</dt><dd>{{ teacher_courses | map(attribute="discipline") | unique | sort | join(", ") or "—" }}</dd>
+      <dt>{{ _('Ведомостей') }}</dt><dd>{{ teacher_courses | length }}</dd>
+      <dt>{{ _('Групп') }}</dt><dd>{{ teacher_courses | map(attribute="group") | unique | list | length }}</dd>
+      <dt>{{ _('Дисциплины') }}</dt><dd>{{ teacher_courses | map(attribute="discipline") | unique | sort | join(", ") or "—" }}</dd>
     </dl>
-    <p class="page__note">Должность, подразделение и табельный номер вымышленные. ФИО вымышленное: при импорте расписания каждому преподавателю РУЗ присваивается сгенерированное имя.</p>
+    <p class="page__note">{{ _('Должность, подразделение и табельный номер вымышленные. ФИО вымышленное: при импорте расписания каждому преподавателю РУЗ присваивается сгенерированное имя.') }}</p>
   </section>
   {% elif viewer.user.role == "staff" %}
   <section class="panel profile">
     <div class="profile__head">
-      <span class="avatar avatar--big">Д</span>
-      <div><p class="profile__name">Сотрудник деканата</p><p class="muted">Логин: {{ viewer.user.login }} · сотрудник</p></div>
+      <span class="avatar avatar--big">{{ _('Д') }}</span>
+      <div><p class="profile__name">{{ _('Сотрудник деканата') }}</p><p class="muted">{{ _('Логин:') }} {{ viewer.user.login }} {{ _('· сотрудник') }}</p></div>
     </div>
     {% set sc = staff_card(viewer.user, "специалист деканата", "Деканат") %}
-    <h2 class="panel__title">Информация о сотруднике</h2>
+    <h2 class="panel__title">{{ _('Информация о сотруднике') }}</h2>
     <dl class="props">
-      <dt>Должность</dt><dd>{{ sc.position }}</dd>
-      <dt>Подразделение</dt><dd>{{ sc.unit }}</dd>
-      <dt>Статус занятости</dt><dd>{{ sc.employment }}</dd>
-      <dt>График работы</dt><dd>{{ sc.rate }}</dd>
-      <dt>Табельный номер</dt><dd>{{ sc.tab_no }}</dd>
-      <dt>Работает с</dt><dd>{{ sc.since }}</dd>
+      <dt>{{ _('Должность') }}</dt><dd>{{ sc.position }}</dd>
+      <dt>{{ _('Подразделение') }}</dt><dd>{{ sc.unit }}</dd>
+      <dt>{{ _('Статус занятости') }}</dt><dd>{{ sc.employment }}</dd>
+      <dt>{{ _('График работы') }}</dt><dd>{{ sc.rate }}</dd>
+      <dt>{{ _('Табельный номер') }}</dt><dd>{{ sc.tab_no }}</dd>
+      <dt>{{ _('Работает с') }}</dt><dd>{{ sc.since }}</dd>
     </dl>
-    <p class="page__note">Должность, подразделение и табельный номер вымышленные.</p>
+    <p class="page__note">{{ _('Должность, подразделение и табельный номер вымышленные.') }}</p>
   </section>
   {% else %}
-    <p class="alert">Учётная запись сотрудника: студенческих данных нет.</p>
+    <p class="alert">{{ _('Учётная запись сотрудника: студенческих данных нет.') }}</p>
   {% endif %}
 </div>
 {% endblock %}

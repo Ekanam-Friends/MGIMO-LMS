@@ -27,6 +27,7 @@ class User(Base):
     login: Mapped[str] = mapped_column(String(100), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default=Role.STUDENT)
+    interface_language: Mapped[str] = mapped_column(String(2), default="ru", server_default="ru")
     student_id: Mapped[int | None] = mapped_column(
         ForeignKey("students.id"), nullable=True, unique=True
     )

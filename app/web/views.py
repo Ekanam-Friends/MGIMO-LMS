@@ -27,9 +27,11 @@ from app.models.certificates import CertificateKind, RequestStatus
 from app.web import calendar_view as cv
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
+from app.web.i18n import LANGUAGES, configure
 from app.web.nav import MENU, SERVICES, STAFF_MENU, STAFF_TABBAR, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+configure(templates.env)
 templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, TEACHER_MENU=TEACHER_MENU, TEACHER_TABBAR=TEACHER_TABBAR,
                              STAFF_MENU=STAFF_MENU, STAFF_TABBAR=STAFF_TABBAR,
                              sv=sv, cv=cv, KINDS=CertificateKind.TITLES)
@@ -58,6 +60,17 @@ def today() -> date:
 
 def render(request: Request, name: str, viewer: Viewer | None, **ctx) -> HTMLResponse:
     return templates.TemplateResponse(request, name, {"viewer": viewer, "path": request.url.path, **ctx})
+
+
+@router.post("/profile/language")
+async def set_interface_language(language: str = Form(...), viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)):
+    if viewer.user.role != "student":
+        raise HTTPException(404)
+    if language not in LANGUAGES:
+        raise HTTPException(400, "Неподдерживаемый язык")
+    viewer.user.interface_language = language
+    await db.commit()
+    return RedirectResponse("/profile", status_code=303)
 
 
 def _parse_day(raw: str | None, default: date) -> date:

@@ -1,0 +1,4 @@
+.language-form{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.language-form select{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface);color:var(--text);font:inherit;max-width:100%}
+.language-form label{font-size:13px;color:var(--muted)}
+html[lang="zh"] body{font-family:Manrope,"Microsoft YaHei","PingFang SC",sans-serif}
