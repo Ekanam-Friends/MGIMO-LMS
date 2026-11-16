@@ -19,13 +19,14 @@ concurrency:
 
 jobs:
   sync:
-    if: vars.PROJECT_SYNC_ENABLED == 'true'
+    if: github.event_name == 'workflow_dispatch' || vars.PROJECT_SYNC_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.PROJECT_SYNC_TOKEN }}
       SYNC_REPOSITORY: Ekanam-Friends/MGIMO-LMS
       SYNC_PROJECT_NUMBER: '4'
+      PROJECT_SYNC_ENABLED: ${{ vars.PROJECT_SYNC_ENABLED }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,10 +39,5 @@ jobs:
           fi
       - name: Синхронизировать
         env:
-          DRY_RUN: ${{ inputs.dry_run }}
-        run: |
-          if [ "$DRY_RUN" = 'true' ]; then
-            python3 scripts/sync_github_project.py --dry-run
-          else
-            python3 scripts/sync_github_project.py
-          fi
+          MANUAL_DRY_RUN: ${{ inputs.dry_run }}
+        run: python3 scripts/sync_github_project.py --workflow

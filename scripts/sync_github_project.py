@@ -65,7 +65,7 @@ def desired_change(issue, status):
 
 
 class Sync:
-    def __init__(self, owner, repo_name, project_number, dry_run=False):
+    def __init__(self, owner, repo_name, project_number, dry_run=True):
         self.owner = owner
         self.repo_name = repo_name
         self.repository = f"{owner}/{repo_name}"
@@ -211,12 +211,33 @@ class Sync:
         print(f"Проверено: {len(issues)} Issues, {len(items)} карточек; dry_run={self.dry_run}")
 
 
+def workflow_mode(event_name, enabled, manual_dry_run):
+    """Отсутствующий ручной ввод не разрешает запись; cron требует явного включения."""
+    if event_name == "schedule":
+        return "apply" if enabled == "true" else "skip"
+    if event_name == "workflow_dispatch":
+        if manual_dry_run not in {"", "true", "false"}:
+            raise ValueError("Некорректное значение dry_run")
+        return "apply" if manual_dry_run == "false" else "dry-run"
+    raise ValueError("Неподдерживаемое событие синхронизации")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--dry-run", action="store_true")
+    mode.add_argument("--apply", action="store_true", help="Явно разрешить запись в GitHub")
+    mode.add_argument("--workflow", action="store_true", help="Применить правила события GitHub Actions")
     args = parser.parse_args()
+    selected = "apply" if args.apply else "dry-run"
+    if args.workflow:
+        selected = workflow_mode(os.environ.get("GITHUB_EVENT_NAME", ""),
+            os.environ.get("PROJECT_SYNC_ENABLED", ""), os.environ.get("MANUAL_DRY_RUN", ""))
+    if selected == "skip":
+        print("Периодическая синхронизация выключена; запросы к GitHub не выполняются")
+        return
     owner, repo = os.environ.get("SYNC_REPOSITORY", "Ekanam-Friends/MGIMO-LMS").split("/")
-    Sync(owner, repo, int(os.environ.get("SYNC_PROJECT_NUMBER", "4")), args.dry_run).run()
+    Sync(owner, repo, int(os.environ.get("SYNC_PROJECT_NUMBER", "4")), selected != "apply").run()
 
 
 if __name__ == "__main__":

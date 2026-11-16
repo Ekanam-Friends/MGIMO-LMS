@@ -1,7 +1,8 @@
 """Проверки конфликтов между состоянием Issue и статусом Project."""
 
 import unittest
-from scripts.sync_github_project import desired_change
+from scripts.sync_github_project import desired_change, workflow_mode, main
+from unittest.mock import patch
 
 
 def issue(state, changed="2026-11-16T10:00:00Z"):
@@ -15,6 +16,38 @@ def status(name, changed="2026-11-16T11:00:00Z", initial=False):
 
 
 class ProjectSyncTests(unittest.TestCase):
+    def test_manual_dry_run_is_available_with_schedule_disabled(self):
+        for enabled in ("", "false", "true"):
+            for given in ("", "true"):
+                self.assertEqual(workflow_mode("workflow_dispatch", enabled, given), "dry-run")
+            self.assertEqual(workflow_mode("workflow_dispatch", enabled, "false"), "apply")
+
+    def test_cron_cannot_write_before_explicit_activation(self):
+        for enabled in ("", "false"):
+            for given in ("", "true", "false"):
+                self.assertEqual(workflow_mode("schedule", enabled, given), "skip")
+        self.assertEqual(workflow_mode("schedule", "true", ""), "apply")
+
+    def test_unknown_workflow_inputs_fail_closed(self):
+        for event, given in (("push", "false"), ("workflow_dispatch", "yes")):
+            with self.assertRaises(ValueError):
+                workflow_mode(event, "true", given)
+
+    def test_cli_writes_only_with_explicit_apply(self):
+        for arguments, expected in (([], True), (["--dry-run"], True), (["--apply"], False)):
+            with patch("sys.argv", ["sync", *arguments]), patch.dict("os.environ", {}, clear=True), \
+                    patch("scripts.sync_github_project.Sync") as sync:
+                main()
+                self.assertEqual(sync.call_args.args[-1], expected)
+                sync.return_value.run.assert_called_once()
+
+    def test_disabled_workflow_does_not_contact_github(self):
+        with patch("sys.argv", ["sync", "--workflow"]), \
+                patch.dict("os.environ", {"GITHUB_EVENT_NAME": "schedule"}, clear=True), \
+                patch("scripts.sync_github_project.Sync") as sync:
+            main()
+            sync.assert_not_called()
+
     def test_done_closes_open_issue(self):
         self.assertEqual(desired_change(issue("OPEN"), status("Done")), ("issue", "CLOSED"))
 
