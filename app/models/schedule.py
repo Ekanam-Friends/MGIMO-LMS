@@ -99,6 +99,17 @@ class ImportRun(Base):
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class GroupScheduleCoverage(Base):
+    """Подтверждённая загрузка полного семестра конкретной группы."""
+
+    __tablename__ = "group_schedule_coverage"
+
+    group_id: Mapped[int] = mapped_column(ForeignKey("study_groups.id"), primary_key=True)
+    period_start: Mapped[date] = mapped_column(Date, primary_key=True)
+    period_end: Mapped[date] = mapped_column(Date)
+    run_id: Mapped[int] = mapped_column(ForeignKey("import_runs.id"))
+
+
 class Lesson(Base):
     __tablename__ = "lessons"
 

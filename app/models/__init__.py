@@ -19,6 +19,7 @@ from app.models.grades import (
 from app.models.notifications import Announcement, NotificationRead
 from app.models.schedule import (
     Faculty,
+    GroupScheduleCoverage,
     ImportRun,
     Lesson,
     LessonChange,
@@ -51,6 +52,7 @@ __all__ = [
     "CertificateRequest",
     "CertificateRequestEvent",
     "Faculty",
+    "GroupScheduleCoverage",
     "ImportRun",
     "Lesson",
     "LessonChange",
