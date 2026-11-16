@@ -1,78 +1,78 @@
 {% extends "base.html" %}
-{% block title %}Объявления{% endblock %}
+{% block title %}{{ _('Объявления') }}{% endblock %}
 {% block content %}
 {% set v = values %}
 <div class="page page--narrow">
-  <h1 class="title-1">Объявления</h1>
+  <h1 class="title-1">{{ _('Объявления') }}</h1>
   {% if mode == "staff" %}
-  <p class="page__note">Объявление появится в колокольчике у выбранных студентов: всех, факультета, потока (программа и курс), группы или одного студента. Заявки на справки по-прежнему обрабатываются в Pyrus — их статусы студент увидит там же.</p>
+  <p class="page__note">{{ _('Объявление появится в колокольчике у выбранных студентов: всех, факультета, потока (программа и курс), группы или одного студента. Заявки на справки по-прежнему обрабатываются в Pyrus — их статусы студент увидит там же.') }}</p>
   {% else %}
-  <p class="page__note">Объявление увидят студенты выбранной группы — только тех групп, у которых вы ведёте курс.</p>
+  <p class="page__note">{{ _('Объявление увидят студенты выбранной группы — только тех групп, у которых вы ведёте курс.') }}</p>
   {% endif %}
-  {% if sent %}<div class="alert alert--ok" role="status">Объявление отправлено.</div>{% endif %}
+  {% if sent %}<div class="alert alert--ok" role="status">{{ _('Объявление отправлено.') }}</div>{% endif %}
   {% if error %}<div class="alert alert--error" role="alert">{{ error }}</div>{% endif %}
   <section class="panel">
-    <h2 class="panel__title">Новое объявление</h2>
+    <h2 class="panel__title">{{ _('Новое объявление') }}</h2>
     <form class="form" method="post" action="{{ '/d/announcements' if mode == 'staff' else '/t/announcements' }}">
       <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
       {% if mode == "staff" %}
-      <label class="field"><span class="field__label">От чьего имени</span>
+      <label class="field"><span class="field__label">{{ _('От чьего имени') }}</span>
         <select class="field__input" name="source">
-          <option value="dean"{% if v.source != "university" %} selected{% endif %}>Деканат</option>
-          <option value="university"{% if v.source == "university" %} selected{% endif %}>Вуз</option>
+          <option value="dean"{% if v.source != "university" %} selected{% endif %}>{{ _('Деканат') }}</option>
+          <option value="university"{% if v.source == "university" %} selected{% endif %}>{{ _('Вуз') }}</option>
         </select></label>
-      <label class="field"><span class="field__label">Кому</span>
+      <label class="field"><span class="field__label">{{ _('Кому') }}</span>
         <select class="field__input" name="audience" id="aud">
-          <option value="all"{% if v.audience in (none, "all") %} selected{% endif %}>Всем студентам</option>
-          <option value="faculty"{% if v.audience == "faculty" %} selected{% endif %}>Факультету</option>
-          <option value="stream"{% if v.audience == "stream" %} selected{% endif %}>Потоку (программа + курс)</option>
-          <option value="group"{% if v.audience == "group" %} selected{% endif %}>Группе</option>
-          <option value="student"{% if v.audience == "student" %} selected{% endif %}>Студенту</option>
+          <option value="all"{% if v.audience in (none, "all") %} selected{% endif %}>{{ _('Всем студентам') }}</option>
+          <option value="faculty"{% if v.audience == "faculty" %} selected{% endif %}>{{ _('Факультету') }}</option>
+          <option value="stream"{% if v.audience == "stream" %} selected{% endif %}>{{ _('Потоку (программа + курс)') }}</option>
+          <option value="group"{% if v.audience == "group" %} selected{% endif %}>{{ _('Группе') }}</option>
+          <option value="student"{% if v.audience == "student" %} selected{% endif %}>{{ _('Студенту') }}</option>
         </select></label>
-      <label class="field" data-aud="faculty"><span class="field__label">Факультет (если выбрано «Факультету»)</span>
+      <label class="field" data-aud="faculty"><span class="field__label">{{ _('Факультет (если выбрано «Факультету»)') }}</span>
         <select class="field__input" name="faculty">
           <option value="">—</option>
           {% for f in faculties %}<option value="{{ f }}"{% if v.faculty == f %} selected{% endif %}>{{ f }}</option>{% endfor %}
         </select></label>
-      <label class="field" data-aud="stream"><span class="field__label">Программа (если выбрано «Потоку»)</span>
+      <label class="field" data-aud="stream"><span class="field__label">{{ _('Программа (если выбрано «Потоку»)') }}</span>
         <select class="field__input" name="program">
           <option value="">—</option>
           {% for p in programs %}<option value="{{ p }}"{% if v.program == p %} selected{% endif %}>{{ p }}</option>{% endfor %}
         </select></label>
-      <label class="field" data-aud="stream"><span class="field__label">Курс (если выбрано «Потоку»)</span>
+      <label class="field" data-aud="stream"><span class="field__label">{{ _('Курс (если выбрано «Потоку»)') }}</span>
         <select class="field__input" name="course">
           <option value="">—</option>
           {% for n in range(1, 7) %}<option value="{{ n }}"{% if v.course == n %} selected{% endif %}>{{ n }}</option>{% endfor %}
         </select></label>
-      <label class="field" data-aud="group"><span class="field__label">Группа (если выбрано «Группе»), например 1МО-01</span>
+      <label class="field" data-aud="group"><span class="field__label">{{ _('Группа (если выбрано «Группе»), например 1МО-01') }}</span>
         <input class="field__input" name="group" value="{{ v.group or '' }}" maxlength="100"></label>
-      <label class="field" data-aud="student"><span class="field__label">Студент (если выбрано «Студенту»): начните вводить ФИО</span>
+      <label class="field" data-aud="student"><span class="field__label">{{ _('Студент (если выбрано «Студенту»): начните вводить ФИО') }}</span>
         <input class="field__input" name="student_q" type="search" autocomplete="off" minlength="2"
                hx-get="/d/students/search" hx-trigger="input changed delay:300ms" hx-target="#student-results" hx-swap="innerHTML"></label>
-      <div id="student-results" data-aud="student" aria-live="polite">{% if picked %}<p class="muted">Выбран: {{ picked.full_name }}<input type="hidden" name="student_id" value="{{ picked.id }}"></p>{% endif %}</div>
+      <div id="student-results" data-aud="student" aria-live="polite">{% if picked %}<p class="muted">{{ _('Выбран:') }} {{ picked.full_name }}<input type="hidden" name="student_id" value="{{ picked.id }}"></p>{% endif %}</div>
       {% else %}
-      <label class="field"><span class="field__label">Группа</span>
+      <label class="field"><span class="field__label">{{ _('Группа') }}</span>
         <select class="field__input" name="group_id" required>
           {% for g in groups %}<option value="{{ g.id }}"{% if v.group_id == g.id %} selected{% endif %}>{{ g.number }}</option>{% endfor %}
         </select></label>
-      {% if not groups %}<p class="muted">У вас пока нет групп с курсами.</p>{% endif %}
+      {% if not groups %}<p class="muted">{{ _('У вас пока нет групп с курсами.') }}</p>{% endif %}
       {% endif %}
-      <label class="field"><span class="field__label">Заголовок</span>
+      <label class="field"><span class="field__label">{{ _('Заголовок') }}</span>
         <input class="field__input" name="title" required maxlength="200" value="{{ v.title or '' }}"></label>
-      <label class="field"><span class="field__label">Текст</span>
+      <label class="field"><span class="field__label">{{ _('Текст') }}</span>
         <textarea class="field__input" name="body" rows="5" maxlength="2000">{{ v.body or '' }}</textarea></label>
-      <button class="btn btn--primary" type="submit"{% if mode == "teacher" and not groups %} disabled{% endif %}>Отправить</button>
+      <button class="btn btn--primary" type="submit"{% if mode == "teacher" and not groups %} disabled{% endif %}>{{ _('Отправить') }}</button>
     </form>
   </section>
   <section class="panel">
-    <h2 class="panel__title">Мои объявления</h2>
+    <h2 class="panel__title">{{ _('Мои объявления') }}</h2>
     {% for a in mine %}
       <article class="notif-own">
         <p><strong>{{ a.title }}</strong> <small class="muted">· {{ a.created_at.strftime("%d.%m.%Y %H:%M") }} ·
-          {% if a.audience == "all" %}всем{% elif a.audience == "faculty" %}{{ a.faculty_name }}{% elif a.audience == "stream" %}поток: {{ a.program }}, {{ a.course }} курс{% elif a.audience == "student" %}{{ a.student.full_name }}{% else %}группа {{ a.group.number }}{% endif %}</small></p>
+          {% if a.audience == "all" %}{{ _('всем') }}{% elif a.audience == "faculty" %}{{ a.faculty_name }}{% elif a.audience == "stream" %}{{ _('поток:') }} {{ a.program }}, {{ a.course }} {{ _('курс') }}{% elif a.audience == "student" %}{{ a.student.full_name }}{% else %}{{ _('группа') }} {{ a.group.number }}{% endif %}</small></p>
         {% if a.body %}<p class="muted">{{ a.body }}</p>{% endif %}
       </article>
-    {% else %}<p class="muted">Вы ещё ничего не отправляли.</p>{% endfor %}
+    {% else %}<p class="muted">{{ _('Вы ещё ничего не отправляли.') }}</p>{% endfor %}
   </section>
 </div>
 {% endblock %}

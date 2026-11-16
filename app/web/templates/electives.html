@@ -1,24 +1,23 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}Элективные дисциплины{% endblock %}
-{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Элективные дисциплины</span></nav>{% endblock %}
+{% block title %}{{ _('Элективные дисциплины') }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="{{ _('Главная') }}">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ _('Элективные дисциплины') }}</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
-  <h1 class="title-1">Элективы и подгруппы</h1>
-  <p class="muted">Отметьте, какие занятия по выбору ваши. В календаре останутся только они — без чужих подгрупп
-    и параллельных курсов. Варианты собраны из расписания вашей группы в РУЗ.</p>
-  {% if saved %}<p class="alert alert--ok">Сохранено. Календарь обновлён.</p>{% endif %}
+  <h1 class="title-1">{{ _('Элективы и подгруппы') }}</h1>
+  <p class="muted">{{ _('Отметьте, какие занятия по выбору ваши. В календаре останутся только они — без чужих подгрупп\n    и параллельных курсов. Варианты собраны из расписания вашей группы в РУЗ.') }}</p>
+  {% if saved %}<p class="alert alert--ok">{{ _('Сохранено. Календарь обновлён.') }}</p>{% endif %}
   {% if not has_group %}
-    <p class="alert">Учебная группа не указана — выбирать пока не из чего.</p>
+    <p class="alert">{{ _('Учебная группа не указана — выбирать пока не из чего.') }}</p>
   {% elif not catalog.subgroups and not catalog.families %}
-    <p class="alert">В расписании вашей группы нет занятий по выбору.</p>
+    <p class="alert">{{ _('В расписании вашей группы нет занятий по выбору.') }}</p>
   {% else %}
   <form method="post" action="/electives" class="form">
     <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
     {% if catalog.subgroups %}
     <section class="panel elective-block">
-      <h2 class="panel__title">Языковые подгруппы</h2>
-      <p class="muted">Подгруппа определяет, на какие языки и семинары вы ходите.</p>
+      <h2 class="panel__title">{{ _('Языковые подгруппы') }}</h2>
+      <p class="muted">{{ _('Подгруппа определяет, на какие языки и семинары вы ходите.') }}</p>
       <div class="choice-list">
         {% for sg, discs in catalog.subgroups.items() %}
           <label class="choice">
@@ -31,8 +30,8 @@
     {% endif %}
     {% for fam in catalog.families %}
     <section class="panel elective-block">
-      <h2 class="panel__title">Курсы по выбору{% if catalog.families | length > 1 %} — блок {{ loop.index }}{% endif %}</h2>
-      <p class="muted">Эти дисциплины идут в одно время — отметьте свою.</p>
+      <h2 class="panel__title">{{ _('Курсы по выбору') }}{% if catalog.families | length > 1 %} {{ _('— блок') }} {{ loop.index }}{% endif %}</h2>
+      <p class="muted">{{ _('Эти дисциплины идут в одно время — отметьте свою.') }}</p>
       <div class="choice-list">
         {% for d in fam %}
           <label class="choice">
@@ -43,7 +42,7 @@
       </div>
     </section>
     {% endfor %}
-    <button type="submit" class="btn btn--primary">Сохранить</button>
+    <button type="submit" class="btn btn--primary">{{ _('Сохранить') }}</button>
   </form>
   {% endif %}
 </div>

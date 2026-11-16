@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}База знаний{% endblock %}
+{% block header %}<p class="header__title">База знаний</p>{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/documents.css?v=1">
+<div class="page documents-page">
+  <div class="page__head">
+    <div><a href="/d/home" class="muted">← Кабинет деканата</a><h1 class="title-1">База знаний ассистента</h1>
+      <p class="muted">Добавляйте публичные нормативные документы, чтобы ассистент находил в них ответы.</p></div>
+  </div>
+  {% if error %}<div class="panel documents-error" role="alert">{{ error }}</div>{% endif %}
+  {% if request.query_params.get('uploaded') %}<div class="panel" role="status">Документ сохранён. Обработка запустится автоматически. Обновите список, чтобы увидеть результат.</div>{% endif %}
+  {% if request.query_params.get('duplicate') %}<div class="panel" role="status">Этот файл уже есть в базе. Повторная копия не создана.</div>{% endif %}
+  <section class="panel" aria-labelledby="upload-title">
+    <h2 id="upload-title" class="panel__title">Новый документ</h2>
+    <form method="post" action="/d/documents" enctype="multipart/form-data" class="form documents-form">
+      <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+      <label>Название документа<input name="title" maxlength="500" required value="{{ values.get('title', '') }}" placeholder="Например, положение об академическом отпуске"></label>
+      <label>Ссылка на публичный оригинал<input type="url" name="source_url" maxlength="2000" required value="{{ values.get('source_url', '') }}" placeholder="https://mgimo.ru/…" aria-describedby="source-help"></label>
+      <p id="source-help" class="muted">Только официальный сайт mgimo.ru. Ссылка нужна для проверки и цитирования источника.</p>
+      <label>Редакция или версия<input name="revision" maxlength="120" required value="{{ values.get('revision', '') }}" placeholder="Например, редакция от 01.09.2026"></label>
+      <label>PDF-файл<input type="file" name="file" accept=".pdf,application/pdf" required aria-describedby="file-help"></label>
+      <p id="file-help" class="muted">До 10 МБ и 100 страниц, без пароля, с текстовым слоем. Для сканов сначала выполните распознавание и проверьте текст.</p>
+      <label class="documents-check"><input type="checkbox" name="reviewed_public" value="yes" required><span>Я сверил файл с публичным источником. Он не содержит персональных или закрытых данных и может использоваться ассистентом с передачей выдержек в GigaChat.</span></label>
+      <p class="muted">Файл будет обработан автоматически. Добавленные документы используются как справочные снимки; даты действия норм отдельно не подтверждены.</p>
+      <button type="submit" class="btn btn--primary">Загрузить документ</button>
+    </form>
+  </section>
+  <section aria-labelledby="documents-title" class="documents-list">
+    <div class="documents-heading"><h2 id="documents-title" class="panel__title">Загруженные документы</h2><a class="btn btn--ghost" href="/d/documents">Обновить список</a></div>
+    {% for doc in documents %}
+    <article class="panel document-card" id="document-{{ doc.id }}">
+      <h3>{{ doc.title }}</h3>
+      <p class="document-status document-status--{{ doc.status }}">{{ statuses.get(doc.status, doc.status) }}</p>
+      <p class="muted">{{ doc.revision }} · {{ doc.filename }}<br>Загружен {{ doc.uploaded_at.strftime('%d.%m.%Y %H:%M') }} UTC · № {{ doc.id }}</p>
+      <a href="{{ doc.source_url }}" target="_blank" rel="noopener noreferrer">Публичный источник ↗</a>
+      {% if doc.status == 'published' %}<p>Фрагментов в поиске: {{ doc.chunk_count }}. Справочный снимок.</p>{% endif %}
+      {% if doc.status == 'published' %}<a class="btn btn--ghost" href="/d/documents/{{ doc.id }}/notify">Уведомить студентов</a>{% endif %}
+      {% if doc.error %}<p class="documents-error" role="status">{{ doc.error }}</p>{% endif %}
+      {% if doc.status == 'error' %}<form method="post" action="/d/documents/{{ doc.id }}/retry"><input type="hidden" name="csrf" value="{{ viewer.csrf }}"><button class="btn btn--ghost" type="submit">Повторить обработку</button></form>{% endif %}
+    </article>
+    {% else %}<p class="panel muted">Пока нет документов, загруженных через кабинет. Добавьте первый PDF выше. Базовый корпус ассистента хранится отдельно и в этом списке не показан.</p>{% endfor %}
+    {% if documents|length == 100 %}<p class="muted">Показаны последние 100 загрузок.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

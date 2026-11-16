@@ -1,26 +1,28 @@
 {% from "_icons.html" import icon %}<!doctype html>
-<html lang="ru">
+<html lang="{{ interface_language(viewer) }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Личный кабинет студента{% endblock %} · концепт</title>
+<title>{% block title %}{{ _('Личный кабинет студента') }}{% endblock %} {{ _('· концепт') }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/app.css?v={{ css_version() }}">
+<link rel="stylesheet" href="/static/languages.css?v=20261116">
 <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" defer></script>
+<script>window.lmsLocale={{ interface_language(viewer)|tojson }};window.lmsDictionary={{ interface_catalogue(viewer)|tojson }};window.lmsT=function(value){return window.lmsDictionary[value]||value;};</script>
 </head>
 <body{% if viewer %} hx-headers='{"X-CSRF-Token": "{{ viewer.csrf }}"}'{% endif %}>
-<div class="concept-bar" role="note">Концепт для конкурса MGIMO×AI Challenge — не официальный сервис. Все данные вымышленные.</div>
+<div class="concept-bar" role="note">{{ _('Концепт для конкурса MGIMO×AI Challenge — не официальный сервис. Все данные вымышленные.') }}</div>
 {% if viewer %}
 {% set is_staff = viewer.user.role == "staff" %}
 {% set nav_menu = TEACHER_MENU if viewer.teacher else (STAFF_MENU if is_staff else MENU) %}{% set nav_tabbar = TEACHER_TABBAR if viewer.teacher else (STAFF_TABBAR if is_staff else TABBAR) %}{% set home = "/t/home" if viewer.teacher else ("/d/home" if is_staff else "/") %}
 <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden>
 <div class="layout">
-  <aside class="menu" aria-label="Разделы">
+  <aside class="menu" aria-label="{{ _('Разделы') }}">
     <div class="menu__head">
-      <a href="{{ home }}" class="wordmark"><span class="wordmark__mark">ЛК</span><span class="wordmark__text">{{ "преподавателя" if viewer.teacher else ("деканата" if is_staff else "студента") }}<br><small>концепт</small></span></a>
-      <label for="menu-toggle" class="menu__close" aria-label="Закрыть меню">{{ icon("close") }}</label>
+      <a href="{{ home }}" class="wordmark"><span class="wordmark__mark">{{ _('ЛК') }}</span><span class="wordmark__text">{{ "преподавателя" if viewer.teacher else ("деканата" if is_staff else "студента") }}<br><small>{{ _('концепт') }}</small></span></a>
+      <label for="menu-toggle" class="menu__close" aria-label="{{ _('Закрыть меню') }}">{{ icon("close") }}</label>
     </div>
     <nav>
       {% for item in nav_menu %}
@@ -44,17 +46,17 @@
   <div class="layout__main">
     <header class="header">
       <div class="header__left">
-        <label for="menu-toggle" class="header__burger" aria-label="Меню">{{ icon("menu") }}</label>
+        <label for="menu-toggle" class="header__burger" aria-label="{{ _('Меню') }}">{{ icon("menu") }}</label>
         {% block header %}<p class="header__title">{{ "Кабинет преподавателя" if viewer.teacher else ("Кабинет деканата" if is_staff else "Личный кабинет студента") }}</p>{% endblock %}
       </div>
       <div class="header__right">
         {% if not is_staff %}
         <div class="bell" id="bell">
-          <button type="button" class="header__bell" aria-label="Уведомления" aria-expanded="false" aria-controls="bell-panel"
+          <button type="button" class="header__bell" aria-label="{{ _('Уведомления') }}" aria-expanded="false" aria-controls="bell-panel"
                   hx-get="/notifications/panel" hx-target="#bell-panel" hx-trigger="click" hx-swap="innerHTML">
             {{ icon("bell", 24) }}<span id="bell-badge" class="bell__badge" hidden hx-get="/notifications/badge" hx-target="this" hx-trigger="load, notif-changed from:body" hx-swap="outerHTML"></span>
           </button>
-          <div id="bell-panel" class="bell__panel" role="dialog" aria-label="Уведомления" hidden></div>
+          <div id="bell-panel" class="bell__panel" role="dialog" aria-label="{{ _('Уведомления') }}" hidden></div>
         </div>
         {% endif %}
         <a href="/profile" class="header__user">
@@ -63,14 +65,14 @@
         </a>
         <form method="post" action="/logout" class="header__logout">
           <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
-          <button type="submit" aria-label="Выйти" title="Выйти">{{ icon("logout") }}</button>
+          <button type="submit" aria-label="{{ _('Выйти') }}" title="{{ _('Выйти') }}">{{ icon("logout") }}</button>
         </form>
       </div>
     </header>
     <main class="main">{% block content %}{% endblock %}</main>
   </div>
 </div>
-<nav class="tabbar" aria-label="Быстрые разделы">
+<nav class="tabbar" aria-label="{{ _('Быстрые разделы') }}">
   {% for t in nav_tabbar %}
     <a href="{{ t.href }}" class="tabbar__link{% if (t.href == '/' and path == '/') or (t.href != '/' and path.startswith(t.href)) %} tabbar__link--active{% endif %}">{{ icon(t.icon, 22) }}<span>{{ t.title }}</span></a>
   {% endfor %}
