@@ -478,6 +478,22 @@ textarea.field__input { resize: vertical; }
 .cal { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; background: var(--surface); border-radius: var(--radius-l); padding: 16px; }
 .cal__side { display: flex; flex-direction: column; gap: 10px; }
 .cal--wide { grid-template-columns: minmax(0, 1fr); }
+.cal--wide { gap: 10px; }
+/* «Расписание»: слои строкой плашек над неделей (вариант D2) */
+.cal-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.cal-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 12%, var(--surface)); border: 1px solid transparent; font-size: 12px; font-weight: 600;
+  line-height: 16px; color: var(--text); cursor: pointer; white-space: nowrap; position: relative; transition: background .15s, border-color .15s, color .15s; }
+.cal-chip:hover { border-color: color-mix(in srgb, var(--c) 50%, transparent); }
+.cal-chip__mark { width: 8px; height: 8px; border-radius: 2px; background: var(--c); border: 1.5px solid var(--c); flex: none; }
+.cal-chip:has(.cal-layer__input:not(:checked)) { background: transparent; border-color: var(--line); border-style: dashed; color: var(--muted); font-weight: 500; }
+.cal-chip .cal-layer__input:not(:checked) + .cal-chip__mark { background: transparent; opacity: .6; }
+.cal-chip:has(.cal-layer__input:focus-visible) { outline: 2px solid var(--c); outline-offset: 2px; }
+.cal-chips__set { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.cal-chips__set:hover { color: var(--accent); background: var(--bg); }
+.cal-chips__hint { margin: 2px 0 0 44px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* «Мои календари» карточкой в правой колонке главной */
 .cal-panel { gap: 10px; }
 .cal-panel .cal__side-title { font-size: 16px; line-height: 22px; font-weight: 600; margin: 0; }
