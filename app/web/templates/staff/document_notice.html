@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Уведомление о документе{% endblock %}
+{% block header %}<p class="header__title">Уведомление студентам</p>{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/documents.css?v=2">
+<div class="page documents-page">
+  <a href="/d/documents">← База знаний</a>
+  <h1 class="title-1">Кого касается документ</h1>
+  <section class="panel document-card"><h2 class="panel__title">{{ doc.title }}</h2><a href="{{ doc.source_url }}" target="_blank" rel="noopener noreferrer">Публичный источник ↗</a></section>
+  {% if error %}<p class="panel documents-error" role="alert">{{ error }}</p>{% endif %}
+  {% if notice and notice.confirmed_at %}
+    <section class="panel" role="status"><h2 class="panel__title">Уведомление подтверждено</h2>
+      <p>Получателей: {{ notice.preview_count }}. Уведомления добавлены в личные кабинеты, для подключённого Telegram создана очередь доставки.</p>
+      <p class="muted">Повторная обработка документа и нажатие кнопки не создают новую рассылку.</p></section>
+  {% elif doc.status != 'published' %}
+    <p class="panel">Сначала дождитесь успешной обработки документа в базе знаний.</p>
+  {% else %}
+    <section class="panel"><h2 class="panel__title">Предложение ИИ</h2>
+      <p>GigaChat предложит аудиторию по выдержке из публичного документа. Проверяйте выбор: ИИ может ошибиться. ФИО, контакты и список студентов провайдеру не передаются.</p>
+      <form method="post" action="/d/documents/{{ doc.id }}/notify/suggest"><input type="hidden" name="csrf" value="{{ viewer.csrf }}"><button class="btn btn--ghost" type="submit">Предложить адресатов с ИИ</button></form>
+      {% if notice and notice.explanation %}<p>{{ notice.explanation }}</p>{% endif %}
+    </section>
+    <section class="panel"><h2 class="panel__title">Проверьте и исправьте адресатов</h2>
+      <p>Отметьте подходящие аудитории. Можно выбрать до 20; пересечения не создают повторных уведомлений. «Все студенты» выбирается отдельно.</p>
+      <form class="form documents-form" method="post" action="/d/documents/{{ doc.id }}/notify/preview">
+        <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+        <fieldset class="audience-options"><legend>Аудитории</legend>
+        {% for option in options %}<label><input type="checkbox" name="targets" value="{{ option.key }}"{% if option.key in selected %} checked{% endif %}><span>{{ option.label }}</span></label>{% endfor %}
+        </fieldset>
+        <label>Или найдите конкретного студента<input name="student_q" placeholder="Вымышленное ФИО, от двух букв" hx-get="/d/students/search" hx-trigger="input changed delay:300ms" hx-target="#student-results" hx-include="this"></label>
+        <div id="student-results"></div>
+        <button class="btn btn--primary" type="submit">Проверить получателей</button>
+      </form>
+    </section>
+    {% if notice and notice.preview_token and notice.preview_by == viewer.user.id %}
+    <section class="panel" id="notice-preview"><h2 class="panel__title">Подтвердите отправку</h2>
+      <ul>{% for label in preview_labels %}<li>{{ label }}</li>{% endfor %}</ul>
+      <p><strong>Получателей: {{ notice.preview_count }}</strong></p>
+      <p>В личном кабинете появится «Новый документ: {{ doc.title }}» со ссылкой на источник. Подключённый Telegram получит такое же сообщение.</p>
+      <p class="muted">Кнопка отправит уведомление аудитории из этого предпросмотра. Если изменили выбор выше, снова нажмите «Проверить получателей».</p>
+      <form method="post" action="/d/documents/{{ doc.id }}/notify/confirm"><input type="hidden" name="csrf" value="{{ viewer.csrf }}"><input type="hidden" name="preview_token" value="{{ notice.preview_token }}"><button class="btn btn--primary" type="submit">Подтвердить и отправить</button></form>
+    </section>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

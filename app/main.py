@@ -25,6 +25,7 @@ from app.assistant.service import Assistant
 from app.web.assistant_views import router as assistant_router
 from app.assistant.documents import DocumentProcessor
 from app.web.document_views import DocumentBodyLimit, router as document_router
+from app.web.document_notice_views import router as document_notice_router
 from app.certificates.service import CertificateSync
 from app.certificates.webhook import router as pyrus_router
 from app.core.config import Settings, get_settings
@@ -112,6 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(pyrus_router)
     app.include_router(assistant_router)
     app.include_router(document_router)
+    app.include_router(document_notice_router)
     app.include_router(web_router)
     app.include_router(teacher_router)
     app.include_router(notif_router)

@@ -1823,3 +1823,15 @@ Assistant отвечает по источникам и разрешённым �
 
 Предложения по полям и методам находятся отдельно в [предметном каталоге](01-domain.md)
 и [учебной модели](03-oop-proposal.md); они не добавлены в это представление как существующие.
+
+## Дополнение после внедрения уведомлений
+
+Добавлены две ORM-модели `DocumentNotice`, `DocumentRecipient` (состав полей —
+[в предметном каталоге](01-domain.md#дополнение-уведомления-о-новом-документе-есть)).
+`app/notifications/documents.py` содержит `NoticeError`, `AudienceOption` и
+`Suggestion`, а также функции `audience_options`, `recipients_for`, `suggest`,
+`preview`, `confirm`. `Suggestion` проверяет ответ ИИ; `AudienceOption` связывает
+ключ и название аудитории с SQL-предикатом. `app/bot/document_notify.py`
+содержит `deliver_document_notifications`, вызываемый текущим scheduler.tick.
+Уведомления в кабинете собираются `_documents` сервиса ленты по student_id.
+Это реализованное поведение, а не дополнительные обязанности Student или User.

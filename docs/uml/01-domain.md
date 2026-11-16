@@ -865,3 +865,57 @@ bytes — двоичные данные; T | None означает необяз�
 - Все ФИО и учебные данные прототипа вымышленные. Пароли и коды доступа не хранятся открытым текстом; feed_token — секретная ссылка.
 
 Полный перечень реальных сигнатур и вспомогательных классов — в [модели кода](02-current-code.md).
+
+## Дополнение: уведомления о новом документе [ЕСТЬ]
+
+Работник подтверждает адресатов, ИИ только предлагает.
+[Сценарий и ограничения](../document-notifications.md).
+
+```mermaid
+classDiagram
+class KnowledgeDocument
+class DocumentNotice
+class DocumentRecipient
+class Student
+class User
+KnowledgeDocument "1" -- "0..1" DocumentNotice
+User "0..1" -- "0..*" DocumentNotice : confirmed_by
+DocumentNotice "1" -- "0..*" DocumentRecipient
+Student "1" -- "0..*" DocumentRecipient
+```
+
+Источник: [app/models/document_notice.py](../../app/models/document_notice.py).
+
+### DocumentNotice
+
+| Поле | Тип |
+| --- | --- |
+| `document_id` | `int` |
+| `suggested_targets` | `list` |
+| `explanation` | `str` |
+| `suggestion_at` | `datetime \| None` |
+| `preview_targets` | `list` |
+| `preview_token` | `str \| None` |
+| `preview_sha256` | `str \| None` |
+| `preview_recipients_hash` | `str \| None` |
+| `preview_count` | `int` |
+| `preview_by` | `int \| None` |
+| `preview_at` | `datetime \| None` |
+| `confirmed_by` | `int \| None` |
+| `confirmed_at` | `datetime \| None` |
+
+Собственных методов нет. Правила и действия реализованы в сервисах.
+
+### DocumentRecipient
+
+| Поле | Тип |
+| --- | --- |
+| `document_id` | `int` |
+| `student_id` | `int` |
+| `telegram_id` | `int \| None` |
+| `telegram_state` | `str` |
+| `telegram_attempts` | `int` |
+| `telegram_attempted_at` | `datetime \| None` |
+| `telegram_sent_at` | `datetime \| None` |
+
+Собственных методов нет. Правила и действия реализованы в сервисах.

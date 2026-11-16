@@ -239,12 +239,12 @@ def test_document_migration_upgrade_and_downgrade(tmp_path):
     database = tmp_path / "migration.db"
     config = Config("alembic.ini")
     config.set_main_option("sqlalchemy.url", f"sqlite+aiosqlite:///{database}")
-    command.upgrade(config, "head")
+    command.upgrade(config, "0011_doc_notices")
     with sqlite3.connect(database) as db:
-        assert db.execute("select version_num from alembic_version").fetchone()[0] == "0010_documents"
+        assert db.execute("select version_num from alembic_version").fetchone()[0] == "0011_doc_notices"
         assert {r[1] for r in db.execute("pragma table_info(knowledge_documents)")} >= {
             "data", "sha256", "uploaded_by_user_id", "status", "source_key"}
     command.downgrade(config, "0009")
     with sqlite3.connect(database) as db:
         assert not db.execute("select name from sqlite_master where name='knowledge_documents'").fetchone()
-    command.upgrade(config, "head")
+    command.upgrade(config, "0011_doc_notices")

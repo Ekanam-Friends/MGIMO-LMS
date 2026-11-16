@@ -20,6 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.bot import notify
+from app.bot.document_notify import deliver_document_notifications
 from app.bot.formatting import clip, format_date, format_day, short_kind
 from app.bot.handlers import MOSCOW, upcoming_exams
 from app.core.config import Settings
@@ -64,6 +65,7 @@ def digest_due(link: TelegramLink, now_msk: datetime) -> bool:
 async def tick(ctx: Context, *, now: datetime | None = None) -> None:
     now_msk = (now or datetime.now(MOSCOW)).astimezone(MOSCOW)
     today = now_msk.date()
+    await deliver_document_notifications(ctx.bot, ctx.sf)
 
     async with ctx.sf() as session:
         changes = await notify.collect_schedule_changes(session, today=today)

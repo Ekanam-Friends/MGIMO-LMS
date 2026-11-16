@@ -35,6 +35,7 @@
       <p class="muted">{{ doc.revision }} · {{ doc.filename }}<br>Загружен {{ doc.uploaded_at.strftime('%d.%m.%Y %H:%M') }} UTC · № {{ doc.id }}</p>
       <a href="{{ doc.source_url }}" target="_blank" rel="noopener noreferrer">Публичный источник ↗</a>
       {% if doc.status == 'published' %}<p>Фрагментов в поиске: {{ doc.chunk_count }}. Справочный снимок.</p>{% endif %}
+      {% if doc.status == 'published' %}<a class="btn btn--ghost" href="/d/documents/{{ doc.id }}/notify">Уведомить студентов</a>{% endif %}
       {% if doc.error %}<p class="documents-error" role="status">{{ doc.error }}</p>{% endif %}
       {% if doc.status == 'error' %}<form method="post" action="/d/documents/{{ doc.id }}/retry"><input type="hidden" name="csrf" value="{{ viewer.csrf }}"><button class="btn btn--ghost" type="submit">Повторить обработку</button></form>{% endif %}
     </article>
