@@ -38,11 +38,13 @@
     <h2 class="profile__name">Приложение МГИМО</h2>
     <p>Официальное мобильное приложение университета. Кабинет-концепт с ним не связан, ссылки ведут
       в магазины приложений.</p>
-    <div class="tg__actions">
-      <a class="btn btn--primary" href="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener">App Store</a>
-      <a class="btn btn--ghost" href="{{ MGIMO_APP.android }}" target="_blank" rel="noopener">Google Play</a>
+    {# Красная и первая — кнопка магазина устройства студента (static/app-links.js). #}
+    <div class="tg__actions js-app-choice">
+      <a class="btn btn--primary" data-store="ios" href="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener">App Store</a>
+      <a class="btn btn--ghost" data-store="android" href="{{ MGIMO_APP.android }}" target="_blank" rel="noopener">Google Play</a>
     </div>
   </section>
+  <script src="/static/app-links.js" defer></script>
 
   <section class="panel tg">
     <h2 class="profile__name">Сервисы вуза</h2>

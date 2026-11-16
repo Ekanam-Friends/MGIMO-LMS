@@ -72,16 +72,10 @@
         <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Расписание в MAX": "/services#max", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
       {% endfor %}
       {# Официальное приложение вуза: ссылка в магазин приложений по платформе (см. app_links ниже). #}
-      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>Приложение МГИМО</span></a>
+      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" data-android="{{ MGIMO_APP.android }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>Приложение МГИМО</span></a>
     </div>
     </section>
   </aside>
 </div>
-<script>
-// iPhone и iPad — в App Store, остальные — в Google Play.
-document.querySelectorAll(".js-app-link").forEach(function (a) {
-  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  if (ios) a.href = a.dataset.ios;
-});
-</script>
+<script src="/static/app-links.js" defer></script>
 {% endblock %}
