@@ -26,7 +26,8 @@ from app.bot import notify
 from app.bot.formatting import clip, format_date, format_day, short_kind
 from app.bot.handlers import MOSCOW, upcoming_exams
 from app.core.config import Settings
-from app.models import LessonGroup, Student, TelegramLink
+from app.models import GroupScheduleCoverage, ImportRun, Lesson, LessonGroup, Student, StudyGroup, TelegramLink
+from app.models.schedule import ImportStatus, LessonStatus
 from app.web.schedule_view import lessons_for
 
 log = logging.getLogger(__name__)
@@ -131,17 +132,33 @@ async def refresh_group_ids(session: AsyncSession, scope: str) -> set[int]:
     return set((await session.scalars(q)).all())
 
 
-async def loaded_group_ids(session: AsyncSession) -> set[int]:
-    return set((await session.scalars(select(LessonGroup.group_id).distinct())).all())
+async def loaded_group_ids(session: AsyncSession, *, today: date | None = None) -> set[int]:
+    """Группы курсов 1–6 с подтверждённым покрытием текущего семестра и занятиями."""
+    from app.schedule.importer import semester_bounds
+
+    start, finish = semester_bounds(today or datetime.now(MOSCOW).date())
+    q = (
+        select(GroupScheduleCoverage.group_id).distinct()
+        .join(ImportRun, ImportRun.id == GroupScheduleCoverage.run_id)
+        .join(StudyGroup, StudyGroup.id == GroupScheduleCoverage.group_id)
+        .join(LessonGroup, LessonGroup.group_id == GroupScheduleCoverage.group_id)
+        .join(Lesson, Lesson.id == LessonGroup.lesson_id)
+        .where(
+            GroupScheduleCoverage.period_start <= start, GroupScheduleCoverage.period_end >= finish,
+            ImportRun.status.in_([ImportStatus.OK, ImportStatus.PARTIAL]),
+            StudyGroup.course.between(1, BOOTSTRAP_MAX_COURSE),
+            Lesson.date.between(start, finish), Lesson.status == LessonStatus.ACTIVE,
+        )
+    )
+    return set((await session.scalars(q)).all())
 
 
 async def bootstrap_schedule(ctx: Context, *, transport: object | None = None) -> int:
     """Догружает весь семестр новых групп, пока расписание не наберётся у BOT_BOOTSTRAP_GROUPS.
 
-    Возвращает, сколько групп загружено. Уже загруженные группы не трогает, поэтому повторный
+    Возвращает число непустых групп. Группы с подтверждённым семестром не трогает: повторный
     старт бота после успешной загрузки — один запрос к своей базе и ни одного к РУЗ.
-    Новые группы в журнал изменений не попадают (правило импортёра), пушей о «добавленных»
-    занятиях не будет.
+    Добавленные при расширении окна занятия в журнал не попадают, пушей о них не будет.
     """
     from app.schedule.importer import ScheduleImporter, semester_bounds
     from app.schedule.ruz_client import RuzClient
@@ -149,25 +166,30 @@ async def bootstrap_schedule(ctx: Context, *, transport: object | None = None) -
     target = ctx.settings.bot_bootstrap_groups
     if target <= 0:
         return 0
+    today = datetime.now(MOSCOW).date()
     async with ctx.sf() as session:
-        have = await loaded_group_ids(session)
+        have = await loaded_group_ids(session, today=today)
     missing = target - len(have)
     if missing <= 0:
         log.info("расписание уже есть у %s групп (нужно %s) — догрузка не нужна", len(have), target)
         return 0
-    start, finish = semester_bounds(datetime.now(MOSCOW).date())
+    start, finish = semester_bounds(today)
     log.info("расписание есть у %s групп из %s — догружаю семестр ещё %s групп", len(have), target, missing)
     cfg = ctx.settings
     extra = {"transport": transport} if transport is not None else {}  # подмена РУЗ в тестах
     async with RuzClient(cfg.ruz_base_url, delay=cfg.ruz_request_delay, timeout=cfg.ruz_timeout, **extra) as client:
-        importer = ScheduleImporter(ctx.sf, client, fake_name_salt=cfg.fake_name_salt, concurrency=cfg.ruz_concurrency)
+        importer = ScheduleImporter(ctx.sf, client, fake_name_salt=cfg.fake_name_salt,
+                                    concurrency=cfg.ruz_concurrency, report_additions=False)
         stats = await importer.run(
-            start, finish, limit=missing,
+            start, finish, nonempty_limit=missing,
             group_filter=lambda g: g.id not in have and g.course is not None and 1 <= g.course <= BOOTSTRAP_MAX_COURSE,
         )
     log.info("догрузка расписания: %s, групп %s/%s, занятий %s", stats.status, stats.groups_ok, stats.groups_total,
              stats.lessons_seen)
-    return stats.groups_ok
+    if stats.groups_populated < missing:
+        log.warning("цель догрузки не достигнута: %s/%s групп; кандидаты исчерпаны",
+                    len(have) + stats.groups_populated, target)
+    return stats.groups_populated
 
 
 async def import_linked_groups(ctx: Context) -> None:
