@@ -1,27 +1,13 @@
-{#- Календарь из трёх слоёв (решение 0006): слева «Мои календари», справа неделя.
-    Слои прячутся чистым CSS (:has), выбор запоминается в localStorage. -#}
-<section class="cal cal--{{ cal.size }}" aria-label="Календарь">
-  <div class="cal__side">
-    <p class="cal__side-title">Мои календари</p>
-    {% for key, title in cv.LAYERS %}
-      <label class="cal-layer cal-layer--{{ key }}">
-        <input type="checkbox" class="cal-layer__input" data-layer="{{ key }}" checked>
-        <span class="cal-layer__box" aria-hidden="true"></span><span>{{ title }}</span>
-      </label>
-    {% endfor %}
-    {% if not cal.has_group %}
-      <p class="cal__hint">Учебная группа не указана — пары появятся после привязки группы.</p>
-    {% elif not cal.has_choices %}
-      <p class="cal__hint">Элективы и подгруппы не выбраны. <a href="/electives">Выбрать →</a></p>
-    {% else %}
-      <p class="cal__hint"><a href="/electives">Изменить элективы и подгруппы</a></p>
-    {% endif %}
-    <p class="cal__hint">Нажмите на событие, чтобы увидеть аудиторию и время. Бледные активности открыты для записи.</p>
-  </div>
+{#- Календарь из трёх слоёв (решение 0006): «Мои календари» и неделя.
+    layers_outside=true — переключатели рисует сама страница (главная: в правой колонке),
+    а неделя занимает всю ширину. Выбор слоёв запоминается в localStorage. -#}
+<section class="cal cal--{{ cal.size }}{% if layers_outside %} cal--wide{% endif %}" aria-label="Календарь">
+  {% if not layers_outside %}<div class="cal__side">{% include "partials/calendar_layers.html" %}</div>{% endif %}
   {% include "partials/calendar_week.html" %}
 </section>
 <script>
-(function () {
+// После загрузки всей страницы: переключатели могут стоять ниже по разметке (правая колонка главной).
+document.addEventListener("DOMContentLoaded", function () {
   var KEY = "lms.calendar.layers";
   var off = [];
   try { off = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) {}
@@ -33,5 +19,5 @@
       try { localStorage.setItem(KEY, JSON.stringify(now)); } catch (e) {}
     });
   });
-})();
+});
 </script>

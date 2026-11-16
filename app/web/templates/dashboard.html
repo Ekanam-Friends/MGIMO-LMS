@@ -5,9 +5,9 @@
 <div class="dashboard">
   <div class="dashboard__col">
     {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
-    <section class="dash-block">
+    <section class="dash-block dash-calendar">
       <div class="dash-block__header"><h2 class="dash-title">Календарь</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="Расписание на неделю">{{ icon("arrow") }}</a></div>
-      <div class="only-desktop">{% include "partials/calendar.html" %}</div>
+      <div class="only-desktop">{% with layers_outside = true %}{% include "partials/calendar.html" %}{% endwith %}</div>
       <div class="only-mobile">{% include "partials/day_schedule.html" %}</div>
     </section>
 
@@ -66,12 +66,25 @@
   </div>
 
   <aside class="dashboard__aside">
+    {# Переключатели слоёв календаря — здесь, а не слева от недели: сетка недели шире. #}
+    <section class="box cal-panel only-desktop" aria-label="Мои календари">{% include "partials/calendar_layers.html" %}</section>
+    <section class="dash-block dash-services">
     <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
     <div class="services services--column">
-      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
-        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Расписание в MAX", "#6A5AE0"), ("Календарь .ics", "#3BA55C")] %}
+        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Расписание в MAX": "/services#max", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
       {% endfor %}
+      {# Официальное приложение вуза: ссылка в магазин приложений по платформе (см. app_links ниже). #}
+      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>Приложение МГИМО</span></a>
     </div>
+    </section>
   </aside>
 </div>
+<script>
+// iPhone и iPad — в App Store, остальные — в Google Play.
+document.querySelectorAll(".js-app-link").forEach(function (a) {
+  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (ios) a.href = a.dataset.ios;
+});
+</script>
 {% endblock %}

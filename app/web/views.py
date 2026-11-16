@@ -27,12 +27,12 @@ from app.models.certificates import CertificateKind, RequestStatus
 from app.web import calendar_view as cv
 from app.web import schedule_view as sv
 from app.web.deps import COOKIE_NAME, Viewer, check_csrf, current_viewer, get_db
-from app.web.nav import MENU, SERVICES, STAFF_MENU, STAFF_TABBAR, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
+from app.web.nav import MENU, MGIMO_APP, SERVICES, STAFF_MENU, STAFF_TABBAR, STUBS, TABBAR, TEACHER_MENU, TEACHER_TABBAR
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals.update(MENU=MENU, TABBAR=TABBAR, TEACHER_MENU=TEACHER_MENU, TEACHER_TABBAR=TEACHER_TABBAR,
                              STAFF_MENU=STAFF_MENU, STAFF_TABBAR=STAFF_TABBAR,
-                             sv=sv, cv=cv, KINDS=CertificateKind.TITLES)
+                             MGIMO_APP=MGIMO_APP, sv=sv, cv=cv, KINDS=CertificateKind.TITLES)
 # Версия стилей в адресе: после выкладки браузер не держит старый app.css из кэша.
 _CSS = Path(__file__).parent / "static" / "app.css"
 templates.env.globals["css_version"] = lambda: int(_CSS.stat().st_mtime)
