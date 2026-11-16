@@ -123,6 +123,30 @@ small { font-size: 12px; }
 .ref-card__title { font-weight: 600; }
 .ref-card__date { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .ref-card--empty .ref-card__date { color: var(--accent); }
+/* Деканат на главной: пусто — тихая надпись по центру строки, без карточки */
+.ref-empty { margin: 0; padding: 12px 16px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.ref-empty a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+.ref-empty a:hover { text-decoration: underline; }
+/* есть заявки — до трёх строками в одной карточке (вариант M1) */
+.req-all { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+.req-list { background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+.req-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); transition: background .15s; }
+.req-row:hover { background: #fafafc; }
+.req-row__ico { flex: none; width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; background: var(--bg); color: var(--muted); }
+.req-row__ico--ok { background: #eaf6ee; color: var(--green); }
+.req-row__main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.req-row__name { font-weight: 600; font-size: 14px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.req-row__meta { font-size: 12px; line-height: 18px; color: var(--muted); }
+.req-row__badge { flex: none; }
+.req-add { display: flex; align-items: center; gap: 8px; padding: 14px 16px; color: var(--accent); font-weight: 700; font-size: 14px; transition: background .15s; }
+.req-add:hover { background: var(--accent-soft); }
+@media (max-width: 640px) {
+  .req-all span { display: none; }
+  .req-row { flex-wrap: wrap; row-gap: 6px; }
+  .req-row__main { flex-basis: calc(100% - 48px); }
+  .req-row__name { white-space: normal; }
+  .req-row__badge { margin-left: 48px; }
+}
 
 .services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .service { background: var(--surface); border-radius: var(--radius); padding: 12px; display: flex; align-items: center; gap: 8px; min-height: 52px; }

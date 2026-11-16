@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "partials/_cert.html" import status_badge %}
+{% from "partials/_cert.html" import status_badge, request_row %}
 {% block content %}
 <div class="dashboard">
   <div class="dashboard__col">
@@ -45,22 +45,19 @@
       </div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Деканат</h2><a class="dash-link" href="/mfc/certificates" aria-label="Справки и выписки">{{ icon("arrow") }}</a></div>
-      <div class="dashboard__row dashboard__row--two">
-        {% for r in requests %}
-          <a class="ref-card" href="/mfc/certificates/{{ r.id }}">
-            <p class="ref-card__title">{{ KINDS.get(r.kind, r.kind) }}</p>
-            <p class="ref-card__date">{{ r.created_at | ddmmyyyy }}</p>
-            {{ status_badge(certs.electronic_label(r), r.status) }}
-          </a>
-        {% else %}
-          <a class="ref-card ref-card--empty" href="/mfc/certificates">
-            <p class="ref-card__title">Справок пока нет</p>
-            <p class="ref-card__date">Заказать справку об обучении →</p>
-          </a>
-        {% endfor %}
-      </div>
+    {# Деканат (вариант M1 дизайн-ревью 2026-11-16): пусто — тихая надпись по центру;
+       есть заявки — до трёх последних строками в одной карточке и «+ Заказать справку». #}
+    <section class="dash-block{% if not requests %} dash-block--empty{% endif %}">
+      <div class="dash-block__header"><h2 class="dash-title">Деканат</h2>
+        <a class="dash-link req-all" href="/mfc/certificates" aria-label="Все заявки в деканат">{% if requests %}<span>Все заявки</span>{% endif %}{{ icon("arrow") }}</a></div>
+      {% if requests %}
+        <div class="req-list">
+          {% for r in requests %}{{ request_row(r, certs, KINDS) }}{% endfor %}
+          <a class="req-add" href="/mfc/certificates#order"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Заказать справку</span></a>
+        </div>
+      {% else %}
+        <p class="ref-empty">Справок пока нет<br><a href="/mfc/certificates#order">Заказать справку об обучении</a></p>
+      {% endif %}
     </section>
 
   </div>

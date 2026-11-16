@@ -139,7 +139,7 @@ async def dashboard(
     if viewer.student is None:
         return RedirectResponse("/d/home", status_code=303)
     day = _parse_day(d, today())
-    requests = (await certs.list_requests(db, viewer.student_id))[:2]
+    requests = (await certs.list_requests(db, viewer.student_id))[:3]  # на главной — три последние
     book = await grades.record_book(db, viewer.student_id, today(), events=0)
     return render(
         request, "dashboard.html", viewer, requests=requests, certs=certs, book=book, scale=scale,
