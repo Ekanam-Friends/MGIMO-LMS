@@ -6,16 +6,16 @@
   <div class="dashboard__col">
     {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Календарь</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="Расписание на неделю">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Календарь') }}</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="{{ _('Расписание на неделю') }}">{{ icon("arrow") }}</a></div>
       <div class="only-desktop">{% include "partials/calendar.html" %}</div>
       <div class="only-mobile">{% include "partials/day_schedule.html" %}</div>
     </section>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Текущая успеваемость</h2><a class="dash-link" href="/grades" aria-label="Успеваемость">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Текущая успеваемость') }}</h2><a class="dash-link" href="/grades" aria-label="{{ _('Успеваемость') }}">{{ icon("arrow") }}</a></div>
       <div class="dashboard__row dashboard__row--grades">
         <a class="box" href="/grades">
-          <p class="box__title">Результаты по дисциплинам текущего семестра</p>
+          <p class="box__title">{{ _('Результаты по дисциплинам текущего семестра') }}</p>
           {% set courses = (book.current.courses if book.current else []) | selectattr("percent", "ne", none) | list %}
           {% if courses %}
           <ul class="mini-bars">
@@ -25,19 +25,19 @@
                 <span class="mini-bars__val">{{ c.percent | round | int }}%</span></li>
             {% endif %}{% endfor %}
           </ul>
-          <p class="box__note">Доля набранных баллов от возможного на сегодня · сначала слабые места</p>
+          <p class="box__note">{{ _('Доля набранных баллов от возможного на сегодня · сначала слабые места') }}</p>
           {% else %}
-          <p class="box__note">Преподаватели ещё не выставили баллы в этом семестре</p>
+          <p class="box__note">{{ _('Преподаватели ещё не выставили баллы в этом семестре') }}</p>
           {% endif %}
         </a>
         <div class="dashboard__stack">
           <a class="box" href="/grades#debts">
-            <p class="box__title">Академические долги</p>
-            {% if book.debts %}<p class="big-num big-num--red">{{ book.debts | length }}</p><p class="box__note">{{ book.debts[0].card.discipline }}{% if book.debts | length > 1 %} и ещё {{ book.debts | length - 1 }}{% endif %}</p>
-            {% else %}<p class="big-num big-num--green">0</p><p class="box__note">Долгов нет</p>{% endif %}
+            <p class="box__title">{{ _('Академические долги') }}</p>
+            {% if book.debts %}<p class="big-num big-num--red">{{ book.debts | length }}</p><p class="box__note">{{ book.debts[0].card.discipline }}{% if book.debts | length > 1 %} {{ _('и ещё') }} {{ book.debts | length - 1 }}{% endif %}</p>
+            {% else %}<p class="big-num big-num--green">0</p><p class="box__note">{{ _('Долгов нет') }}</p>{% endif %}
           </a>
           <a class="box" href="/grades#record">
-            <p class="box__title">Средний балл</p>
+            <p class="box__title">{{ _('Средний балл') }}</p>
             {% set g = book.gpa %}
             <div class="gauge{% if g %} gauge--on{% endif %}" style="--p: {{ ((g - 2) / 3 * 100) | round if g else 0 }}" aria-label="Средний балл {{ g or 'нет' }}"><span>{{ "%.2f" | format(g) | replace(".", ",") if g else "—" }}</span></div>
           </a>
@@ -46,7 +46,7 @@
     </section>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Деканат</h2><a class="dash-link" href="/mfc/certificates" aria-label="Справки и выписки">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Деканат') }}</h2><a class="dash-link" href="/mfc/certificates" aria-label="{{ _('Справки и выписки') }}">{{ icon("arrow") }}</a></div>
       <div class="dashboard__row dashboard__row--two">
         {% for r in requests %}
           <a class="ref-card" href="/mfc/certificates/{{ r.id }}">
@@ -56,8 +56,8 @@
           </a>
         {% else %}
           <a class="ref-card ref-card--empty" href="/mfc/certificates">
-            <p class="ref-card__title">Справок пока нет</p>
-            <p class="ref-card__date">Заказать справку об обучении →</p>
+            <p class="ref-card__title">{{ _('Справок пока нет') }}</p>
+            <p class="ref-card__date">{{ _('Заказать справку об обучении →') }}</p>
           </a>
         {% endfor %}
       </div>
@@ -66,7 +66,7 @@
   </div>
 
   <aside class="dashboard__aside">
-    <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
+    <div class="dash-block__header"><h2 class="dash-title">{{ _('Популярные сервисы') }}</h2><a class="dash-link" href="/services" aria-label="{{ _('Сервисы') }}">{{ icon("arrow") }}</a></div>
     <div class="services services--column">
       {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
         <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>

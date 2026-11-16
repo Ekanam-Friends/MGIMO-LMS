@@ -62,9 +62,12 @@ class Settings(BaseSettings):
     gigachat_auth_key: SecretStr = SecretStr("")
     gigachat_scope: str = "GIGACHAT_API_PERS"
     gigachat_model: str = "GigaChat-2"
+    gigachat_translation_model: str = "GigaChat-2-Max"
     gigachat_ca_bundle: str = ""
     llm_embedding_model: str = ""
     rag_use_embeddings: bool = False
+    assistant_demo_student_access: bool = False
+    """Только для базы вымышленных студентов: выбор любого студента преподавателем и сотрудником."""
     rag_corpus_dir: str = "/data/regulations"
     rag_top_k: int = Field(default=5, ge=1, le=6)
     rag_lexical_weight: float = Field(default=1., gt=0, le=10, allow_inf_nan=False)

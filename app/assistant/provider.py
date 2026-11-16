@@ -19,8 +19,9 @@ class ProviderError(RuntimeError):
 
 
 class GigaChat:
-    def __init__(self, key: str, scope: str, model: str, ca_bundle: str = "", *, transport=None):
+    def __init__(self, key: str, scope: str, model: str, ca_bundle: str = "", *, transport=None, translation_model: str = ""):
         self.key, self.scope, self.model = key, scope, model
+        self.translation_model = translation_model or model
         ctx = ssl.create_default_context()
         if ca_bundle:
             ctx.load_verify_locations(cafile=ca_bundle)
@@ -80,12 +81,15 @@ class GigaChat:
                         self._token, self._expires = "", 0
         raise ProviderError("Авторизация GigaChat не восстановлена")
 
-    async def complete(self, system: str, data: dict) -> str:
-        result = await self._call("/chat/completions", {
-            "model": self.model, "messages": [{"role": "system", "content": system},
+    async def complete(self, system: str, data: dict, *, max_tokens: int = 2200, response_schema: dict | None = None, model: str | None = None) -> str:
+        payload = {
+            "model": model or self.model, "messages": [{"role": "system", "content": system},
                 {"role": "user", "content": json.dumps(data, ensure_ascii=False)}],
-            "temperature": 0.1, "max_tokens": 2200, "stream": False,
-        })
+            "temperature": 0.1, "max_tokens": max_tokens, "stream": False,
+        }
+        if response_schema is not None:
+            payload["response_format"] = {"type":"json_schema", "schema":response_schema, "strict":True}
+        result = await self._call("/chat/completions", payload)
         try:
             choice = result["choices"][0]
             text = choice["message"]["content"]

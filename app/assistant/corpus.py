@@ -45,6 +45,11 @@ class Chunk(BaseModel):
     downloaded_at: date
     reviewed_public: bool = False
     verification_status: Literal["verified", "snapshot"] = "verified"
+    document_family: str | None = Field(default=None, max_length=120)
+    act_kind: Literal["base", "amendment", "repeal"] = "base"
+    related_document_ids: list[str] = Field(default_factory=list, max_length=100)
+    publication_checked_at: date | None = None
+    publication_source_url: str | None = Field(default=None, max_length=2000)
     page: int = Field(ge=1, le=10000)
     page_end: int | None = Field(default=None, ge=1, le=10000)
     clause: str = Field(min_length=1, max_length=100)
@@ -55,6 +60,10 @@ class Chunk(BaseModel):
     @model_validator(mode="after")
     def valid_metadata(self):
         public_url(self.source_url)
+        if self.publication_checked_at:
+            if not self.publication_source_url:
+                raise ValueError("Нужна страница опубликованного акта")
+            public_url(self.publication_source_url)
         if self.verification_status == "verified" and (self.document_date is None or self.effective_from is None):
             raise ValueError("Проверенной редакции нужны подтверждённые даты")
         if self.page_end is not None and self.page_end < self.page:
@@ -134,10 +143,15 @@ class Corpus:
             raise CorpusError("Не удалось проверить снимок корпуса") from exc
 
     def active(self, as_of: date, today: date, max_age: int) -> list[Chunk]:
-        rows = [c for c in self.chunks if c.reviewed_public
+        from .revisions import current_published
+        published = current_published([c for c in self.chunks if c.reviewed_public
+            and c.checked_at <= today and c.downloaded_at <= today
+            and (c.publication_checked_at is None or c.publication_checked_at <= today)], as_of)
+        rows = [c for c in published if c.reviewed_public
                 and ((c.verification_status == "snapshot" and as_of == today)
                      or (c.verification_status == "verified" and c.effective_from is not None and c.effective_from <= as_of))
                 and (c.effective_to is None or as_of < c.effective_to)
+                and (c.effective_from is None or c.effective_from <= as_of)
                 and c.checked_at <= today and c.downloaded_at <= today
                 and (today - c.checked_at).days <= max_age]
         revisions: dict[str, set[str]] = {}
@@ -154,7 +168,7 @@ class Corpus:
             return []
         by_doc: dict[str, list[Chunk]] = {}
         for c in rows:
-            by_doc.setdefault(c.document_id, []).append(c)
+            by_doc.setdefault(c.document_family or c.document_id, []).append(c)
         docs = list(by_doc)
         texts = [by_doc[d][0].title + " " + " ".join(c.text for c in by_doc[d]) for d in docs]
         doc_scores = _bm25(query, texts)

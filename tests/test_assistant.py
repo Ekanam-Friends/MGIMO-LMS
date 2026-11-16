@@ -40,7 +40,7 @@ class FakeProvider:
         self.replies = iter(replies)
         self.calls = []
 
-    async def complete(self, system, data):
+    async def complete(self, system, data, **kwargs):
         self.calls.append((system, data))
         result = next(self.replies)
         if isinstance(result, Exception):

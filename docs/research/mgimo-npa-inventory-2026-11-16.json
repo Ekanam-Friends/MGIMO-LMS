@@ -1,0 +1,4719 @@
+{
+  "inventory_generated_at": "2026-11-16T22:30:36.135846+00:00",
+  "scope": "Публичные НПА раздела Сведения об образовательной организации, нормативные приложения и формы",
+  "candidate_documents": 321,
+  "local_pdf_saved": 211,
+  "excluded_link_occurrences": {
+    "excluded_financial_report": 52,
+    "excluded_self_assessment_report": 6,
+    "excluded_educational_material": 2000
+  },
+  "note": "Сохранение PDF не означает включение в рабочий индекс, приёмку OCR или подтверждение действия редакции.",
+  "documents": [
+    {
+      "title": "ОС ВО МГИМО МИД России 05.04.06 Экология и природопользование (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000217.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000217.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "aa7cffd560178f8bd60d357b23b06fd83c20e449f5604d150b205b6ed1ef3a22",
+      "bytes": 8735471,
+      "downloaded_at": "2026-11-16T22:03:02.616Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 37.04.01 Психология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000218.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000218.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "0a3558c4d9988959cb8c63961e1ba82263ff7a85c1da2ff2740d2ac9ada4acb7",
+      "bytes": 9029482,
+      "downloaded_at": "2026-11-16T21:11:04.242Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.01 Экономика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000219.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000219.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "95593536c951071e40377f0e98fcbb2ccfc78530591db65072c58f303fca0564",
+      "bytes": 10273527,
+      "downloaded_at": "2026-11-16T21:10:57.468Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.02 Менеджмент (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000220.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000220.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "36246d77df4459a989bef4eefbb0e197d13b47ade6efb968c687bb27af079f25",
+      "bytes": 9714786,
+      "downloaded_at": "2026-11-16T21:10:57.438Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.03 Управление персоналом (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000221.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000221.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4b0b47bd06e8e3cd826029c295502f70afa8e8325e21cdc3651e752d3faccba1",
+      "bytes": 7890537,
+      "downloaded_at": "2026-11-16T21:10:57.419Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.04 Государственное и муниципальное управление (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000222.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000222.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ce148c7d82d118075bd8083b0005eb9bfb98942877d6dc9ffb24623a4dfed643",
+      "bytes": 8015947,
+      "downloaded_at": "2026-11-16T22:05:19.037Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.05 Бизнес-информатика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000223.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000223.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c0dc8d1e273562984c0ef55c2693cf471a9ad5a0ea4f656e1916f33843dceccc",
+      "bytes": 8845274,
+      "downloaded_at": "2026-11-16T21:11:41.599Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.06 Торговое дело (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000224.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000224.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7524245f6f56a058ae80989a8d231a0511f15d20fcc13eb633d793500a81211e",
+      "bytes": 7837465,
+      "downloaded_at": "2026-11-16T21:11:41.574Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.04.08 Финансы и кредит (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000225.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000225.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f073d701c214d621da12d4e4415336380d097e914efda8912499d3ca868904fe",
+      "bytes": 10607759,
+      "downloaded_at": "2026-11-16T21:11:04.207Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 39.04.01 Социология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000226.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000226.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4b2ed426d2367549e309624c4633f92f01797e76513dad1758d085fc1aa73bef",
+      "bytes": 8072212,
+      "downloaded_at": "2026-11-16T21:11:04.142Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 40.04.01 Юриспруденция (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000227.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000227.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e57a8af143788058f0de6edc7acc5fb1472f21cff8fa5816069e2f394efe4429",
+      "bytes": 481734,
+      "downloaded_at": "2026-11-16T22:05:19.795Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.04.01 Зарубежное регионоведение (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000228.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000228.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f90c3f8a5a87d9e1e323fc1706f7e7355d6fd5216f95ae5b28ce55c5bfa6a56a",
+      "bytes": 8828483,
+      "downloaded_at": "2026-11-16T22:05:19.065Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.04.04 Политология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000229.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000229.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.04.05 Международные отношения (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000230.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000230.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 42.04.01 Реклама и связи с общественностью (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000231.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000231.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 42.04.02 Журналистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000232.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000232.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "139f6e8bd8afba1f674cba00e3c64a70aea9b8ec151a354f0e1b7c2c490f9b24",
+      "bytes": 8593139,
+      "downloaded_at": "2026-11-16T22:06:40.869Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 44.04.01 Педагогическое образование (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000233.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000233.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "abd138ca0339e24a146b14a39b61ee28f992419f053428b36bfc7fc91f011a6f",
+      "bytes": 8543059,
+      "downloaded_at": "2026-11-16T22:06:40.898Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 45.04.02 Лингвистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000234.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000234.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6fec2c4759c269a990d0699c1e7963dec399ff5a3d31d96ed259dc39c431fb30",
+      "bytes": 8428477,
+      "downloaded_at": "2026-11-16T22:06:28.894Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 51.04.03 Социально-культурная деятельность (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/000235.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000235.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d4174484ad1044b68f0652c69d331f89846312eb768b7566dd9212785bb23ab8",
+      "bytes": 8721359,
+      "downloaded_at": "2026-11-16T22:06:29.445Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 05.03.06 Экология и природопользование",
+      "url": "https://mgimo.ru/sveden/files/000245.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000245.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f4bd28f401b02f9eda5111d0ae607ddad5cdbee63784113127fad78eaadddd2b",
+      "bytes": 1115329,
+      "downloaded_at": "2026-11-16T21:15:51.683Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 37.03.01 Психология",
+      "url": "https://mgimo.ru/sveden/files/000247.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000247.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "606772ae0d72f523339d8b6b27d027eb26aa78365897ffa6dca5dce06857cf4e",
+      "bytes": 1101040,
+      "downloaded_at": "2026-11-16T21:15:52.046Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.01 Экономика",
+      "url": "https://mgimo.ru/sveden/files/000249.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000249.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "bf083afb2f4e4b338cb52a377bc661ab469108e63d7cea91ce802190a896c690",
+      "bytes": 1310192,
+      "downloaded_at": "2026-11-16T21:15:51.705Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.02 Менеджмент",
+      "url": "https://mgimo.ru/sveden/files/000251.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000251.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "df91f2dd131aff0cda3829460eb0ec65e17fd8c4c6b36e6d5c79ac7869ed1e21",
+      "bytes": 1154762,
+      "downloaded_at": "2026-11-16T21:15:44.636Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.03 Управление персоналом",
+      "url": "https://mgimo.ru/sveden/files/000254.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000254.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "df984038cd5a02ef1cec8e188695008dbffbccec6df9f531a2bcd4b45946c198",
+      "bytes": 1022339,
+      "downloaded_at": "2026-11-16T21:15:44.357Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.04 Государственное и муниципальное управление",
+      "url": "https://mgimo.ru/sveden/files/000255.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000255.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d583429638a81e5c0c92540e263e8251f216cf8ebbb337ab57f7d2b29672a7ca",
+      "bytes": 1030131,
+      "downloaded_at": "2026-11-16T21:15:44.370Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.05 Бизнес-информатика",
+      "url": "https://mgimo.ru/sveden/files/000257.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000257.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "9d2577dfaf52daad02af9d9d15d5c040ef1182278094e8bb99ffb2bdeaffe486",
+      "bytes": 1153688,
+      "downloaded_at": "2026-11-16T21:35:03.915Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.03.06 Торговое дело",
+      "url": "https://mgimo.ru/sveden/files/000259.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000259.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "648ff79786abb6bfbb84fd7875d6511de8f7e7815342177db40757555b3392b9",
+      "bytes": 988624,
+      "downloaded_at": "2026-11-16T21:35:03.737Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 39.03.01 Социология",
+      "url": "https://mgimo.ru/sveden/files/000261.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000261.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "0e313dcd80556d3d55d5818e9daf933a3532bb65e3b7fac7e7d008b6dffc623f",
+      "bytes": 204407,
+      "downloaded_at": "2026-11-16T21:35:03.766Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 40.03.01 Юриспруденция",
+      "url": "https://mgimo.ru/sveden/files/000262.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000262.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "9c0a989b1369359eb717ea88ded4a16762a295a888c00968714662a216ea4777",
+      "bytes": 172680,
+      "downloaded_at": "2026-11-16T21:35:01.853Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.03.01 Зарубежное регионоведение",
+      "url": "https://mgimo.ru/sveden/files/000264.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000264.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6720e8902bd86897b30d01147c8437947117ccc2db41d1d5bf9f84f0519c3b78",
+      "bytes": 172305,
+      "downloaded_at": "2026-11-16T21:35:01.717Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.03.05 Международные отношения",
+      "url": "https://mgimo.ru/sveden/files/000265.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000265.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "fd5d2d00b0e94fc7aa82636182fbe6d3ebd8ff88d88bb29e0cca4358bf67e699",
+      "bytes": 172660,
+      "downloaded_at": "2026-11-16T21:35:00.311Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.03.06 Публичная политика и социальные науки",
+      "url": "https://mgimo.ru/sveden/files/000266.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000266.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "5281618c7a9e8fab4e23650ae2b4206fc2e25c52d4be55a314f9b63501fde431",
+      "bytes": 1091695,
+      "downloaded_at": "2026-11-16T21:35:00.343Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 42.03.01 Реклама и связи с общественностью",
+      "url": "https://mgimo.ru/sveden/files/000267.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000267.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4518f754c5eb54e64fb9044e5dcdbac828f11d3cfb0316dbe440af9fe48cfce0",
+      "bytes": 175747,
+      "downloaded_at": "2026-11-16T21:34:59.674Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 42.03.02 Журналистика",
+      "url": "https://mgimo.ru/sveden/files/000268.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000268.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a182984fd4cbee76cd1dbe8328c34d51b7c3e62952023c054e4fcf2e0ce8dd93",
+      "bytes": 180765,
+      "downloaded_at": "2026-11-16T21:34:56.519Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 43.03.02 Туризм",
+      "url": "https://mgimo.ru/sveden/files/000269.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000269.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "84dffca2d8d620d0897256e0c325fe40835b2b7e691c3e3b7132ac01b525fdb3",
+      "bytes": 174389,
+      "downloaded_at": "2026-11-16T21:34:56.520Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 44.03.01 Педагогическое образование",
+      "url": "https://mgimo.ru/sveden/files/000270.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000270.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "98cbc926f7ed6050a4115619ca4f2ddca5fde1ee138593e8f16f8a9c226cbf9a",
+      "bytes": 187943,
+      "downloaded_at": "2026-11-16T21:34:56.519Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 45.03.02 Лингвистика",
+      "url": "https://mgimo.ru/sveden/files/000271.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000271.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2a7033f70041fac26277c13d551b684bc661dbdfce8e542726bae25aa109c170",
+      "bytes": 990231,
+      "downloaded_at": "2026-11-16T21:37:24.346Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 05.04.06 Экология и природопользование",
+      "url": "https://mgimo.ru/sveden/files/000281.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000281.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c2e4e72e5cf0fac5978e8dbc4ea692dcfd8250efde53f3c1ade5469eaa2960d0",
+      "bytes": 1025647,
+      "downloaded_at": "2026-11-16T21:37:23.809Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 37.04.01 Психология",
+      "url": "https://mgimo.ru/sveden/files/000282.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000282.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7f338917b4cf3265dc5831b5a6c646848f726d47352b67ca209d9c2f2122116a",
+      "bytes": 1101372,
+      "downloaded_at": "2026-11-16T21:37:22.792Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.01 Экономика",
+      "url": "https://mgimo.ru/sveden/files/000283.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000283.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c4c0be7da04671897055e832c127190d02c884a935b8ad105c29f01f381f8217",
+      "bytes": 1216780,
+      "downloaded_at": "2026-11-16T21:37:22.723Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.02 Менеджмент",
+      "url": "https://mgimo.ru/sveden/files/000284.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000284.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a48bc4474a8844075e2a88091ec79227029735123ac4f103e04f76c318eb9620",
+      "bytes": 1147998,
+      "downloaded_at": "2026-11-16T21:37:22.859Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.03 Управление персоналом",
+      "url": "https://mgimo.ru/sveden/files/000285.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000285.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b12fa2d5970bf9bfac6feda99e8c0b3de325b1d0e794175a920e83e711e805bf",
+      "bytes": 976012,
+      "downloaded_at": "2026-11-16T21:37:15.246Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.04 Государственное и муниципальное управление",
+      "url": "https://mgimo.ru/sveden/files/000286.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000286.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "779d01a041e353610230a51c69e84fd41f5ba3fea020668e18de00763c019917",
+      "bytes": 1002777,
+      "downloaded_at": "2026-11-16T21:37:15.525Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.05 Бизнес-информатика",
+      "url": "https://mgimo.ru/sveden/files/000287.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000287.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d7a379c95521b89210dec4a1b15abcd113ad27597814288384dfcb4cefa49b83",
+      "bytes": 1074691,
+      "downloaded_at": "2026-11-16T21:37:15.248Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.06 Торговое дело",
+      "url": "https://mgimo.ru/sveden/files/000288.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000288.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "add9fec7dd7634c1f9f7dbb2176042129b6ff54ae7984f0a954144915fecae5e",
+      "bytes": 945085,
+      "downloaded_at": "2026-11-16T21:37:11.805Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 38.04.08 Финансы и кредит",
+      "url": "https://mgimo.ru/sveden/files/000289.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000289.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "05dd43092afd6137ca3dfb279b7ab502ae8f37a8f4df9373c8df0d9f2f62860b",
+      "bytes": 1207824,
+      "downloaded_at": "2026-11-16T21:37:11.811Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 39.04.01 Социология",
+      "url": "https://mgimo.ru/sveden/files/000290.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000290.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "232ba6c3a4a9dde4807df2b4e00a0593fcb66abb6bce552563610f94cd42fcb2",
+      "bytes": 180702,
+      "downloaded_at": "2026-11-16T21:37:09.645Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 40.04.01 Юриспруденция",
+      "url": "https://mgimo.ru/sveden/files/000291.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000291.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "010df448d04b93211e666bff2bcc0deaa21212a909afb15e3f7c23e96c8160e5",
+      "bytes": 1200258,
+      "downloaded_at": "2026-11-16T21:38:32.389Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.04.01 Зарубежное регионоведение",
+      "url": "https://mgimo.ru/sveden/files/000292.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000292.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "53ae9de53e850fb37261e4e7a4988cbdfd3d7769dc1c5c8124a14a4cf82bbec6",
+      "bytes": 176186,
+      "downloaded_at": "2026-11-16T21:38:30.706Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.04.04 Политология",
+      "url": "https://mgimo.ru/sveden/files/000293.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000293.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3503193b192230f7a8a6e2cc7ad74c52dbdc366e177135d221ce483c909ec19a",
+      "bytes": 175805,
+      "downloaded_at": "2026-11-16T21:38:30.707Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.04.05 Международные отношения",
+      "url": "https://mgimo.ru/sveden/files/000294.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000294.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "1483d99cf28e08d7c48ce9e5628b181d33f697efbfe5ea11391d3aaf1c43d064",
+      "bytes": 177414,
+      "downloaded_at": "2026-11-16T21:38:30.583Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 42.04.01 Реклама и связи с общественностью",
+      "url": "https://mgimo.ru/sveden/files/000295.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000295.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ff4dd0c5f48be1032a03fd3840a0d8ae63627effe5265b1d46b4dfcb238d97c9",
+      "bytes": 172878,
+      "downloaded_at": "2026-11-16T21:38:29.726Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 42.04.02 Журналистика",
+      "url": "https://mgimo.ru/sveden/files/000296.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000296.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "768d9f493c0b493c27b5c4dfa3e9574ef3eb64febc722619029983baf71f9f16",
+      "bytes": 178601,
+      "downloaded_at": "2026-11-16T21:38:29.701Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 43.04.02 Туризм",
+      "url": "https://mgimo.ru/sveden/files/000297.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000297.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "44878b51d0b7875a9f6e13220ac1ec62fe4e6220b829892ebe00cfd4c2cbe3ad",
+      "bytes": 172055,
+      "downloaded_at": "2026-11-16T21:38:29.601Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 44.04.01 Педагогическое образование",
+      "url": "https://mgimo.ru/sveden/files/000298.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000298.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "377355012c4f828e0ddb05a1820a7eb9e1e617cd2d2fde5a1d8724285f9ee1b9",
+      "bytes": 185464,
+      "downloaded_at": "2026-11-16T21:38:28.249Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 45.04.02 Лингвистика",
+      "url": "https://mgimo.ru/sveden/files/000299.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000299.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c04c90c9265d7b389f6c42066d1848e75e58c94ff4850cee369fc103f96fb42a",
+      "bytes": 169399,
+      "downloaded_at": "2026-11-16T21:38:28.249Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 51.04.03 Социально-культурная деятельность",
+      "url": "https://mgimo.ru/sveden/files/000300.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000300.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ff671229051d8610410ff6a4fb9a9cddfcae3e756478efb062fb58e7eda162f7",
+      "bytes": 181075,
+      "downloaded_at": "2026-11-16T21:38:28.080Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ №720 от 17.08.2022 О внесении изменений в приказ №529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/000422.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000422.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4106a7602e5493e4d2a4fe1e2d63fb6230be22ba0d7bb80a7268e487427dad8e",
+      "bytes": 629646,
+      "downloaded_at": "2026-11-16T20:15:58.531Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ №529 от 05.08.2020 О размерах стипендий",
+      "url": "https://mgimo.ru/sveden/files/000423.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000423.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3f135fa3f9dd10dbaebdd6390187c7ec13cf327d6d61622ab66d1760785d301e",
+      "bytes": 1098456,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ №22 от 20.01.2021 О размерах стипендий",
+      "url": "https://mgimo.ru/sveden/files/000424.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000424.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "140820eb491e1be39229cde2860de6346651cdb54fe87630c76c04b75a49d34c",
+      "bytes": 695318,
+      "downloaded_at": "2026-11-16T20:16:31.754Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ №665 от 10.08.2021 О внесении изменений в приказ №529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/000425.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000425.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "34d7d2fd22176590d01371b966d885890c66cdce6c05cdbf8a08c4548d757ccf",
+      "bytes": 638913,
+      "downloaded_at": "2026-11-16T20:16:35.880Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ №1062 от 22.12.2021 О внесении изменений в приказ №529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/000426.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000426.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f1f3871bc5427e43183c17085f20943cb6aff85c43fc59888e05404fb792dfd8",
+      "bytes": 335225,
+      "downloaded_at": "2026-11-16T20:16:38.031Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о стипендиальном обеспечении",
+      "url": "https://mgimo.ru/sveden/files/000427.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000427.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d46a92b82f51b8735af0ada875f6aef236d06037c73973dc4656199457cdf134",
+      "bytes": 5188782,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Положение о социальной комиссии Студенческого союза МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000428.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000428.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6b924f316c7934001b595dd4d019c657426cfd03723adc57c0c20709d8c72231",
+      "bytes": 4698096,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ №730 от 03.07.2019 Об изменении размеров оплаты за проживание в общежитиях",
+      "url": "https://mgimo.ru/sveden/files/000429.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "000429.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ №748 от 20.10.2020 О внесении изменений",
+      "url": "https://mgimo.ru/sveden/files/000430.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "000430.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ПРОВЕДЕНИЯ ТЕКУЩЕГО КОНТРОЛЯ ОБУЧАЮЩИХСЯ",
+      "url": "https://mgimo.ru/sveden/files/000453.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000453.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "9aba3aaf6aac04f39a896815ea7e7efbbc372e2c78329bc6162d2740e694afae",
+      "bytes": 1336368,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПОРЯДОК ВОССТАНОВЛЕНИЯ СТУДЕНТОВ",
+      "url": "https://mgimo.ru/sveden/files/000456.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000456.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "db9412ea9ad133067308d08158f8044a7ddc2acf96c912a843f1857464106425",
+      "bytes": 1562621,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРАВИЛА ВНУТРЕННЕГО РАСПОРЯДКА ОБУЧАЮЩИХСЯ",
+      "url": "https://mgimo.ru/sveden/files/000457.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000457.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "bc365ee28ce7b16704ccedcaaf41863f4f96f4cc4e198001ded81bffd3635db6",
+      "bytes": 6014352,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРАВИЛА ВНУТРЕННЕГО ТРУДОВОГО РАСПОРЯДКА",
+      "url": "https://mgimo.ru/sveden/files/000458.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000458.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b5296c45465e10c28549e44f932281c42292900f1d7b0ed2f2d35afa52108a3b",
+      "bytes": 7745920,
+      "acquisition_origin": "local_pdf_requires_provenance_check"
+    },
+    {
+      "title": "КОЛЛЕКТИВНЫЙ ДОГОВОР",
+      "url": "https://mgimo.ru/sveden/files/000459.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000459.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4a97a3c78e20c392721304b9fad2a134d3c70fd3309bbf7db2864b55c10cb566",
+      "bytes": 7877675,
+      "downloaded_at": "2026-11-16T19:11:19.832Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Федеральные государственные требования к структуре программ подготовки научных и научно-педагогических кадров в аспирантуре",
+      "url": "https://mgimo.ru/sveden/files/000481.pdf",
+      "selection_status": "included_federal_requirement",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "000481.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8f1462c2caad0de4687ac452352bc9c7447d1cd027ca99a2d0c648f5596a7350",
+      "bytes": 1012254,
+      "downloaded_at": "2026-11-16T22:07:29.227Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ДОГОВОР об оказании платных образовательных услуг Аспирантура_очная",
+      "url": "https://mgimo.ru/sveden/files/000539.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000539.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "584cf8f11a5542dc07d2cd75f993b7327bcac0679fcc53c3080c7e655ccf6ec7",
+      "bytes": 249701,
+      "downloaded_at": "2026-11-16T22:08:27.920Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Дополнительное соглашение к ДОГОВОРУ Аспирантура_очная",
+      "url": "https://mgimo.ru/sveden/files/000540.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000540.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c4540f7d41d84e65d0d5c7d50a4fb60a9d81fbdf1da70339a6be422986f85774",
+      "bytes": 210956,
+      "downloaded_at": "2026-11-16T22:08:26.406Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ДОГОВОР об оказании платных образовательных услуг Аспирантура_на соискание ученой степени",
+      "url": "https://mgimo.ru/sveden/files/000541.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000541.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "18eb622b4d2a0db6fb6d07e3c922ea60392f262d26436d3fa380ca9f94288a53",
+      "bytes": 248922,
+      "downloaded_at": "2026-11-16T22:08:26.148Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Дополнительное соглашение к ДОГОВОРУ Аспирантура _на соискание ученой степени",
+      "url": "https://mgimo.ru/sveden/files/000542.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000542.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3bd64ce7d4f79d85d17e86783fea883bf5eff1bb1578a963bce2d0feccd27cf2",
+      "bytes": 212723,
+      "downloaded_at": "2026-11-16T22:08:26.245Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ДОГОВОР об оказании платных консультационных услуг на соискание ученой степени доктора наук",
+      "url": "https://mgimo.ru/sveden/files/000543.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000543.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7bba535feb07abd5ed1377c6714e88186028e14fe2631574d8183852e1480c3a",
+      "bytes": 228296,
+      "downloaded_at": "2026-11-16T22:08:24.870Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 825 от 17.10.2018 Об утверждении Положения об оказании платных образовательных услуг",
+      "url": "https://mgimo.ru/sveden/files/000544.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000544.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 533 от 22.05.2019 О внесении изменений",
+      "url": "https://mgimo.ru/sveden/files/000545.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000545.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 756 от 22.10.2020 О внесении изменений",
+      "url": "https://mgimo.ru/sveden/files/000546.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000546.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 715 от 10.08.2022 О внесении изменений",
+      "url": "https://mgimo.ru/sveden/files/000547.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000547.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о порядке оформления возникновения, прекращения отношений между МГИМО и обучающимися",
+      "url": "https://mgimo.ru/sveden/files/000631.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000631.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b8cefde175a6c6644100fa24126665058614d23f8172ce65f43b05d0ada3f913",
+      "bytes": 2304380,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИКАЗ № 593 от 16.07.2018 Об Экспертном совете по отбору кандидатов на получение именных стипендий",
+      "url": "https://mgimo.ru/sveden/files/000632.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000632.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b0dfacbd9b505750101a3c539fa681e9330ff6fd8a0dbb011a6fe834b3f41374",
+      "bytes": 774269,
+      "downloaded_at": "2026-11-16T20:16:40.521Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 502 от 18.06.2018 Об утверждении Положения об отборе кандидатов из числа обучающихся",
+      "url": "https://mgimo.ru/sveden/files/000633.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "000633.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "680ffc2f5c05723c1994bc8c84e833b826f5ff70a5db856717c94651b64fa2bf",
+      "bytes": 1959989,
+      "downloaded_at": "2026-11-16T20:16:45.463Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Присмотр и уход за детьми",
+      "url": "https://mgimo.ru/sveden/files/000634.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "000634.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ОТЧИСЛЕНИЯ, ВОССТАНОВЛЕНИЯ И ПЕРЕВОДА АСПИРАНТОВ МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000839.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000839.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "33bc79e205ff3a90c123832d5c102017920bee550a68c3ff5a9d49ebf9c977c1",
+      "bytes": 1066305,
+      "downloaded_at": "2026-11-16T19:15:50.350Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ПРОВЕДЕНИЯ ПРОМЕЖУТОЧНОЙ АТТЕСТАЦИИ В АСПИРАНТУРЕ",
+      "url": "https://mgimo.ru/sveden/files/000840.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000840.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "19a853d6ec81fe5b6e019a12cabe9d4f3f14bbc99a126feaad9210e2960e2bb8",
+      "bytes": 1143223,
+      "downloaded_at": "2026-11-16T19:26:52.407Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ПРОВЕДЕНИЯ ТЕКУЩЕГО КОНТРОЛЯ В АСПИРАНТУРЕ",
+      "url": "https://mgimo.ru/sveden/files/000841.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "000841.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "21180fee081c5eb34d50c3a0e5e86d94b84a79b143783dabb28597920fc0ddf3",
+      "bytes": 809759,
+      "downloaded_at": "2026-11-16T19:26:55.587Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Бюро ученого секретаря МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000844.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000844.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8aead49f996d94fd10e88a4f2b79487311fed88c2cf998115149af1b6ca01645",
+      "bytes": 2369224,
+      "downloaded_at": "2026-11-16T20:37:23.545Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Проектном офисе по внедрению Стратегии развития МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000845.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000845.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "bce222bb3b8c82b9b34c8b6c52b49402cce5461c8bc419a1b7a4cfd41d46fde5",
+      "bytes": 3796638,
+      "downloaded_at": "2026-11-16T20:37:28.967Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Регламент работы лаборатории регионоведения им. А.А. Ахтамзяна",
+      "url": "https://mgimo.ru/sveden/files/000848.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000848.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "77c1d13bfebc865dd37983919f686b3683830a6bfbc23ef697d70b21356efcea",
+      "bytes": 1049983,
+      "downloaded_at": "2026-11-16T20:37:32.096Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об учебно-практической лаборатории коммуникационных технологий факультета МЖ",
+      "url": "https://mgimo.ru/sveden/files/000849.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000849.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "fbecd2c9fffd7ed194570fe936bb015fa3b25ad69e26ef7fcbf596752c067419",
+      "bytes": 5938048,
+      "downloaded_at": "2026-11-16T20:37:38.695Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Лаборатории геоэкологии и устойчивого природопользования",
+      "url": "https://mgimo.ru/sveden/files/000850.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000850.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "363deef76d914020c7dcfad1c4c194b2a8d27a9e50fc15093b1db4b9d4799fd7",
+      "bytes": 554077,
+      "downloaded_at": "2026-11-16T20:37:40.548Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ о создании Лаборатории геоэкологии и устойчивого природопользования",
+      "url": "https://mgimo.ru/sveden/files/000851.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000851.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "55b7c87dbcef0c207ac265f57b8e739a3a4f06d67f0fac16e68912b56091dd3c",
+      "bytes": 721703,
+      "downloaded_at": "2026-11-16T20:37:43.359Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Школе бизнеса и международных компетенций МГИМО",
+      "url": "https://mgimo.ru/sveden/files/000852.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000852.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ede4c14e0551e221f0aeee31752306d65851023e9f321c77d2f451e9bb82da44",
+      "bytes": 4557427,
+      "downloaded_at": "2026-11-16T20:37:48.499Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре АСЕАН в МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000854.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000854.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c4f6f06d162b2269955301c518b0bfbcd57754dd90998c9351390b211567b4d6",
+      "bytes": 1651064,
+      "downloaded_at": "2026-11-16T20:37:52.088Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре изучения иностранных языков",
+      "url": "https://mgimo.ru/sveden/files/000858.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000858.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8bf9f9381107ddc348f567cc3b54f39d998455f6c48065e9f0f28cef1baa8d09",
+      "bytes": 2071192,
+      "downloaded_at": "2026-11-16T20:40:22.257Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре Студенческий спортивный клуб",
+      "url": "https://mgimo.ru/sveden/files/000859.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000859.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "26e7f5d1696074b98c1844a7bf46474aa0ff58c4c3441efa63b6ed6cfe7d9959",
+      "bytes": 5483607,
+      "downloaded_at": "2026-11-16T20:40:30.330Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении магистерской подготовки МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000864.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000864.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "009f42d75c0029787af65eddd5e95e7dd0d4ab269ce1fa2a1fbba2a9e17b4601",
+      "bytes": 2661721,
+      "downloaded_at": "2026-11-16T20:40:34.504Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении по воспитательной работе МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000866.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000866.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "68179cd315c8766bd05b7c9fcdefeaf793dcd170b5bf3a69d9cb06e0f732b457",
+      "bytes": 2441339,
+      "downloaded_at": "2026-11-16T20:40:38.416Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении учебно-организационной работы МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000867.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000867.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b8e389ed755a2e3121f65f8f249c0c8f7903e896f033113d01ee158d8af142bd",
+      "bytes": 3136537,
+      "downloaded_at": "2026-11-16T20:40:42.309Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о факультете (институте)",
+      "url": "https://mgimo.ru/sveden/files/000869.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000869.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2b5277c217aeef9f77ca1a46c935c5459db7036a82c5af0005a48e01134472d4",
+      "bytes": 2663032,
+      "downloaded_at": "2026-11-16T20:40:45.931Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении научных и инновационных проектов",
+      "url": "https://mgimo.ru/sveden/files/000870.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000870.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6c26e4f1a3a26fbf2f515ebe585e193888a2db8ef39ba2558ce5998791ed1a0c",
+      "bytes": 795518,
+      "downloaded_at": "2026-11-16T20:40:48.916Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении по работе с персоналом МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000872.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000872.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4aa7fbb6a601f162d853424b3121a05e90a9c11f1f2188f5272b720112b82f50",
+      "bytes": 4313993,
+      "downloaded_at": "2026-11-16T20:40:54.057Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении по работе со студентами и выпускниками МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000873.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000873.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "264200dc225c6616bc72c68ae2074f3e3cdfc88b4110040543c1fbe9156717f0",
+      "bytes": 1957688,
+      "downloaded_at": "2026-11-16T20:44:17.812Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении по делам общежитий МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000877.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000877.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ea4376e0c584938e5e9c6124deb48067a81cb4197b2d78ca0822992ed25ae58b",
+      "bytes": 2906461,
+      "downloaded_at": "2026-11-16T20:44:22.592Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении информации и рекламы МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000878.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000878.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "016afe71acf73147f049b3e13119a47ae168aa400156e01cf2805b360465da15",
+      "bytes": 3655366,
+      "downloaded_at": "2026-11-16T20:44:27.571Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Бухгалтерии МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000880.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000880.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "091539deacebc21cc9e49d8af379153bf3b000e8f3e662e37c8e744d8f191bf5",
+      "bytes": 3031198,
+      "downloaded_at": "2026-11-16T20:44:31.390Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Спортивно-оздоровительном центре МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000881.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000881.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "39762b427f68352cd8595ae255d533b34c617c4ac167899bdb28ffeec88dd970",
+      "bytes": 1866835,
+      "downloaded_at": "2026-11-16T20:44:34.510Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Научной библиотеке имени И.Г.Тюлина",
+      "url": "https://mgimo.ru/sveden/files/000882.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000882.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "919d36f20928d1a634a559ed94fc8a1b0e77285cb7a3f0e184317d4dc6e3e20a",
+      "bytes": 2881724,
+      "downloaded_at": "2026-11-16T20:44:38.459Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Поликлинике МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000884.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000884.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f0528d1cecfeb306904b519377c0df987819b75f421d63e44441d680a35ce44e",
+      "bytes": 2832768,
+      "downloaded_at": "2026-11-16T20:44:41.575Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Дирекции информационных технологий МГИМО (У) МИД России",
+      "url": "https://mgimo.ru/sveden/files/000885.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000885.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7fcc9e4c061520a096545b789c4e3cc2489dcdcdc2a68a73c589e1c5d88044eb",
+      "bytes": 3115998,
+      "downloaded_at": "2026-11-16T20:44:44.756Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Одинцовском филиале МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000889.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000889.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "92e2cd242cca06990f3c90b81a6f3a028f8f19954b565045fe687044ff551911",
+      "bytes": 5364892,
+      "downloaded_at": "2026-11-16T20:49:28.257Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Ташкентском филиале МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/000890.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000890.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "fd5ae3deab7b106dfd87ab9a0a2f791c442b76bbd69c86f47090c9823198c0a9",
+      "bytes": 6869262,
+      "downloaded_at": "2026-11-16T20:49:27.172Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Лаборатории Электронно-вычислительной техники им. П.В. Чеповского",
+      "url": "https://mgimo.ru/sveden/files/000891.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "000891.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "771bd480ec4d891d24263973d46b23ab9661a4918ec1d281edc6f54525886d18",
+      "bytes": 1852467,
+      "downloaded_at": "2026-11-16T20:49:27.147Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре Секретариат Сочинского (российско-австрийского) диалога",
+      "url": "https://mgimo.ru/sveden/files/001131.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "001131.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "64372d82d7e2ee86b976dbe5f3c0d3b5117e05849c1cc5eafc3600d189ed84da",
+      "bytes": 394954,
+      "downloaded_at": "2026-11-16T20:49:27.092Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Факультете довузовской подготовки МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/001203.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "001203.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "9607df755fe9f184da14c869da944db6736a423b9b73489faeffa38d4984f14f",
+      "bytes": 284807,
+      "downloaded_at": "2026-11-16T20:49:35.835Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 41.03.04 Политология",
+      "url": "https://mgimo.ru/sveden/files/001267.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001267.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2519cae33f560615ffd9624d346f4c6fc9720327962152d315e11f4782282e83",
+      "bytes": 1026250,
+      "downloaded_at": "2026-11-16T21:35:02.580Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №397 от 03.05.2023 Бакалавриат для ин. граждан набора 2023 года.",
+      "url": "https://mgimo.ru/sveden/files/001292.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001292.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "fce82a449f1e405053a400304aafc6b72ffb0f830665d6a9889c931768a1368d",
+      "bytes": 1879702,
+      "downloaded_at": "2026-11-16T22:10:10.530Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №396 от 03.05.2023 Бакалавриат для граждан РФ набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001293.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001293.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3821a228920324006378e1efe568ceb97a0b2a8ca12bcebb90bb72ba6950e927",
+      "bytes": 1863737,
+      "downloaded_at": "2026-11-16T22:10:10.574Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №395 от 03.05.2023 Магистратура для ин. граждан набора 2023 года.",
+      "url": "https://mgimo.ru/sveden/files/001294.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001294.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7250f4905b5003eaa6984b6682148435a3fc4c86d00932c2e2c6b4596eb1a1aa",
+      "bytes": 2017775,
+      "downloaded_at": "2026-11-16T22:10:08.644Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №394 от 03.05.2023 Магистратура для граждан РФ набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001295.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001295.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "5291cf2577eae6b5371ad6c436656d77b5b4c0e37f843e380e149e50d55a608e",
+      "bytes": 2041147,
+      "downloaded_at": "2026-11-16T22:10:08.680Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №393 от 03.05.2023 Аспирантура для граждан РФ набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001296.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001296.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "36b2ec119807e3463887f76fce6e847658490aeb073e830b6ee9bbc8c04faa1f",
+      "bytes": 1899563,
+      "downloaded_at": "2026-11-16T22:10:08.639Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №392 от 03.05.2023 Аспирантура для ин. граждан набора 2023 года.",
+      "url": "https://mgimo.ru/sveden/files/001297.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001297.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d3105ecf09a5d391060811ee90913ceaa363d7fb74fbe5319e47f9d7da63a5b5",
+      "bytes": 1916602,
+      "downloaded_at": "2026-11-16T22:10:05.179Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №391 от 03.05.2023 Центр изучения иностранных языков МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001298.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001298.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "19965d5aff2ae98be3b831a10cacf0800a78d390fd8e3d7356be082d98c9f67b",
+      "bytes": 850912,
+      "downloaded_at": "2026-11-16T22:10:05.172Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №390 от 03.05.2023 Международное управление МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001299.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001299.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f4bc2c3f1147df83b8220cb2bf264745e6c7daca56890a95f4182fb8fed2985c",
+      "bytes": 738029,
+      "downloaded_at": "2026-11-16T22:10:05.175Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №389 от 03.05.2023 ПК и ПП МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001300.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001300.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №388 от 03.05.2023 Факультет довузовской подготовки МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001301.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001301.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №387 от 03.05.2023 Координационный центр довузовской и дополнительной языковой подготовки МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001302.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001302.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "94775ed803ee8376cc9779570fd68895e45a682067946c40d5ab27296b63835b",
+      "bytes": 1304444,
+      "downloaded_at": "2026-11-16T22:11:52.451Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №386 от 03.05.2023 МВА МГИМО МИД России для набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001303.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001303.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8417f3ab7f037ecd2c9359b812ce47c0b2d73f549c3792c206826a14738fb7fe",
+      "bytes": 701053,
+      "downloaded_at": "2026-11-16T22:11:48.235Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 376 от 28.04.2023 Об индексации стоимости ИМОУ",
+      "url": "https://mgimo.ru/sveden/files/001306.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001306.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8de7bf723a6e1420182742dd623977a72f15414a1a0d164b67c7bc74103440e6",
+      "bytes": 5245973,
+      "downloaded_at": "2026-11-16T22:11:50.794Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 377 от 28.04.2023 Об индексации стоимости Магистратура для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/001307.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001307.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a14570e84eba8264afae314730e9b206c605b13d235bb6451156cc69822f1019",
+      "bytes": 5842447,
+      "downloaded_at": "2026-11-16T22:11:50.817Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 378 от 28.04.2023 Об индексации стоимости Магистратура для ин.граждан",
+      "url": "https://mgimo.ru/sveden/files/001308.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001308.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "899e2d2b9917281e06703daa1f0b9a2ef3b555a42e2cb716fd7cffb0df1a3e0f",
+      "bytes": 5997389,
+      "downloaded_at": "2026-11-16T22:11:45.862Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор об оказании платных образовательных услуг Заказчик — физическое лицо (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/001372.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001372.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6fe488ad127fc392f5e014ac6996e8cfead90683e378771e16d8e5643c09fab7",
+      "bytes": 256640,
+      "downloaded_at": "2026-11-16T22:08:24.709Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор об оказании платных образовательных услуг Заказчик — юридическое лицо (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/001373.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001373.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e3dd20b369b1e49afa0c239917dbe7aed286a038faec2fc02dbb979b675319fe",
+      "bytes": 258110,
+      "downloaded_at": "2026-11-16T22:08:25.148Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор присоединения (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/001374.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001374.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "bfb74e8976f7ca2e8510044cbc1a3df79ea92349a30cc1c2bc60eb0b8c498942",
+      "bytes": 265043,
+      "downloaded_at": "2026-11-16T22:08:23.533Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор об оказании платных образовательных услуг Заказчик — физическое лицо (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/001375.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001375.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "331258d63ea40fed9c4a6a2d625b5c92dc191a6f83625ceb1e919cf3639b3956",
+      "bytes": 257521,
+      "downloaded_at": "2026-11-16T22:08:23.442Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор присоединения (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/001376.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001376.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "96918489b102e559e43f94b622da6a5bee8bd0547817ad12acb6f8e672bde4e6",
+      "bytes": 285476,
+      "downloaded_at": "2026-11-16T22:08:23.421Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 659 от 07.07.2023 Магистратура для граждан РФ набора 2023 Бизнес-медиа в цифровую эпоху. Мастерская Ведомостей",
+      "url": "https://mgimo.ru/sveden/files/001589.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001589.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f4880bcb08418fae77709cb404e35f7593124b41b9399fefe5d32b5bb5abaab8",
+      "bytes": 856884,
+      "downloaded_at": "2026-11-16T22:11:45.068Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 660 от 07.07.2023 Магистратура для ин.граждан набора 2023 Бизнес-медиа в цифровую эпоху. Мастерская Ведомостей",
+      "url": "https://mgimo.ru/sveden/files/001590.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001590.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "fd5774d9c2b7ab2a83b4ad5351efe259621826ef222f47efba73e5822c504cc4",
+      "bytes": 440554,
+      "downloaded_at": "2026-11-16T22:11:45.226Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 374 от 28.04.2023 Об индексации стоимости Бакалавриат для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/001599.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001599.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d81bc3c98f4a7d443618656cf360aa4a49a7ef886d8814800e4b8f2a1af49502",
+      "bytes": 6699952,
+      "downloaded_at": "2026-11-16T22:11:42.301Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 375 от 28.04.2023 Об индексации стоимости Бакалавриат для ин.граждан",
+      "url": "https://mgimo.ru/sveden/files/001600.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001600.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6e4eabeed60d6353677a9641f8dacaaf30612fd09243c9e8131b5dec7cf9120c",
+      "bytes": 6945705,
+      "downloaded_at": "2026-11-16T22:11:42.275Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Юридическом управлении МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/001643.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "001643.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "9f35822e82369ed63601a894cc9da897a1b2e98c599af67e3d8bb90cafdb76fe",
+      "bytes": 3851022,
+      "downloaded_at": "2026-11-16T20:49:35.677Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 731 от 25.08.2022 Об установлении размеров оплаты за проживание в общежитиях",
+      "url": "https://mgimo.ru/sveden/files/001725.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "001725.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6889a343725f34f32723f7ed541922c79cabdfb9612e56db11255808e9fddad5",
+      "bytes": 2372515,
+      "downloaded_at": "2026-11-16T20:17:10.241Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 729 от 07.08.2023 Об установлении размеров оплаты за проживание в общежитиях",
+      "url": "https://mgimo.ru/sveden/files/001726.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "001726.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "538dfe2121c8e0e7561cedf6e768d339efde63962683ae1d3b605f779ec2938a",
+      "bytes": 2771921,
+      "downloaded_at": "2026-11-16T20:17:16.759Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №683 от 14.07.2023 О внесении изменений в Приказы №394 от 03.05.2023 и №395 от 03.05.2023",
+      "url": "https://mgimo.ru/sveden/files/001727.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001727.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ab1ce185750780ef0e97918f6cf374ee51adc15fb47e2e6e4d060bcd622c8743",
+      "bytes": 447330,
+      "downloaded_at": "2026-11-16T22:11:37.895Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №684 от 14.07.2023 О внесении изменений в Приказы №402 от 16.05.2020 и №403 от 16.05.2023",
+      "url": "https://mgimo.ru/sveden/files/001728.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001728.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f6df3d9014caba744bbcc54adafa92fd3662a21707ee97fc3fb8cc5cf38ee0a7",
+      "bytes": 450051,
+      "downloaded_at": "2026-11-16T22:13:05.536Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №717 от 03.08.2023 О внесении изменений в Приказы №687 от 01.08.2022 и №688 от 01.08.2022",
+      "url": "https://mgimo.ru/sveden/files/001729.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001729.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "74c541a5089c03f02e7dd3d688fc35edef05d6ca075d56d51ae45d8aff11a3c6",
+      "bytes": 1033568,
+      "downloaded_at": "2026-11-16T22:13:04.639Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №718 от 03.08.2023 О внесении изменений в Приказы №692 от 02.09.2021 и №693 от 02.09.2021",
+      "url": "https://mgimo.ru/sveden/files/001730.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001730.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "632b057d183f038e070d97c4402e78b0bad7307a040719093271788d833b7682",
+      "bytes": 794198,
+      "downloaded_at": "2026-11-16T22:13:04.501Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №719 от 03.08.2023 О внесении изменений в Приказы №392 от 03.05.2023 и №393 от 03.05.2023",
+      "url": "https://mgimo.ru/sveden/files/001731.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001731.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e50949f4ff29d19462ed733d65262cf8c6303d111f7e11541488f6da044d73a6",
+      "bytes": 501782,
+      "downloaded_at": "2026-11-16T22:13:04.519Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №720 от 03.08.2023 О внесении изменений в Приказы №401 от 16.05.2022 и №400 от 16.05.2022",
+      "url": "https://mgimo.ru/sveden/files/001732.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001732.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2e3ca8f5c3dd4d65374ec32f8da86c4967a4ea0fcd1c541bec662a253ff5fe29",
+      "bytes": 465891,
+      "downloaded_at": "2026-11-16T22:13:02.233Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №793 от 13.09.2023 Магистратура с МГУ для граждан РФ набора 2023",
+      "url": "https://mgimo.ru/sveden/files/001768.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001768.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e74efd8bede10bf55e068d1a403c6f76d2aebaff256877d78fedeceb1f8673ff",
+      "bytes": 478203,
+      "downloaded_at": "2026-11-16T22:13:02.132Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №794 от 13.09.2023 Магистратура с МГУ для ин.граждан набора 2023",
+      "url": "https://mgimo.ru/sveden/files/001769.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001769.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "93b17cea922b931551bdf85525474b253fef05a364c0618651487a97e49a3117",
+      "bytes": 481770,
+      "downloaded_at": "2026-11-16T22:13:02.117Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 1141 от 14.12.2022 Об утверждении размеров денежных выплат студентам-сиротам в 2023 году",
+      "url": "https://mgimo.ru/sveden/files/001770.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "001770.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "5fa0f388798ad3be8041ccb81f4179b32e258ed7b1faa8afdc18828dcaafa690",
+      "bytes": 663900,
+      "downloaded_at": "2026-11-16T20:17:20.240Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №858 от 05.10.2023 Аспирантура для граждан РФ набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001871.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001871.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "04167896d8702c20e43dcbf935fc5ce8e57ba923f72c8d317438bd2702aef8bb",
+      "bytes": 417735,
+      "downloaded_at": "2026-11-16T22:13:00.486Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №686 от 01.08.2022 О внесении изменений в Приказ №400 от 16.05.2022",
+      "url": "https://mgimo.ru/sveden/files/001897.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001897.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2e83f6488d59e009f78da5ecdc3115598c9c217c035b4a85b8b88526f3790edf",
+      "bytes": 502144,
+      "downloaded_at": "2026-11-16T22:13:00.346Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №695 от 04.08.2022 Бакалавриат для граждан РФ и ин.граждан наборы 2019 - 2021г",
+      "url": "https://mgimo.ru/sveden/files/001898.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001898.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "80b1cc07c8d88cb03ffc20235c5e8affbe2c35d71ce92751d06b047dc68bfeb0",
+      "bytes": 1063533,
+      "downloaded_at": "2026-11-16T22:13:00.066Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №236 от 27.03.2023 О внесении изменений в Приказ №402 от 16.05.2022",
+      "url": "https://mgimo.ru/sveden/files/001899.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001899.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №237 от 27.03.2023 О внесении изменений в Приказ №403 от 16.05.2022",
+      "url": "https://mgimo.ru/sveden/files/001900.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001900.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №746 от 18.08.2023 О внесении изменений в Приказ №376 от 28.04.2023",
+      "url": "https://mgimo.ru/sveden/files/001902.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001902.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №738 от 16.08.2023 О внесении изменений в Приказ №392 от 13.05.2022",
+      "url": "https://mgimo.ru/sveden/files/001903.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001903.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 05.03.06 Экология и природопользование (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001904.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001904.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2a6b9e1d1f9735ae42be32bcab8110268dc78956839ee99e201dcf106e6df349",
+      "bytes": 8985022,
+      "downloaded_at": "2026-11-16T22:01:29.095Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 37.03.01 Психология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001905.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001905.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e290f03ca290142886361e10da69b0c27773345a376dd46812cc14d5bbd4edbe",
+      "bytes": 9162305,
+      "downloaded_at": "2026-11-16T21:39:37.977Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.01 Экономика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001906.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001906.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "92a9f824c9013d8b92b4cd032e4a034825e50eb8a1fe77e0af059e0a4dad3db6",
+      "bytes": 8846277,
+      "downloaded_at": "2026-11-16T21:39:33.231Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.02 Менеджмент (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001907.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001907.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "53aa5ee14b546a8872be9bfd67b83e8be600452ba6ac0acc5d8e6ab4681feaa6",
+      "bytes": 9002153,
+      "downloaded_at": "2026-11-16T21:39:33.251Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.04 Государственное и муниципальное управление (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001909.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001909.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "aeca8ce0e224b131a07502c9715da6f09072d8092c231569f2c45967f7206b10",
+      "bytes": 8952105,
+      "downloaded_at": "2026-11-16T22:01:29.118Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.05 Бизнес-информатика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001910.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001910.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "72541c090961220f227b2fdb24981bf1d3fefc2bc7111dd9b75d5d41d79b9bae",
+      "bytes": 9359241,
+      "downloaded_at": "2026-11-16T21:39:18.493Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.06 Торговое дело (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001911.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001911.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2163ee1f1d7a6b0c2bad764ec9c6b2743ad3767d457de34b442d4191e507c3eb",
+      "bytes": 8599942,
+      "downloaded_at": "2026-11-16T21:39:23.556Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 39.03.01 Социология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001912.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001912.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "1da21ce38104530d0f70ee021f6bf66aa5a25650f5861a60f4837739a45a3cea",
+      "bytes": 8676620,
+      "downloaded_at": "2026-11-16T21:39:23.602Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 40.03.01 Юриспруденция (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001913.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001913.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f59cc5845863bc1edf277a4d449a280ea67d0c316733707fe7343420d2600efb",
+      "bytes": 7722343,
+      "downloaded_at": "2026-11-16T21:41:16.418Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.03.01 Зарубежное регионоведение (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001914.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001914.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "49dbc196a6e30c61966e797e8e1f27a708790bdc048ddaf20b910f8a0e0220e9",
+      "bytes": 8619890,
+      "downloaded_at": "2026-11-16T21:41:07.954Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.03.04 Политология (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001915.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001915.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.03.05 Международные отношения (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001916.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001916.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e186d5def2981d66f5560439d7b0db07e057a02d3f1a621cf9eef08a74af0993",
+      "bytes": 8696010,
+      "downloaded_at": "2026-11-16T21:41:11.631Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 41.03.06 Публичная политика и социальные науки (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001917.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001917.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "60631c4c7376b2a885729fcbe6f8a5f148b6c7fe4af29da23e437c636cff24ad",
+      "bytes": 9219376,
+      "downloaded_at": "2026-11-16T22:01:29.140Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 42.03.01 Реклама и связи с общественностью (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001918.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001918.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6f900839e978fbe89d02f8f63aa95aa55d26bc73e24dfe17a8a41eee016fbcfe",
+      "bytes": 8807911,
+      "downloaded_at": "2026-11-16T21:49:28.585Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 42.03.02 Журналистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001919.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001919.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "053463ebc58646d32076bfae65da4ebca58c4e16ee4fb7be78e6b4856482c40e",
+      "bytes": 8767341,
+      "downloaded_at": "2026-11-16T21:49:28.556Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 43.03.02 Туризм (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001920.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001920.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "b7e731687d7e5ecaff9e24f45df9f8fbf88920eaee88494308128709f7463ca9",
+      "bytes": 8440925,
+      "downloaded_at": "2026-11-16T21:49:28.619Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 44.03.01 Педагогическое образование (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001921.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001921.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 45.03.02 Лингвистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/001922.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "001922.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №895 от 16.10.2023 Аспирантура для ин. граждан набора 2023 года",
+      "url": "https://mgimo.ru/sveden/files/001923.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "001923.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение об Управлении по договорной работе МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/001970.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "001970.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2ba00f6b7c65f0825060709cd6953c834de14fff4fc3fed2324ce2a5934a22a4",
+      "bytes": 1231796,
+      "downloaded_at": "2026-11-16T20:49:35.656Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 43.04.02 Туризм (с учетом профессиональных стандартов",
+      "url": "https://mgimo.ru/sveden/files/002074.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "002074.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2bd1bb4e3db6b23f2081d50235243f6c65ca8f4bc1fe6c2146c2af829a67b361",
+      "bytes": 7793294,
+      "downloaded_at": "2026-11-16T22:06:40.831Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Международном управлении МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002078.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002078.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a6df88dee4b6afc23cf3cc6381e7bee125fd46382b2f3ff06f7ee0b717dda689",
+      "bytes": 3192911,
+      "downloaded_at": "2026-11-16T20:49:35.668Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении экономики МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002099.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002099.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a5280ab34774c12714298a796391d2cfd0e0d2af466f205b957316599a7b0d7c",
+      "bytes": 1747005,
+      "downloaded_at": "2026-11-16T20:56:37.628Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Управлении языковой подготовки МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002137.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002137.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7a5ff51ed9f5ce2461921341e26cefb7f6082dc06562504197612fc8856275a1",
+      "bytes": 1479054,
+      "downloaded_at": "2026-11-16T20:56:37.513Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре по работе со школами",
+      "url": "https://mgimo.ru/sveden/files/002138.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002138.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2f78f354466417a44e2b3f5f9a1f677174ebeb0f2f74dfbb40246cd089a5cb9b",
+      "bytes": 342325,
+      "downloaded_at": "2026-11-16T20:56:35.362Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об Институте маркетинга и предпринимательства МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002140.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002140.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о Центре устойчивого развития и ESG трансформации",
+      "url": "https://mgimo.ru/sveden/files/002144.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002144.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7e8563f4bd42b873c4f2890d82acea39767a4b9becf27cdf1e9328a634280c2f",
+      "bytes": 3278001,
+      "downloaded_at": "2026-11-16T20:56:38.271Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Центре анализа и продвижения результатов научной деятельности МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002165.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002165.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a450027407b94f01c3af4f78defd975fffde5a55767829cab143828f5be01c7f",
+      "bytes": 7307903,
+      "downloaded_at": "2026-11-16T20:56:41.848Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Дополнительное соглашение 2023",
+      "url": "https://mgimo.ru/sveden/files/002182.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "002182.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d2bb525505f07d71b8b8bca47e431cb47380d07e052ccc879911a9113f98c334",
+      "bytes": 547038,
+      "downloaded_at": "2026-11-16T19:26:59.607Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Контрольно-методическом управлении МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002184.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002184.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "968fb4fae12fb09e306984e7f5c05e1785b7baecc70f16c874fb5c5eed016f82",
+      "bytes": 2779828,
+      "downloaded_at": "2026-11-16T20:56:41.725Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 36 от 16.01.2024 Об утверждении размеров денежных выплат студентам-сиротам в 2024 году",
+      "url": "https://mgimo.ru/sveden/files/002194.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "002194.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "efc92c84c6a5ed107e6dc6194eb18eda6d96e022f7ea136ab8e10fb0ec13fcb7",
+      "bytes": 711489,
+      "downloaded_at": "2026-11-16T20:17:25.100Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №152 от 04.03.2024 О внесении изменений в Приказ №376 от 28.04.2023",
+      "url": "https://mgimo.ru/sveden/files/002195.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002195.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №153 от 04.03.2024 О внесении изменений в Приказ № 375 от 28.04.2023",
+      "url": "https://mgimo.ru/sveden/files/002196.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002196.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №154 от 04.03.2024 О внесении изменений в Приказ № 374 от 28.04.2023",
+      "url": "https://mgimo.ru/sveden/files/002197.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002197.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №155 от 04.03.2024 О внесении изменений в Приказы №396 от 03.05.2023 и №397 от 03.05.2023",
+      "url": "https://mgimo.ru/sveden/files/002198.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002198.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 585 от 15.06.2023 О внесении изменений в приказ № 529 от 05.02.2020",
+      "url": "https://mgimo.ru/sveden/files/002312.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "002312.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "7d7da9d18b1503660fd28d261266223043a8b0b0b8fb58965022df3682607277",
+      "bytes": 1035524,
+      "downloaded_at": "2026-11-16T20:17:30.432Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 44 от 18.01.2024 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/002313.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "002313.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e695f0ebba12025e8a854319e8db1abc46ff2077a34e0064a5a58f4f97d1af74",
+      "bytes": 503241,
+      "downloaded_at": "2026-11-16T20:17:35.470Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 90 от 12.02.2024 О размерах стипендий",
+      "url": "https://mgimo.ru/sveden/files/002314.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "002314.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "bd484f9095d9219b06ae1b0cfff81b09b9584946c319d5924c1d19fe21cb1568",
+      "bytes": 884210,
+      "downloaded_at": "2026-11-16T20:17:40.391Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ №318 от 16.04.2024 Об индексации стоимости Магистратура для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/002537.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002537.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №319 от 16.04.2024 Об индексации стоимости Бакалавриат для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/002538.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002538.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ №323 от 17.04.2024 Об индексации стоимости Магистратура для ин.граждан",
+      "url": "https://mgimo.ru/sveden/files/002598.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002598.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 337 от 19.04.2024 Об индексации стоимости Аспирантура",
+      "url": "https://mgimo.ru/sveden/files/002630.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002630.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 340 от 22.04.2024 Аспирантура для граждан РФ набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002631.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002631.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 343 от 22.04.2024 Аспирантура для ин.граждан набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002632.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002632.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 344 от 22.04.2024 Об индексации стоимости программ ИМОиУ",
+      "url": "https://mgimo.ru/sveden/files/002637.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002637.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 278 от 08.04.2024 О внесении изменений в ПРИКАЗ №825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/002638.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002638.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 335 от 19.04.2024 Об индексации стоимости Бакалавриат для ин.граждан",
+      "url": "https://mgimo.ru/sveden/files/002644.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002644.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 463 от 28.05.2024 Бакалавриат для граждан РФ набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002709.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002709.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 464 от 28.05.2024 Бакалавриат для ин.граждан набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002710.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002710.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 432 от 27.05.2024 Центр изучения иностранных языков МГИМО МИД России для набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002713.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002713.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 433 от 27.05.2024 Об индексации стоимости Факультет довузовской подготовки МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002714.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002714.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 322 от 17.04.2024 Международное управление МГИМО МИД России для набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002715.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002715.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 336 от 19.04.2024 Центр изучения иностранных языков МГИМО МИД России для набора 2024 год",
+      "url": "https://mgimo.ru/sveden/files/002716.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002716.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 341 от 22.04.2024 ПК и ПП МГИМО МИД России для набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002717.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002717.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 342 от 22.04.2024 МВА МГИМО МИД России для набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002718.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002718.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 345 от 22.04.2024 Факультет довузовской подготовки МГИМО МИД России для набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002719.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002719.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о Центре «Кафедра ЮНЕСКО по правам человека и демократии»",
+      "url": "https://mgimo.ru/sveden/files/002729.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "002729.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "0d8b2fb8a87241726790ae33bc3e6296987261d21c4561e45f0f075fe8e345f0",
+      "bytes": 2091774,
+      "downloaded_at": "2026-11-16T20:56:40.795Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 499 от 04.06.2024 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/002730.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "002730.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "59f5ec910673e0df66f911e04391c4c49e320b670da5119f9b68f984c8bc501b",
+      "bytes": 962322,
+      "downloaded_at": "2026-11-16T20:17:46.685Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 488 от 31.05.2024 О внесении изменений в Приказ № 345 от 22.04.2024 Факультет довузовской подготовки МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/002731.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002731.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 475 от 28.05.2024 О внесении изменений в ПРИКАЗ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/002744.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002744.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 465 от 28.05.2024 Магистратура для граждан РФ набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002871.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002871.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 466 от 28.05.2024 Магистратура для ин. граждан набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/002872.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "002872.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 640 от 01.08.2024 О внесении изменений в Приказ № 465, 466 от 28.05.2024",
+      "url": "https://mgimo.ru/sveden/files/003021.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003021.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о Проектном офисе Минобразования России на базе МГИМО",
+      "url": "https://mgimo.ru/sveden/files/003060.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003060.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 633 от 31.07.2024 Магистратура для граждан РФ и ин. граждан набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/003061.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003061.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 651 от 09.08.2024 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/003063.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "003063.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОРЯДОК ПЕРЕВОДА ОБУЧАЮЩИХСЯ В МГИМО МИД РОССИИ",
+      "url": "https://mgimo.ru/sveden/files/003143.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "003143.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3873b07497384b331d9d7625db603301af8f46f09c43f6364c3a843c3b5295b5",
+      "bytes": 3587930,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИКАЗ № 764 от 07.10.2024 О внесении изменений в Приказ № 342 от 22.04.2024 года",
+      "url": "https://mgimo.ru/sveden/files/003181.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003181.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 732 от 26.09.2024 Магистратура для граждан РФ набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/003198.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003198.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 733 от 26.09.2024 Магистратура для ин. граждан набора 2024 года",
+      "url": "https://mgimo.ru/sveden/files/003199.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003199.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о Наблюдательном совете МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003238.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003238.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение об Ученом совете МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003245.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003245.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 889 от 05.11.2024 О внесении изменений в ПРИКАЗ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/003251.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003251.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ ОБ ОСОБЕННОСТЯХ РЕАЛИЗАЦИИ ОБРАЗОВАТЕЛЬНОЙ ДЕЯТЕЛЬНОСТИ ДЛЯ ЛИЦ С ОВЗ",
+      "url": "https://mgimo.ru/sveden/files/003256.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "003256.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "cdbbdc1616341312b2bfa9d115b9773cfa0f804b7f880019a1c564fceca3d941",
+      "bytes": 2870053,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Положение Об Институте мировых аграрных рынков МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003263.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003263.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ФГОС ВО 58.03.01 Востоковедение и африканистика",
+      "url": "https://mgimo.ru/sveden/files/003282.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "003282.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "c9c76bd04d317c98c15ddaa45b667d9610a0022d1649144461c929b855e13f42",
+      "bytes": 1022974,
+      "downloaded_at": "2026-11-16T21:37:24.535Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ФГОС ВО 58.04.01 Востоковедение и африканистика",
+      "url": "https://mgimo.ru/sveden/files/003283.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "003283.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f836ecf4422f95b1e70a01b7409cc1193bf83394ceee72de54c3cf3f6a34ee84",
+      "bytes": 1004266,
+      "downloaded_at": "2026-11-16T21:39:36.880Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 58.04.01 Востоковедение и африканистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/003284.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "003284.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2847fd89dd18cd7fc144bd191a6d97299066d98799656d8a295dfe71c5ff935a",
+      "bytes": 3570559,
+      "downloaded_at": "2026-11-16T22:06:22.848Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 58.03.01 Востоковедение и африканистика (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/003299.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "003299.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О РЕАЛИЗАЦИИ ОП С ПРИМЕНЕНИЕМ ЭО и ДОТ в МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003325.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "003325.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "21bf785d8f837c8f0e3187d3f3893a5d125e45e0bcd2a7042abada0d57ee5954",
+      "bytes": 345985,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 1084 от 20.12.2024 Об утверждении размеров денежных выплат студентам-сиротам в 2025 году",
+      "url": "https://mgimo.ru/sveden/files/003335.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "003335.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "2c778b345070f3fa9b251b77249625eafe0a244eca4b80a3be3c7ed93fd3bd48",
+      "bytes": 1078857,
+      "downloaded_at": "2026-11-16T20:32:21.692Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 1103 от 26.12.2024 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/003339.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "003339.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "e8d72f24683bcf27ccbd7f996f202541b042f4e577aef2d80920bf4e750525b4",
+      "bytes": 504242,
+      "downloaded_at": "2026-11-16T20:32:24.624Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПРИКАЗ № 1131 от 28.12.2024 О внесении изменения в Приказ от 22.04.2024 г. № 345",
+      "url": "https://mgimo.ru/sveden/files/003345.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003345.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение об Институте международных исследований МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003381.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003381.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение об Издательском доме МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/003382.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "003382.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 232 от 01.04.2025 О внесении изменений в Приказ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/003516.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003516.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 284 от 16.04.2025 Об индексации стоимости Аспирантура",
+      "url": "https://mgimo.ru/sveden/files/003855.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003855.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 376 от 12.05.2025 Об утверждении размера оплаты Аспирантура для граждан РФ набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003926.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003926.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 377 от 12.05.2025 Об утверждении размера оплаты Магистратура для граждан РФ набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003927.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003927.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 378 от 12.05.2025 Об утверждении размера оплаты Магистратура для ин.граждан набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003928.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003928.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 379 от 12.05.2025 Об утверждении размера оплаты Бакалавриата для граждан РФ набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003929.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003929.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 380 от 12.05.2025 Об утверждении размера оплаты Бакалавриата для ин. граждан набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003930.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003930.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 381 от 12.05.2025 Об утверждении размера оплаты Аспирантура для ин. граждан набора 2025-2026 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/003931.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "003931.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ОС ВО МГИМО МИД России 38.03.03 Управление персоналом (с учетом профессиональных стандартов)",
+      "url": "https://mgimo.ru/sveden/files/004023.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/eduStandarts/"
+      ],
+      "filename": "004023.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "eaa359c9d64ab83a161177ceab27e3c686e48b68eacc1eda990bf1830ef0e213",
+      "bytes": 8299538,
+      "downloaded_at": "2026-11-16T21:39:34.854Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ГОСУДАРСТВЕННОЙ ИТОГОВОЙ АТТЕСТАЦИИ",
+      "url": "https://mgimo.ru/sveden/files/004028.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004028.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "5ebaf1a0705d8270bc24ffafe0245cce1ed4073a13e0913ec1c53ef68509af51",
+      "bytes": 895310,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИЛОЖЕНИЕ 1 МЕТОДИЧЕСКИЕ РЕКОМЕНДАЦИИ ПО НАПИСАНИЮ И ОФОРМЛЕНИЮ ВКР",
+      "url": "https://mgimo.ru/sveden/files/004029.pdf",
+      "selection_status": "included_normative_attachment",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004029.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "69df6821a0e3e3237c550dfa3e1063545ed32b7d05c04e7fcc1588ecd5dc502a",
+      "bytes": 585665,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ПРОВЕРКИ ВЫПУСКНЫХ КВАЛИФИКАЦИОННЫХ РАБОТ НА ПРЕДМЕТ ЗАИМСТВОВАНИЯ",
+      "url": "https://mgimo.ru/sveden/files/004030.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004030.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ce88a4f4104431af05fb7fe3255d5493f862e3ac8c86f20cc8d9cdf7eab4e8c6",
+      "bytes": 3321887,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 572 от 03.07.2025 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/004475.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004475.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "293b392bdeb91f48e1bacc0af3e37d7ccb252ad7ae857ac1c3b87246334f3bf2",
+      "bytes": 343951,
+      "downloaded_at": "2026-11-16T20:32:26.900Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение о Казахстанском филиале МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004488.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004488.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 599 от 17.07.2025 Об установлении размеров оплаты за проживание и коммунальные услуги в общежитиях и служебных квартирах МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004577.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "004577.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a5585c71d4a427246d587336517600b831ccc5207c8445be6ff2304e319c2f36",
+      "bytes": 3631814,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 636 от 18.08.2025 О внесении изменений в Приказ № 599 от 17.07.2025",
+      "url": "https://mgimo.ru/sveden/files/004580.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "004580.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "5d8c5bb94a48567a51bab9c63274bc6b5595d86917317e060291279d65f0805c",
+      "bytes": 1312066,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИКАЗ № 642 от 28.08.2025 Об индексации стоимости Магистратура для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/004609.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004609.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 643 от 28.08.2025 Об индексации стоимости Бакалавриата для граждан РФ",
+      "url": "https://mgimo.ru/sveden/files/004610.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004610.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 644 от 28.08.2025 Об индексации стоимости Магистратура для иностр. граждан",
+      "url": "https://mgimo.ru/sveden/files/004611.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004611.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 645 от 28.08.2025 Об индексации стоимости Бакалавриата для иностр. граждан",
+      "url": "https://mgimo.ru/sveden/files/004612.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004612.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 678 от 09.09.2025 О внесении изменений в приказ № 1084 от 20.12.2024",
+      "url": "https://mgimo.ru/sveden/files/004618.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004618.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "82462f0d8bf72237bb71a95061a6879a4319c9edf3426948e529c9c2a93b9798",
+      "bytes": 1039901,
+      "downloaded_at": "2026-11-16T20:32:29.775Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 831 от 22.10.2025 О внесении изменений в Приказ № 599 от 17.07.2025",
+      "url": "https://mgimo.ru/sveden/files/004667.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "004667.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "d864ed14b71317f0a171d2d0511a57e5c76ddafc80bf50d2b88c5efe5b3709e8",
+      "bytes": 800304,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Положение о Генеральной дирекции эксплуатируемого объекта МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004673.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004673.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 878 от 05.11.2025 О внесении изменений в Приказ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/004676.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004676.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 933 от 18.11.2025 О внесении изменений в Приказ № 377 от 12.05.2025",
+      "url": "https://mgimo.ru/sveden/files/004711.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004711.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 938 от 19.11.2025 О внесении изменений в Приказ № 599 от 17.07.2025",
+      "url": "https://mgimo.ru/sveden/files/004712.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "004712.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "1a380f82e666b8f7a7d3dabcc22e10ee6adfecbd3880c945b0a15dca4d985e01",
+      "bytes": 748745,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Положение о кафедре МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004775.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004775.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПРОМЕЖУТОЧНОЙ АТТЕСТАЦИИ ОБУЧАЮЩИХСЯ МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004776.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004776.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a551004f83fd19b23087d16cad4da46b3ae296d5b8d7460b4fcc9158f96fd100",
+      "bytes": 4332913,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ О ПОРЯДКЕ ОРГАНИЗАЦИИ И ОСУЩЕСТВЛЕНИЯ ОБРАЗОВАТЕЛЬНОЙ ДЕЯТЕЛЬНОСТИ В МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004777.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004777.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "baa93a36be20e67c274a87c1d5a3a15bc3b811fcfae8e9fa9e165eb10cf4a23b",
+      "bytes": 6509547,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 1074 от 17.12.2025 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/004778.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004778.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a2ceb1e57989bd6983891156bf12e69410256b4db43f2630fb2a3c5c1245669f",
+      "bytes": 502645,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 1088 от 19.12.2025 Об утверждении размеров денежных выплат студентам-сиротам в 2026 году",
+      "url": "https://mgimo.ru/sveden/files/004782.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004782.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "64c71157375f6e42541a59721bdacc262ac2d5376313c7cf812ce6745bd9aeaf",
+      "bytes": 1099750,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИКАЗ № 1109 от 24.12.2025 О внесении изменений в Приказ от 28.08.2025 № 642",
+      "url": "https://mgimo.ru/sveden/files/004786.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004786.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 1110 от 24.12.2025 О внесении изменений в Приказ от 28.08.2025 № 645",
+      "url": "https://mgimo.ru/sveden/files/004787.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004787.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 1111 от 24.12.2025 О внесении изменений в Приказ от 28.08.2025 № 643",
+      "url": "https://mgimo.ru/sveden/files/004788.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004788.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 1112 от 24.12.2025 О внесении изменений в Приказ от 28.08.2025 № 644",
+      "url": "https://mgimo.ru/sveden/files/004789.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004789.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о Дипломатической академии МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004808.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004808.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 57 от 04.02.2026 О внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/004813.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004813.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "16f8d3e05f1f03cb33216d92f29fff6f7074a96e1878597c70d5dd092e84253b",
+      "bytes": 890785,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Положение о факультете подготовки и аттестации научных кадров МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004815.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004815.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Устав МГИМО 2026",
+      "url": "https://mgimo.ru/sveden/files/004817.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/",
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "004817.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "03968d0d7876a79f3271c0ef430b3d6cee7348c77d7995c0a0edfc1b8a6d815d",
+      "bytes": 9936124,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 130 от 18.02.2026 О внесении изменений в Приказ № 599 от 17.07.2025",
+      "url": "https://mgimo.ru/sveden/files/004825.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/",
+        "https://mgimo.ru/sveden/objects/"
+      ],
+      "filename": "004825.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "396d0b7acf562ae3280698cac4420efb6e20662b07ba4bf4e333ed2a94810ab3",
+      "bytes": 412522,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Правила приёма в МГИМО МИД России 2026",
+      "url": "https://mgimo.ru/sveden/files/004830.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004830.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6cf446725d2f70ce6c95c2a7893523e6f4e17b4633596b5eca589433a39ccd97",
+      "bytes": 1806268,
+      "downloaded_at": "2026-11-16T19:27:15.741Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Правила приёма в аспирантуру МГИМО МИД России в 2026-2027 учебном году",
+      "url": "https://mgimo.ru/sveden/files/004872.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "004872.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "3a8090e0c89c4368ea39b93e13c5684b9d91367a295f78fef07e3819f3820b9e",
+      "bytes": 693040,
+      "downloaded_at": "2026-11-16T19:54:51.754Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Положение об именных стипендиях МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/004873.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "004873.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "4fb53e66be8470d43f15c71c8d2545d4063a1f28a5daa5dba48a48713c630e9f",
+      "bytes": 2424142,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 327 от 09.04.2026 О внесении изменений в Приказ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/004977.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "004977.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 328 от 09.04.2026 Об утверждении размера оплаты Магистратура для граждан РФ набора 2025 года",
+      "url": "https://mgimo.ru/sveden/files/005037.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005037.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 329 от 09.04.2026 Об утверждении размера оплаты Магистратура для граждан РФ набора 2026-2027 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/005038.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005038.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 330 от 09.04.2026 Об утверждении размера оплаты Магистратура для ин. граждан набора 2026-2027 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/005039.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005039.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 331 от 09.04.2026 Об утверждении размера оплаты Бакалавриата для граждан РФ набора 2026-2027 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/005040.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005040.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 332 от 09.04.2026 Об утверждении размера оплаты Бакалавриата для ин.граждан набора 2026-2027 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/005041.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005041.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 334 от 09.04.2026 Об индексации стоимости Магистратура для граждан РФ до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005042.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005042.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 335 от 09.04.2026 Об индексации стоимости Магистратура для ин.граждан до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005043.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005043.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 336 от 09.04.2026 Об индексации стоимости Аспирантура до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005044.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005044.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 337 от 09.04.2026 Об индексации стоимости Бакалавриат для ин.граждан до 2026",
+      "url": "https://mgimo.ru/sveden/files/005045.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005045.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 338 от 09.04.2026 Об индексации стоимости Бакалавриата для граждан РФ до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005046.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005046.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 341 от 09.04.2026 Об утверждении размера оплаты Магистратура для ин. граждан набора 2025 года",
+      "url": "https://mgimo.ru/sveden/files/005047.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005047.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 342 от 09.04.2026 Об утверждении размера оплаты Аспирантура для ин. граждан набора 2026-2027 уч.г.",
+      "url": "https://mgimo.ru/sveden/files/005048.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005048.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 343 от 09.04.2026 Об утверждении размера оплаты Аспирантура для граждан РФ набора 2026-2027 уч. г.",
+      "url": "https://mgimo.ru/sveden/files/005049.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005049.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение о группе финансовой аналитики",
+      "url": "https://mgimo.ru/sveden/files/005125.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "005125.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 448 от 27.04.2026 О внесении изменений в Приказ № 825 от 17.10.2018",
+      "url": "https://mgimo.ru/sveden/files/005172.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005172.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Положение об оказании платных образовательных услуг в МГИМО МИД России",
+      "url": "https://mgimo.ru/sveden/files/005173.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005173.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Приказ № 453 от 27.04.2026 О внесении изменений в Положение об Управлении по договорной работе",
+      "url": "https://mgimo.ru/sveden/files/005190.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "005190.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПОЛОЖЕНИЕ",
+      "url": "https://mgimo.ru/sveden/files/005312.docx",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/struct/"
+      ],
+      "filename": "005312.docx",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 344 от 09.04.2026 Об индексации стоимости заочная Магистратура Дипакадемии до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005408.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005408.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 345 от 09.04.2026 Об индексации стоимости Магистратура Дипакадемии до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005409.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005409.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 346 от 09.04.2026 Об утверждении размера оплаты Магистратура Дипакадемии набор 2026",
+      "url": "https://mgimo.ru/sveden/files/005410.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005410.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 347 от 09.04.2026 Об индексации стоимости Бакалавриат Дипакадемии до 2026 года",
+      "url": "https://mgimo.ru/sveden/files/005411.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005411.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "ПРИКАЗ № 645 от 03.06.2026 О внесении изменения в приказы № 344, № 345",
+      "url": "https://mgimo.ru/sveden/files/005496.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005496.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    },
+    {
+      "title": "Правила приёма в МГИМО МИД России 2026 (в редакции от 25 марта 2026 г.)",
+      "url": "https://mgimo.ru/sveden/files/005650.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/document/"
+      ],
+      "filename": "005650.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "f3de528261344e259824dbe329737910e5ad62f26c71355a275fa2d1627889ed",
+      "bytes": 1765244,
+      "downloaded_at": "2026-11-16T20:13:11.182Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 758 от 02.07.2026 Об утверждении новых типовых форм Договоров об оказании платных образовательных услуг",
+      "url": "https://mgimo.ru/sveden/files/005887.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005887.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "8301dd7a9ccd9afb08436c6a9fe6133eee904ce095cd7ad8a8badf122dd49ee0",
+      "bytes": 1711017,
+      "downloaded_at": "2026-11-16T22:10:12.352Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор об оказании платных образовательных услуг (бакалавриат) Заказчик - физическое лицо (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/005888.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005888.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "53a689c8d6df18378104a546aa6b911dfafe6764a02bf1d7c1b4b04f453f0558",
+      "bytes": 371472,
+      "downloaded_at": "2026-11-16T22:10:11.894Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор об оказании платных образовательных услуг (бакалавриат) Заказчик - юридическое лицо (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/005889.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005889.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "82ba4d8862560c93d8ea08980c9f231db4d2c1347eb1b7f70260d2ac4d481dfd",
+      "bytes": 274273,
+      "downloaded_at": "2026-11-16T22:10:12.221Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Договор присоединения (бакалавриат) (для граждан РФ)",
+      "url": "https://mgimo.ru/sveden/files/005890.pdf",
+      "selection_status": "supporting_contract_form",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005890.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "6c07f06487458c150ca74215648790367a30e11cc07aa7c795929409ee20257e",
+      "bytes": 397784,
+      "downloaded_at": "2026-11-16T22:10:10.567Z",
+      "acquisition_origin": "browser_pdf"
+    },
+    {
+      "title": "Приказ № 771 от 08.07.2026 о внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/005891.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "005891.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "a2e02a9ffec3b65b68b1b9aac90cf4418462029ca427bb6140807aec5ab3febe",
+      "bytes": 460672,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "Приказ № 788 от 14.07.2026 о внесении изменений в приказ № 529 от 05.08.2020",
+      "url": "https://mgimo.ru/sveden/files/005892.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/grants/"
+      ],
+      "filename": "005892.pdf",
+      "acquisition_status": "local_pdf_saved",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed",
+      "sha256": "ab3c5cb2c5bf11957141f1b03ea5fa5f258893efbdab16dba5892dc36c91c8e9",
+      "bytes": 938990,
+      "downloaded_at": "2026-11-10",
+      "acquisition_origin": "baseline_server_corpus"
+    },
+    {
+      "title": "ПРИКАЗ № 841 от 05.08.2026 О внесении изменений в Приказ № 347 от 09.04.2026",
+      "url": "https://mgimo.ru/sveden/files/005909.pdf",
+      "selection_status": "candidate_npa",
+      "source_pages": [
+        "https://mgimo.ru/sveden/paid_edu/"
+      ],
+      "filename": "005909.pdf",
+      "acquisition_status": "missing",
+      "ocr_acceptance": "pending",
+      "legal_currentness": "unconfirmed"
+    }
+  ]
+}

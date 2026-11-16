@@ -60,7 +60,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if cfg.llm_provider == "gigachat" and cfg.gigachat_auth_key.get_secret_value():
             try:
                 provider = GigaChat(cfg.gigachat_auth_key.get_secret_value(), cfg.gigachat_scope,
-                                    cfg.gigachat_model, cfg.gigachat_ca_bundle)
+                                    cfg.gigachat_model, cfg.gigachat_ca_bundle,
+                                    translation_model=cfg.gigachat_translation_model)
             except (OSError, ValueError):
                 log.error("Ассистент отключён: проверьте сертификат GigaChat")
         app.state.assistant = Assistant(cfg, provider)

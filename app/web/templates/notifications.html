@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Уведомления{% endblock %}
+{% block title %}{{ _('Уведомления') }}{% endblock %}
 {% block content %}
 <div class="page page--narrow">
-  <h1 class="title-1">Уведомления</h1>
-  <p class="page__note">Объявления, новые документы, статусы справок и новые баллы за последние 45 дней. Нажмите на уведомление, чтобы развернуть его.</p>
+  <h1 class="title-1">{{ _('Уведомления') }}</h1>
+  <p class="page__note">{{ _('Объявления, новые документы, статусы справок и новые баллы за последние 45 дней. Нажмите на уведомление, чтобы развернуть его.') }}</p>
   <section class="panel notif-page">
     {% for it in items %}{% include "partials/_notif_item.html" %}
-    {% else %}<p class="muted">Пока ничего нового.</p>{% endfor %}
+    {% else %}<p class="muted">{{ _('Пока ничего нового.') }}</p>{% endfor %}
   </section>
 </div>
 {% endblock %}

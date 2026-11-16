@@ -1,35 +1,33 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}Сервисы{% endblock %}
-{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Сервисы</span></nav>{% endblock %}
+{% block title %}{{ _('Сервисы') }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="{{ _('Главная') }}">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ _('Сервисы') }}</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
-  <h1 class="title-1">Сервисы</h1>
+  <h1 class="title-1">{{ _('Сервисы') }}</h1>
 
   {% if student %}
     {% set back = "/services" %}{% include "partials/_telegram.html" %}
 
     <section class="panel tg" id="calendar">
-      <h2 class="profile__name">Расписание в календаре (.ics)</h2>
+      <h2 class="profile__name">{{ _('Расписание в календаре (.ics)') }}</h2>
       {% if feed_url %}
-        <p>Подпишитесь на ссылку в Google Календаре, Apple Календаре или Outlook — расписание группы
-          будет обновляться само, переносы тоже. Ссылка личная, не публикуйте её.</p>
-        <input class="field__input tg__feed" type="text" readonly value="{{ feed_url }}" aria-label="Ссылка на календарь" onclick="this.select()">
+        <p>{{ _('Подпишитесь на ссылку в Google Календаре, Apple Календаре или Outlook — расписание группы\n          будет обновляться само, переносы тоже. Ссылка личная, не публикуйте её.') }}</p>
+        <input class="field__input tg__feed" type="text" readonly value="{{ feed_url }}" aria-label="{{ _('Ссылка на календарь') }}" onclick="this.select()">
         <div class="tg__actions">
-          <a class="btn btn--primary" href="{{ webcal_url }}">Подписаться</a>
-          <a class="btn btn--ghost" href="{{ feed_url }}">Скачать .ics</a>
+          <a class="btn btn--primary" href="{{ webcal_url }}">{{ _('Подписаться') }}</a>
+          <a class="btn btn--ghost" href="{{ feed_url }}">{{ _('Скачать .ics') }}</a>
         </div>
       {% else %}
-        <p class="muted">Личная ссылка на календарь появится после подключения Telegram-бота: она
-          привязана к нему и пропадает при отключении.</p>
+        <p class="muted">{{ _('Личная ссылка на календарь появится после подключения Telegram-бота: она\n          привязана к нему и пропадает при отключении.') }}</p>
       {% endif %}
     </section>
   {% else %}
-    <p class="alert">Учётная запись сотрудника: Telegram-бот и календарь доступны только студентам.</p>
+    <p class="alert">{{ _('Учётная запись сотрудника: Telegram-бот и календарь доступны только студентам.') }}</p>
   {% endif %}
 
   <section class="panel tg">
-    <h2 class="profile__name">Сервисы вуза</h2>
+    <h2 class="profile__name">{{ _('Сервисы вуза') }}</h2>
     <ul class="svc-list">
       {% for name, color, text in services %}
         <li class="svc-list__item">
@@ -38,7 +36,7 @@
         </li>
       {% endfor %}
     </ul>
-    <p class="page__note">Концепт: ссылки на реальные системы вуза не подключены.</p>
+    <p class="page__note">{{ _('Концепт: ссылки на реальные системы вуза не подключены.') }}</p>
   </section>
 </div>
 {% endblock %}

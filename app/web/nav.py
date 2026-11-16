@@ -40,6 +40,7 @@ HR_MENU = {"title": "Кадровые сервисы", "icon": "office", "childr
 # Кабинет преподавателя (решения 0007, 0008): «сотрудник» (общая часть, как в ЛК РАНХиГС
 # my.ranepa.ru/lk/employee) + группа «Преподавателю» с рабочими разделами.
 TEACHER_MENU = [
+    {"title": "ИИ-ассистент", "icon": "chat", "href": "/s/assistant"},
     {"title": "Главная", "icon": "home", "href": "/t/home"},
     {"title": "Преподавателю", "icon": "cap", "children": [
         {"title": "Мои курсы", "href": "/t/courses"},
@@ -63,6 +64,7 @@ TEACHER_TABBAR = [
 # Кабинет деканата (решения 0009, 0010): всё, что у сотрудника (главная, сервисы, кадровые сервисы,
 # профиль), плюс группа «Деканат» с адресными объявлениями. Заявки на справки — в Pyrus.
 STAFF_MENU = [
+    {"title": "ИИ-ассистент", "icon": "chat", "href": "/s/assistant"},
     {"title": "Главная", "icon": "home", "href": "/d/home"},
     {"title": "Деканат", "icon": "chat", "children": [
         {"title": "Объявления", "href": "/d/announcements"},
