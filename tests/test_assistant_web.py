@@ -5,12 +5,21 @@ import pytest
 from tests.test_web import client, login  # общие синтетические студенты и изолированная БД
 
 
+async def start_chat(client, csrf):
+    response = await client.post("/s/assistant/conversation", json={"action":"start", "acknowledged":True},
+                                headers={"X-CSRF-Token":csrf})
+    assert response.status_code == 200
+    return response.json()["conversation_token"]
+
+
 async def test_assistant_requires_login_and_csrf(client):
     assert (await client.get("/s/assistant")).status_code == 303
     assert (await client.post("/s/assistant/ask", json={"question":"Академический отпуск"})).status_code == 303
     csrf = await login(client)
     assert (await client.post("/s/assistant/ask", json={"question":"Академический отпуск"})).status_code == 403
-    result = await client.post("/s/assistant/ask", json={"question":"Академический отпуск"}, headers={"X-CSRF-Token":csrf})
+    assert (await client.post("/s/assistant/ask", json={"question":"Академический отпуск"}, headers={"X-CSRF-Token":csrf})).status_code == 403
+    token = await start_chat(client, csrf)
+    result = await client.post("/s/assistant/ask", json={"question":"Академический отпуск", "conversation_token":token}, headers={"X-CSRF-Token":csrf})
     assert result.status_code == 200 and result.json()["status"] == "unavailable"
     assert result.headers["cache-control"] == "no-store"
 
@@ -42,9 +51,10 @@ async def test_staff_cannot_use_student_assistant(client):
 async def test_assistant_uses_user_from_session_and_does_not_send_profile(client):
     from app.assistant.service import BusyError
     csrf = await login(client)
+    token = await start_chat(client, csrf)
     seen = []
     class Recorder:
-        async def ask(self, *args):
+        async def chat(self, *args):
             seen.append(args)
             if len(seen) > 1:
                 raise BusyError()
@@ -52,11 +62,13 @@ async def test_assistant_uses_user_from_session_and_does_not_send_profile(client
     app = client._transport.app
     original = app.state.assistant
     app.state.assistant = Recorder()
+    app.state.assistant.conversations = original.conversations
     try:
-        response = await client.post("/s/assistant/ask", json={"question":"Вопрос по положениям"}, headers={"X-CSRF-Token":csrf})
-        assert response.status_code == 200 and len(seen[0]) == 4
-        assert type(seen[0][0]) is int and seen[0][1:] == ("Вопрос по положениям", [], None)
-        response = await client.post("/s/assistant/ask", json={"question":"Вопрос по положениям"}, headers={"X-CSRF-Token":csrf})
+        response = await client.post("/s/assistant/ask", json={"question":"Вопрос по положениям", "conversation_token":token}, headers={"X-CSRF-Token":csrf})
+        assert response.status_code == 200 and len(seen[0]) == 7
+        assert type(seen[0][0]) is int
+        assert seen[0][1:5] == (1, "Вопрос по положениям", [], None)
+        response = await client.post("/s/assistant/ask", json={"question":"Вопрос по положениям", "conversation_token":token}, headers={"X-CSRF-Token":csrf})
         assert response.status_code == 429 and response.headers["retry-after"] == "60"
     finally:
         app.state.assistant = original

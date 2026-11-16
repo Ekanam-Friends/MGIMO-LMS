@@ -8,6 +8,7 @@ import re
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from typing import Literal
 from urllib.parse import urlsplit
 
 import snowballstemmer
@@ -36,14 +37,16 @@ class Chunk(BaseModel):
     title: str = Field(min_length=1, max_length=500)
     source_url: str = Field(max_length=2000)
     source_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
-    document_date: date
-    effective_from: date
+    document_date: date | None
+    effective_from: date | None
     effective_to: date | None = None  # исключающая правая граница
     retroactive_basis: str | None = Field(default=None, max_length=1000)
     checked_at: date
     downloaded_at: date
     reviewed_public: bool = False
+    verification_status: Literal["verified", "snapshot"] = "verified"
     page: int = Field(ge=1, le=10000)
+    page_end: int | None = Field(default=None, ge=1, le=10000)
     clause: str = Field(min_length=1, max_length=100)
     text: str = Field(min_length=30, max_length=6000)
     embedding_model: str = ""
@@ -52,11 +55,15 @@ class Chunk(BaseModel):
     @model_validator(mode="after")
     def valid_metadata(self):
         public_url(self.source_url)
-        if self.effective_to is not None and self.effective_to <= self.effective_from:
+        if self.verification_status == "verified" and (self.document_date is None or self.effective_from is None):
+            raise ValueError("Проверенной редакции нужны подтверждённые даты")
+        if self.page_end is not None and self.page_end < self.page:
+            raise ValueError("Конец фрагмента раньше начала")
+        if self.effective_to is not None and self.effective_from is not None and self.effective_to <= self.effective_from:
             raise ValueError("Некорректный интервал действия редакции")
-        if self.effective_from < self.document_date and not self.retroactive_basis:
+        if self.effective_from and self.document_date and self.effective_from < self.document_date and not self.retroactive_basis:
             raise ValueError("Обратная сила требует проверенного основания в документе")
-        if self.document_date > self.checked_at or self.downloaded_at > self.checked_at:
+        if (self.document_date and self.document_date > self.checked_at) or self.downloaded_at > self.checked_at:
             raise ValueError("Проверка источника не может предшествовать документу или скачиванию")
         if self.embedding and (not self.embedding_model or not all(math.isfinite(v) for v in self.embedding)
                                or not any(self.embedding)):
@@ -118,7 +125,7 @@ class Corpus:
             metadata = {}
             for row in rows:
                 key = row.document_id, row.revision
-                value = row.model_dump(exclude={"id", "page", "clause", "text", "embedding"})
+                value = row.model_dump(exclude={"id", "page", "page_end", "clause", "text", "embedding"})
                 if key in metadata and metadata[key] != value:
                     raise CorpusError("Противоречивые метаданные редакции")
                 metadata[key] = value
@@ -127,7 +134,9 @@ class Corpus:
             raise CorpusError("Не удалось проверить снимок корпуса") from exc
 
     def active(self, as_of: date, today: date, max_age: int) -> list[Chunk]:
-        rows = [c for c in self.chunks if c.reviewed_public and c.effective_from <= as_of
+        rows = [c for c in self.chunks if c.reviewed_public
+                and ((c.verification_status == "snapshot" and as_of == today)
+                     or (c.verification_status == "verified" and c.effective_from is not None and c.effective_from <= as_of))
                 and (c.effective_to is None or as_of < c.effective_to)
                 and c.checked_at <= today and c.downloaded_at <= today
                 and (today - c.checked_at).days <= max_age]
@@ -139,7 +148,7 @@ class Corpus:
         return rows
 
     def search(self, question: str, rows: list[Chunk], top_k: int,
-               vector: list[float] | None = None) -> list[Chunk]:
+               vector: list[float] | None = None, *, lexical_weight: float = 1., semantic_weight: float = 1.) -> list[Chunk]:
         query = terms(expand(question))
         if not query or not rows:
             return []
@@ -157,9 +166,13 @@ class Corpus:
         relevant = [i for i, c in enumerate(candidates)
                     if len(meaningful & set(terms(c.title + " " + c.text))) / len(meaningful) >= .5]
         lexical = sorted(relevant, key=lambda i: scores[i], reverse=True)
-        ranks = {i: 1/(60+r) for r, i in enumerate(lexical, 1)}
+        # Лексический канал сохраняет фильтр совпадения процедуры. Семантический
+        # ищет по всему корпусу: иначе перефразирование отсекается ещё до векторов.
+        ranks = {candidates[i].id: lexical_weight/(60+r) for r, i in enumerate(lexical, 1)}
+        by_id = {c.id: c for c in rows}
         if vector is not None:
-            dense = sorted(relevant, key=lambda i: _cosine(vector, candidates[i].embedding), reverse=True)
-            for r, i in enumerate(dense, 1):
-                ranks[i] += 1/(60+r)
-        return [candidates[i] for i in sorted(ranks, key=ranks.get, reverse=True)[:top_k]]
+            similarities = [(c.id, _cosine(vector, c.embedding)) for c in rows]
+            dense = sorted(similarities, key=lambda pair: pair[1], reverse=True)[:max(12, top_k * 4)]
+            for r, (cid, _) in enumerate(dense, 1):
+                ranks[cid] = ranks.get(cid, 0.) + semantic_weight/(60+r)
+        return [by_id[cid] for cid in sorted(ranks, key=ranks.get, reverse=True)[:top_k]]

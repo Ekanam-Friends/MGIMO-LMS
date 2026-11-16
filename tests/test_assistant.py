@@ -28,7 +28,7 @@ def chunk(**values):
 
 def config(tmp_path, **values):
     return Settings(_env_file=None, **(dict(database_url="sqlite+aiosqlite:///:memory:",
-        llm_provider="gigachat", rag_corpus_dir=str(tmp_path)) | values))
+        llm_provider="gigachat", rag_corpus_dir=str(tmp_path), rag_use_embeddings=True) | values))
 
 
 def write_corpus(tmp_path, rows):
@@ -79,6 +79,25 @@ def test_metadata_intervals_and_source_freshness(tmp_path):
         Corpus([old.model_copy(update={"effective_to": None}), current], "sha").active(TODAY, TODAY, 30)
 
 
+def test_snapshot_has_no_invented_dates_and_is_not_historical(tmp_path):
+    row = chunk(document_date=None, effective_from=None, verification_status="snapshot")
+    write_corpus(tmp_path, [row])
+    corpus = Corpus.load(tmp_path / "chunks.jsonl")
+    assert corpus.active(TODAY, TODAY, 30)
+    assert not corpus.active(date(2026,11,14), TODAY, 30)
+    with pytest.raises(ValidationError):
+        chunk(document_date=None, effective_from=None, verification_status="verified")
+
+
+async def test_snapshot_can_never_be_presented_as_verified_full_answer(tmp_path):
+    write_corpus(tmp_path, [chunk(document_date=None, effective_from=None, verification_status="snapshot", page_end=4)])
+    provider = FakeProvider({"status":"answer", "summary_id":"leave-1", "steps":[]},
+                            {"accepted_ids":["leave-1"], "complete":True})
+    result = await Assistant(config(tmp_path), provider).ask(1,"Академический отпуск",[],None)
+    assert result["status"] == "partial" and result["summary"]["effective_from"] is None
+    assert result["summary"]["page_end"] == 4 and "OCR" in result["message"]
+
+
 def test_index_rejects_duplicate_ids_and_conflicting_metadata(tmp_path):
     for rows in [[chunk(), chunk()], [chunk(), chunk(id="leave-2", checked_at="2026-11-14")]]:
         write_corpus(tmp_path, rows)
@@ -100,6 +119,16 @@ def test_dense_vectors_must_match_dimension_and_be_finite():
         corpus.search("Академический отпуск", corpus.chunks, 5, [1, 0, 0])
     with pytest.raises(ValidationError):
         chunk(embedding_model="Embeddings", embedding=[float("nan")])
+
+
+def test_semantic_search_is_not_gated_by_lexical_matches():
+    target = chunk(embedding_model="Embeddings", embedding=[1., 0.])
+    other = chunk(id="transfer", document_id="transfer", title="Переход на бюджет",
+                  text="Заявление о переходе на бесплатное обучение подаётся в установленном порядке.",
+                  embedding_model="Embeddings", embedding=[0., 1.])
+    corpus = Corpus([target, other], "sha")
+    assert not corpus.search("Прервать учёбу временно", corpus.chunks, 1)
+    assert corpus.search("Прервать учёбу временно", corpus.chunks, 1, [1., 0.])[0].id == target.id
 
 
 def test_retroactive_revision_requires_explicit_reviewed_basis():
@@ -160,10 +189,10 @@ async def test_provider_failure_is_not_a_refusal_or_nearest_document_fallback(tm
     assert "secret-token" not in json.dumps(result)
 
 
-async def test_no_evidence_refuses_without_generation_or_embedding(tmp_path):
+async def test_lexical_mode_no_evidence_refuses_without_generation(tmp_path):
     write_corpus(tmp_path, [chunk()])
     provider = FakeProvider()
-    result = await Assistant(config(tmp_path, llm_embedding_model="Embeddings"), provider).ask(1, "Как купить криптовалюту?", [], None)
+    result = await Assistant(config(tmp_path), provider).ask(1, "Как купить криптовалюту?", [], None)
     assert result["status"] == "not_found" and not provider.calls
 
 
