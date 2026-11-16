@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 
 from app.assistant.corpus import Chunk, Corpus
+from app.assistant.repositories import load_corpus
 from app.assistant.provider import GigaChat, ProviderError
 from app.core.config import get_settings
 
@@ -116,7 +117,7 @@ async def main():
             await client.aclose()
     pending = args.out / 'chunks.pending.jsonl'
     pending.write_text('\n'.join(c.model_dump_json() for c in chunks)+'\n', encoding='utf-8')
-    corpus = Corpus.load(pending)
+    corpus = load_corpus(pending)
     os.replace(pending, args.out / 'chunks.jsonl')
     (args.out / 'index-report.json').write_text(json.dumps({'snapshot':corpus.snapshot,
         'published_at':date.today().isoformat(), 'model':None if args.lexical_only else cfg.llm_embedding_model, 'chunks':len(chunks),

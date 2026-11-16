@@ -10,6 +10,7 @@ from sqlalchemy import select
 from app.models import Student
 
 from app.assistant.service import BusyError
+from app.assistant.personal import SqlPersonalEvidenceReader
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
 from app.web.views import render
 from app.web.i18n import language_for
@@ -87,8 +88,7 @@ async def conversation_action(request: Request, viewer: Viewer = Depends(check_c
         if conversation is None or conversation.actor_role != viewer.user.role:
             raise HTTPException(403, "Беседа завершена. Подтвердите предупреждение заново")
         if data.action == "allow_grades" and conversation.grades_pending:
-            conversation.grades_allowed = True
-            conversation.grades_pending = False
+            conversation.grant_grades()
         elif data.action == "clear":
             store.clear(data.conversation_token, owner)
         else:
@@ -145,7 +145,7 @@ async def assistant_ask(request: Request, viewer: Viewer = Depends(check_csrf), 
             raise HTTPException(403, "Доступ к демо-студентам отключён")
     try:
         answer = await request.app.state.assistant.chat(viewer.user.id, student_id, data.question.strip(),
-            data.history, data.as_of, conversation, db)
+            data.history, data.as_of, conversation, SqlPersonalEvidenceReader(db))
     except BusyError:
         return JSONResponse({"status": "busy", "message": "Запрос уже выполняется или достигнут лимит. Подождите минуту."},
                             status_code=429, headers={"Retry-After": "60", "Cache-Control": "no-store"})

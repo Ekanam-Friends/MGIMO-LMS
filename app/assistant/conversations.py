@@ -1,18 +1,8 @@
-"""Разрешения беседы в памяти одного процесса; перезапуск отзывает разрешения."""
-from dataclasses import dataclass
+"""Репозиторий бесед в памяти одного процесса; перезапуск отзывает разрешения."""
 import secrets
 import time
 
-
-@dataclass
-class Conversation:
-    owner: str
-    expires: float
-    grades_allowed: bool = False
-    grades_pending: bool = False
-    student_id: int | None = None
-    actor_role: str = "student"
-    language: str = "ru"
+from .conversation import Conversation
 
 
 class Conversations:

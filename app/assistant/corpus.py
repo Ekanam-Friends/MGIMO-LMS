@@ -7,7 +7,6 @@ import math
 import re
 from collections import Counter
 from datetime import date
-from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -123,11 +122,10 @@ class Corpus:
         self.chunks, self.snapshot = chunks, snapshot
 
     @classmethod
-    def load(cls, path: Path) -> "Corpus":
+    def from_bytes(cls, raw: bytes) -> "Corpus":
         try:
-            if path.stat().st_size > 30_000_000:
+            if len(raw) > 30_000_000:
                 raise CorpusError("Индекс слишком большой")
-            raw = path.read_bytes()
             rows = [Chunk.model_validate_json(line) for line in raw.splitlines() if line.strip()]
             if not rows or len(rows) > 15000 or len({r.id for r in rows}) != len(rows):
                 raise CorpusError("Пустой индекс, превышен лимит или повторяются ID")
@@ -139,7 +137,7 @@ class Corpus:
                     raise CorpusError("Противоречивые метаданные редакции")
                 metadata[key] = value
             return cls(rows, hashlib.sha256(raw).hexdigest())
-        except (OSError, ValueError) as exc:
+        except ValueError as exc:
             raise CorpusError("Не удалось проверить снимок корпуса") from exc
 
     def active(self, as_of: date, today: date, max_age: int) -> list[Chunk]:

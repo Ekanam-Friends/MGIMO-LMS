@@ -70,7 +70,7 @@ async def test_demo_roles_select_any_student_and_consent_is_bound(client, role):
     token = response.json()["conversation_token"]
     conversation = app.state.assistant.conversations.items[token]
     assert conversation.student_id == 2 and conversation.actor_role == role
-    conversation.grades_pending = True
+    conversation.request_grades()
     assert (await client.post("/s/assistant/conversation", json={"action":"allow_grades", "conversation_token":token}, headers=headers)).status_code == 200
     assert conversation.grades_allowed
     other = (await client.post("/s/assistant/conversation", json={"action":"start", "acknowledged":True, "student_id":1}, headers=headers)).json()["conversation_token"]

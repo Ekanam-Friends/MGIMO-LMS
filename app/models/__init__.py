@@ -21,6 +21,7 @@ from app.models.knowledge import KnowledgeDocument
 from app.models.document_notice import DocumentNotice, DocumentRecipient
 from app.models.schedule import (
     Faculty,
+    GroupScheduleCoverage,
     ImportRun,
     Lesson,
     LessonChange,
@@ -56,6 +57,7 @@ __all__ = [
     "CertificateRequest",
     "CertificateRequestEvent",
     "Faculty",
+    "GroupScheduleCoverage",
     "ImportRun",
     "Lesson",
     "LessonChange",

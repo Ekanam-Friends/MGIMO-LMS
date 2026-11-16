@@ -1,12 +1,13 @@
 """Разрешения и изоляция личных данных: реальные запросы SQLite, LLM заменена."""
 from datetime import date
+from types import SimpleNamespace
 import json
 
 import pytest
 
 from app.assistant.conversations import Conversation, Conversations
 from app.assistant.personal import collect
-from app.assistant.service import Assistant
+from app.assistant.bootstrap import create_assistant as Assistant
 from tests.test_assistant import FakeProvider, config
 from tests.test_assistant_web import start_chat
 from tests.test_web import client, login
@@ -17,7 +18,8 @@ def test_conversation_owner_expiry_and_clear(monkeypatch):
     store = Conversations()
     token = store.start("session-a")
     assert store.get(token, "session-b") is None
-    store.get(token, "session-a").grades_allowed = True
+    store.get(token, "session-a").request_grades()
+    store.get(token, "session-a").grant_grades()
     store.clear(token, "session-a")
     assert store.get(token, "session-a") is None
     token = store.start("session-a")
@@ -44,11 +46,12 @@ async def test_no_grade_read_or_transfer_before_permission(tmp_path, monkeypatch
     provider = FakeProvider({"scopes":["grades"]}, {"scopes":["grades"]}, {"fact_ids":["fact-1"]})
     assistant = Assistant(config(tmp_path), provider)
     conversation = Conversation("session", float("inf"))
-    first = await assistant.chat(1, 1, "Какие у меня оценки?", [], None, conversation, None)
+    first = await assistant.chat(1, 1, "Какие у меня оценки?", [], None, conversation, SimpleNamespace(collect=collector))
     assert first["status"] == "consent_required" and conversation.grades_pending
     assert not reads and "75" not in json.dumps(provider.calls)
-    conversation.grades_allowed = True
-    second = await assistant.chat(1, 1, "Какие у меня оценки?", [], None, conversation, None)
+    conversation.request_grades()
+    conversation.grant_grades()
+    second = await assistant.chat(1, 1, "Какие у меня оценки?", [], None, conversation, SimpleNamespace(collect=collector))
     assert len(reads) == 1 and second["facts"][0]["text"] == "Тест: 75 баллов"
 
 
@@ -60,7 +63,7 @@ async def test_acknowledgement_and_grant_require_explicit_server_flow(client):
     payload = {"action":"allow_grades", "conversation_token":token}
     assert (await client.post("/s/assistant/conversation", json=payload, headers=headers)).status_code == 400
     store = client._transport.app.state.assistant.conversations
-    store.items[token].grades_pending = True
+    store.items[token].request_grades()
     assert (await client.post("/s/assistant/conversation", json=payload, headers=headers)).status_code == 200
     assert store.items[token].grades_allowed
     assert (await client.post("/s/assistant/conversation", json={"action":"clear", "conversation_token":token}, headers=headers)).status_code == 200
@@ -108,6 +111,8 @@ async def test_invented_personal_evidence_fails_closed(tmp_path, monkeypatch):
         return [{"id":"fact-1", "text":"Реальная запись", "url":"/grades", "label":"Успеваемость"}]
     monkeypatch.setattr("app.assistant.personal.collect", collector)
     provider = FakeProvider({"scopes":["grades"]}, {"fact_ids":["invented"]})
-    conversation = Conversation("session", float("inf"), grades_allowed=True)
-    result = await Assistant(config(tmp_path), provider).chat(1,1,"Мои оценки",[],None,conversation,None)
+    conversation = Conversation("session", float("inf"))
+    conversation.request_grades()
+    conversation.grant_grades()
+    result = await Assistant(config(tmp_path), provider).chat(1,1,"Мои оценки",[],None,conversation,SimpleNamespace(collect=collector))
     assert result["status"] == "error" and not result.get("facts")

@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.certificates.pyrus_client import PyrusClient
 from app.assistant.provider import GigaChat
-from app.assistant.service import Assistant
+from app.assistant.bootstrap import create_assistant
 from app.web.assistant_views import router as assistant_router
 from app.assistant.documents import DocumentProcessor
 from app.web.document_views import DocumentBodyLimit, router as document_router
@@ -64,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                                     translation_model=cfg.gigachat_translation_model)
             except (OSError, ValueError):
                 log.error("Ассистент отключён: проверьте сертификат GigaChat")
-        app.state.assistant = Assistant(cfg, provider)
+        app.state.assistant = create_assistant(cfg, provider)
         engine = make_engine(cfg.database_url)
         app.state.session_factory = make_session_factory(engine)
         app.state.certificate_sync = None

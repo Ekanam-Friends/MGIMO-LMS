@@ -8,6 +8,16 @@ from app.grades.service import record_book
 from app.models import Lesson, LessonGroup, Student
 from app.models.certificates import CertificateKind, CertificateRequest, PaperStatus, RequestStatus
 from app.models.grades import FinalResult
+from .evidence import bounded_facts
+
+
+class SqlPersonalEvidenceReader:
+    """Адаптер чтения: транзакция принадлежит вызывающему HTTP-сценарию."""
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def collect(self, student_id, scopes, today, start, end):
+        return await collect(self.db, student_id, scopes, today, start, end)
 
 
 async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: date,
@@ -67,7 +77,4 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
         if len(rows) > 20:
             add("Выбраны последние 20 заявок. Полная история доступна в разделе справок.", "/mfc/certificates", "Ограничение выборки")
     # Не отправляем провайдеру неограниченный журнал оценок.
-    if len(facts) > 160:
-        facts = facts[:159] + [{"id": "fact-limit", "text": "Выборка ограничена 159 записями; уточните вопрос или откройте раздел кабинета.",
-                               "url": "/grades", "label": "Ограничение выборки"}]
-    return facts
+    return bounded_facts(facts)

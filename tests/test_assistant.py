@@ -10,9 +10,11 @@ import pytest
 from pydantic import ValidationError
 
 from app.assistant.corpus import Chunk, Corpus, CorpusError, public_url
+from app.assistant.repositories import load_corpus
 from app.assistant.ingest import prepare
 from app.assistant.provider import GigaChat, ProviderError
-from app.assistant.service import Assistant, BusyError
+from app.assistant.bootstrap import create_assistant as Assistant
+from app.assistant.service import BusyError
 from app.core.config import Settings
 
 TODAY = date(2026, 11, 15)
@@ -82,7 +84,7 @@ def test_metadata_intervals_and_source_freshness(tmp_path):
 def test_snapshot_has_no_invented_dates_and_is_not_historical(tmp_path):
     row = chunk(document_date=None, effective_from=None, verification_status="snapshot")
     write_corpus(tmp_path, [row])
-    corpus = Corpus.load(tmp_path / "chunks.jsonl")
+    corpus = load_corpus(tmp_path / "chunks.jsonl")
     assert corpus.active(TODAY, TODAY, 30)
     assert not corpus.active(date(2026,11,14), TODAY, 30)
     with pytest.raises(ValidationError):
@@ -102,7 +104,7 @@ def test_index_rejects_duplicate_ids_and_conflicting_metadata(tmp_path):
     for rows in [[chunk(), chunk()], [chunk(), chunk(id="leave-2", checked_at="2026-11-14")]]:
         write_corpus(tmp_path, rows)
         with pytest.raises(CorpusError):
-            Corpus.load(tmp_path / "chunks.jsonl")
+            load_corpus(tmp_path / "chunks.jsonl")
 
 
 def test_two_stage_search_does_not_retrieve_transfer_for_academic_leave():

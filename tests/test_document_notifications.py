@@ -14,7 +14,6 @@ from app.bot.document_notify import deliver_document_notifications
 from app.models import Student, TelegramLink
 from app.models.auth import Role, User
 from app.models.document_notice import DocumentNotice, DocumentRecipient
-from app.notifications import documents as service
 from tests.test_document_upload import client, as_staff, upload, pause_background
 from tests.test_web import PASSWORD
 

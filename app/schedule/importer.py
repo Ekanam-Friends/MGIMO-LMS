@@ -36,6 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models import (
     Faculty,
+    GroupScheduleCoverage,
     ImportRun,
     Lesson,
     LessonChange,
@@ -79,6 +80,7 @@ class ImportStats:
     status: str = ImportStatus.RUNNING
     groups_total: int = 0
     groups_ok: int = 0
+    groups_populated: int = 0
     groups_failed: int = 0
     lessons_seen: int = 0
     changes: dict[str, int] = field(default_factory=dict)
@@ -113,12 +115,14 @@ class ScheduleImporter:
         *,
         fake_name_salt: str,
         concurrency: int = 1,
+        report_additions: bool = True,
         now: Callable[[], datetime] = datetime.now,
     ) -> None:
         self._sf = session_factory
         self._client = client
         self._salt = fake_name_salt
         self._concurrency = max(1, concurrency)
+        self._report_additions = report_additions
         self._now = now
 
         self._run_id = 0
@@ -139,7 +143,11 @@ class ScheduleImporter:
         *,
         group_filter: GroupFilter | None = None,
         limit: int | None = None,
+        nonempty_limit: int | None = None,
     ) -> ImportStats:
+        """nonempty_limit ограничивает число групп с занятиями, не число попыток."""
+        if nonempty_limit is not None and nonempty_limit <= 0:
+            raise ValueError("nonempty_limit должен быть положительным")
         stats = ImportStats()
         async with self._sf() as session:
             run = ImportRun(started_at=self._now(), period_start=start, period_end=finish)
@@ -152,7 +160,7 @@ class ScheduleImporter:
             selected = [g for g in groups if g.has_schedule and (group_filter is None or group_filter(g))]
             if limit is not None:
                 selected = selected[:limit]
-            stats.groups_total = len(selected)
+            stats.groups_total = len(selected) if nonempty_limit is None else 0
             self._surnames = allowed_surnames(real_surnames(await self._client.lecturers()))
             await self._load_teachers()
 
@@ -175,12 +183,24 @@ class ScheduleImporter:
                 else:
                     self._ok_groups.add(group.id)
                     stats.groups_ok += 1
+                    stats.groups_populated += int(seen > 0)
                     stats.lessons_seen += seen
                 done += 1
                 if done % 50 == 0 or done == len(selected):
                     log.info("загружено групп: %s из %s", done, len(selected))
 
-            await asyncio.gather(*(handle(g) for g in selected))
+            if nonempty_limit is None:
+                await asyncio.gather(*(handle(g) for g in selected))
+            else:
+                # Пустые ответы и ошибки не расходуют цель. Не запускаем лишние запросы,
+                # когда осталось набрать меньше групп, чем разрешено параллельных запросов.
+                offset = 0
+                while offset < len(selected) and stats.groups_populated < nonempty_limit:
+                    size = min(self._concurrency, nonempty_limit - stats.groups_populated)
+                    batch = selected[offset:offset + size]
+                    stats.groups_total += len(batch)
+                    await asyncio.gather(*(handle(g) for g in batch))
+                    offset += len(batch)
             await self._finalize(start, finish)
         except BaseException as exc:
             await self._finish_run(stats, ImportStatus.FAILED, error=repr(exc))
@@ -364,6 +384,14 @@ class ScheduleImporter:
                     session.add(
                         LessonGroup(lesson_id=data.id, group_id=group_id, last_seen_run_id=self._run_id)
                     )
+            semester_start, semester_end = semester_bounds(start)
+            if start <= semester_start and finish >= semester_end:
+                # В той же транзакции, что занятия. Короткий импорт не создаёт и не стирает
+                # подтверждение полного семестра; старые импорты не восстанавливаем наугад.
+                await session.merge(GroupScheduleCoverage(
+                    group_id=group_id, period_start=semester_start,
+                    period_end=semester_end, run_id=self._run_id,
+                ))
             await session.commit()
         return len(lessons)
 
@@ -502,7 +530,7 @@ class ScheduleImporter:
         return [c for c in candidates if groups_of.get(c.id, set()) <= self._ok_groups]
 
     async def _find_added(self, session: AsyncSession, start: date, finish: date) -> list[Lesson]:
-        if not self._new_lesson_ids:
+        if not self._report_additions or not self._new_lesson_ids:
             return []
         covered = (
             await session.execute(

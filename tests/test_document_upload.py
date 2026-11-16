@@ -7,6 +7,7 @@ from sqlalchemy import select, update
 
 from app.assistant import documents as service
 from app.assistant.corpus import Corpus
+from app.assistant.repositories import load_corpus
 from app.models.auth import Role, User
 from app.models.knowledge import DocumentStatus as Status, KnowledgeDocument
 from tests.test_web import client, login
@@ -90,7 +91,7 @@ async def test_publication_search_and_idempotent_recovery(client, tmp_path):
     processor = service.DocumentProcessor(app.state.session_factory, app.state.settings)
     assert await processor.process_one()
     target = Path(app.state.settings.rag_corpus_dir) / "chunks.jsonl"
-    corpus = Corpus.load(target)
+    corpus = load_corpus(target)
     from datetime import datetime
     from zoneinfo import ZoneInfo
     today = datetime.now(ZoneInfo("Europe/Moscow")).date()
@@ -104,7 +105,7 @@ async def test_publication_search_and_idempotent_recovery(client, tmp_path):
         await db.commit()
     await processor.process_one()
     assert target.read_bytes() == original
-    from app.assistant.service import Assistant
+    from app.assistant.bootstrap import create_assistant as Assistant
     from tests.test_assistant import FakeProvider
     cid = corpus.chunks[0].id
     provider = FakeProvider({"status": "answer", "summary_id": cid, "steps": [], "clarification": None},
@@ -166,7 +167,7 @@ async def test_failed_processing_keeps_existing_corpus_and_can_retry(client, tmp
     assert (await client.post("/d/documents/2/retry", data={"csrf": csrf})).status_code == 303
     monkeypatch.setattr(service, "publish_chunks", real_publish)
     await processor.process_one()
-    assert len(Corpus.load(target).chunks) == 2
+    assert len(load_corpus(target).chunks) == 2
 
 
 async def test_oversize_request_without_content_length(client):

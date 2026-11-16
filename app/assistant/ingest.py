@@ -16,6 +16,7 @@ import tempfile
 from pathlib import Path
 
 from .corpus import Chunk, Corpus, CorpusError
+from app.assistant.repositories import load_corpus
 
 
 def pdf_pages(path: Path, ocr: str) -> list[str]:
@@ -134,7 +135,7 @@ def main():
     # Сначала проверяем новый снимок целиком, затем атомарно заменяем индекс.
     pending = args.out / "chunks.pending.jsonl"
     pending.write_text("\n".join(c.model_dump_json() for c in chunks) + "\n", encoding="utf-8")
-    corpus = Corpus.load(pending)
+    corpus = load_corpus(pending)
     os.replace(pending, args.out / "chunks.jsonl")
     print(f"Подготовлено фрагментов: {len(chunks)}; SHA-256 снимка: {corpus.snapshot}")
 

@@ -9,13 +9,10 @@ import time
 import uuid
 
 import httpx
+from .errors import ProviderError
 
 AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 API_URL = "https://api.giga.chat/v1"
-
-
-class ProviderError(RuntimeError):
-    pass
 
 
 class GigaChat:

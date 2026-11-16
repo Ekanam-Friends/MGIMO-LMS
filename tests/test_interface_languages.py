@@ -3,7 +3,7 @@ import json
 import pytest
 
 from app.assistant.conversations import Conversation
-from app.assistant.service import Assistant
+from app.assistant.bootstrap import create_assistant as Assistant
 from app.assistant.translation import for_display, for_search
 from tests.test_assistant import FakeProvider, config
 from tests.test_web import client, login

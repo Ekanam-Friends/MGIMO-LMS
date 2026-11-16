@@ -4,6 +4,7 @@ python -m scripts.manual_assistant_demo
 Учётки anna, demo_teacher, demo_staff; пароль из tests.test_web.PASSWORD.
 """
 import asyncio
+import os
 import tempfile
 from pathlib import Path
 
@@ -47,7 +48,8 @@ async def main():
                 db.add_all([User(login="demo_teacher", password_hash=hash_password(PASSWORD), role="teacher", teacher_id=1000, created_at=utcnow()),
                             User(login="demo_staff", password_hash=hash_password(PASSWORD), role="staff", created_at=utcnow())])
                 await db.commit()
-            server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=8011, lifespan="off"))
+            server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1",
+                port=int(os.environ.get("DEMO_PORT", "8011")), lifespan="off"))
             await server.serve()
         finally:
             await fixture.aclose()

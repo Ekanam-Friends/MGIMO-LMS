@@ -23,6 +23,8 @@ from app.auth.service import utcnow
 from app.models.auth import Role, User
 from app.models.knowledge import DocumentStatus as Status, KnowledgeDocument
 from .corpus import Chunk, Corpus, CorpusError, public_url
+from app.assistant.repositories import load_corpus
+from .excerpts import document_excerpts, ExcerptTooLong
 
 log = logging.getLogger(__name__)
 MAX_FILE_BYTES = 10_000_000
@@ -118,7 +120,7 @@ def extract_chunks(row: KnowledgeDocument) -> list[Chunk]:
     except ImportError:
         raise DocumentError("На сервере не установлен обработчик PDF. Сообщите администратору") from None
     checked_on = row.uploaded_at.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("Europe/Moscow")).date()
-    chunks = []
+    pages = []
     try:
         with pymupdf.open(stream=row.data, filetype="pdf") as doc:
             if doc.is_encrypted or not 1 <= len(doc) <= MAX_PAGES:
@@ -127,24 +129,22 @@ def extract_chunks(row: KnowledgeDocument) -> list[Chunk]:
                 text = page.get_text(sort=True).strip()
                 if len(re.findall(r"[а-яёa-z]", text, re.I)) < 40:
                     raise ReviewRequired(f"На странице {page_no} недостаточно текста. Выполните OCR, сверьте текст и загрузите PDF с текстовым слоем")
-                # Полная страница разбивается на фрагменты с перекрытием, без потери хвоста.
-                start = 0
-                while start < len(text):
-                    end = min(start + 5500, len(text))
-                    if len(text) - end < 300:
-                        end = len(text)
-                    block = text[start:end].strip()
-                    chunks.append(Chunk(
-                        id=f"upload:{row.sha256[:32]}:{page_no}:{start}",
+                pages.append(text)
+            try:
+                excerpts = document_excerpts(pages)
+            except ExcerptTooLong as exc:
+                raise ReviewRequired(str(exc)) from None
+            chunks = []
+            for number, excerpt in enumerate(excerpts):
+                chunks.append(Chunk(
+                        id=f"upload:{row.sha256[:32]}:{number}",
                         document_id=f"upload:{row.sha256}", revision=row.revision, title=row.title,
                         source_url=row.source_url, source_sha256=row.sha256,
                         document_date=None, effective_from=None, checked_at=checked_on,
                         downloaded_at=checked_on, reviewed_public=row.reviewed_public,
-                        verification_status="snapshot", page=page_no, clause=f"стр. {page_no}", text=block,
+                        verification_status="snapshot", page=excerpt.page, page_end=excerpt.page_end,
+                        clause=f"стр. {excerpt.page}–{excerpt.page_end}", text=excerpt.text,
                     ))
-                    if end == len(text):
-                        break
-                    start = end - 300
     except (DocumentError, CorpusError):
         raise
     except Exception:
@@ -156,7 +156,7 @@ def publish_chunks(directory: Path, added: list[Chunk]) -> int:
     """Проверить объединённый снимок и заменить его одним атомарным rename."""
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / "chunks.jsonl"
-    existing = Corpus.load(target).chunks if target.exists() else []
+    existing = load_corpus(target).chunks if target.exists() else []
     matching = [c for c in existing if c.source_url == added[0].source_url
                 or c.source_sha256 == added[0].source_sha256]
     if matching:
@@ -173,7 +173,7 @@ def publish_chunks(directory: Path, added: list[Chunk]) -> int:
                 stream.write(chunk.model_dump_json() + "\n")
             stream.flush()
             os.fsync(stream.fileno())
-        Corpus.load(pending)
+        load_corpus(pending)
         os.replace(pending, target)
     finally:
         if pending is not None:
