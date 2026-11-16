@@ -23,6 +23,10 @@
 
 ## Выкладка
 
+> Если выполнено аварийное переключение БД по инструкции ниже, обычный `deploy.sh`
+> и `docker compose up` запрещены до восстановления штатной топологии: они могут
+> запустить старую primary. Используйте только полный набор файлов failover и `--no-deps`.
+
 Перед изменением рабочей БД обязательна резервная копия PostgreSQL. Хранить не более трёх
 последних полных копий; старые удалять после успешной проверки новой версии. Для этого
 деплоя использован формат `pg_dump -Fc`, архив проверен командой `pg_restore --list`.
@@ -34,6 +38,105 @@ sh scripts/deploy.sh
 
 Скрипт отправляет закоммиченный `HEAD` архивом по ssh (репозиторий приватный, сервер его не
 клонирует) и пересобирает `web`. Миграции применяются при старте контейнера.
+
+## Реплика PostgreSQL — задача #19
+
+Проверено 16 ноября 2026: на `/opt/mgimo-lms` запущен `mgimo-lms-db-replica-1`,
+PostgreSQL 16, асинхронный hot standby. Отдельный том `mgimo-lms_pgdata-replica`,
+лимиты 384 МиБ RAM / 0,5 CPU, порт на хосте отсутствует. `web` и `bot` продолжают
+использовать primary: маршрутизация чтений на реплику не реализована.
+
+Установка из корня проекта на VPS (root, Python 3 и Docker Compose):
+
+```bash
+cd /opt/mgimo-lms
+python3 scripts/setup_replica.py
+sh scripts/server/check-replica.sh
+```
+
+Перед изменениями скрипт делает `pg_dump -Fc`, проверяет список архива через
+`pg_restore --list`, сохраняет `pg_hba.conf` и `postgresql.auto.conf` в
+`backups/replica-setup/<UTC>/`. Это проверка структуры архива, не пробное восстановление.
+После успешного запуска остаётся максимум три набора копий. Пароль отдельной роли
+`lms_replica` генерируется на сервере в `.secrets/replication-password` (0600),
+не выводится и не коммитится. Роль имеет REPLICATION, без SUPERUSER/CREATEDB/CREATEROLE.
+HBA разрешает ей репликацию из default-подсети проекта, с SCRAM-аутентификацией.
+
+Настройка использует уже включённые `wal_level=replica`, `max_wal_senders=10` и
+`max_replication_slots=10`; основная БД не перезапускается. Для слота
+`mgimo_lms_replica` установлен `max_slot_wal_keep_size=512MB` (проверяется на checkpoint,
+не является точным пределом размера всего WAL). При долгом простое реплики слот может
+потерять нужный WAL: потребуется новая базовая копия, а не бесконечный рост диска.
+Скрипт не очищает существующий или незавершённый том и не запускает promoted-том как standby.
+
+Ожидаемая проверка: `state=streaming`, слот `active=t`, `lag_bytes` близко к нулю;
+на реплике `pg_is_in_recovery=t`, `read_only=on`. `lag_bytes` сравнивает актуальный LSN
+основной БД с replay LSN, поэтому пригоден и при отсутствии прикладных записей.
+Временные поля lag могут быть NULL при простое — это само по себе не сбой.
+
+Проверенные сценарии: новая техническая запись появилась на реплике; попытка записи
+на standby отклонена с SQLSTATE 25006; после перезапуска только реплики streaming
+восстановился. Техническая таблица затем удалена на основной БД. Повторная установка
+прошла, осталось три набора бэкапов. Проверены вход `student1` и расписание в браузере
+на ширине 360 px; переключение боевого приложения не выполнялось.
+
+### Ручное аварийное переключение
+
+Реплика на том же VPS помогает при отказе процесса основной БД, но не при отказе
+VPS/диска. Асинхронная репликация допускает потерю ещё не полученных транзакций.
+Удаления и ошибочные изменения тоже реплицируются: отдельные резервные копии необходимы.
+При перегрузке общей машины сначала оценить CPU, RAM и диск: promotion не добавляет ресурсов.
+
+1. Остановить все записи и старую primary. Если она недоступна через Docker,
+   сначала обеспечить её изоляцию; без этого promotion запрещён из-за split brain.
+
+   ```bash
+   cd /opt/mgimo-lms
+   docker compose stop web bot db
+   docker update --restart=no mgimo-lms-db-1
+   ```
+
+2. Посмотреть последний полученный и применённый WAL. При доступной primary до её
+   остановки сравнить `pg_current_wal_lsn()` с replay LSN реплики командой проверки.
+   После аварии равенство receive/replay не доказывает получение всех записей primary.
+
+   ```bash
+   docker exec mgimo-lms-db-replica-1 psql -U lms -d lms -c \
+     'SELECT pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn();'
+   docker exec mgimo-lms-db-replica-1 psql -U lms -d lms -c 'SELECT pg_promote(true, 60);'
+   docker exec mgimo-lms-db-replica-1 psql -U lms -d lms -c 'SELECT pg_is_in_recovery();'
+   ```
+
+   Продолжать только если `pg_promote=t`, `pg_is_in_recovery=f`.
+
+3. Применить подготовленный failover-файл. На этом сервере существует
+   `docker-compose.override.yml`; он сохраняется в цепочке, чтобы не потерять сети,
+   корпус и параметры бота. `--no-deps` обязателен: старую БД запускать нельзя.
+
+   ```bash
+   dc_failover() {
+     docker compose -f docker-compose.yml -f docker-compose.override.yml \
+       -f docker-compose.replica.yml -f docker-compose.failover.yml "$@"
+   }
+   dc_failover up -d --no-deps --wait db-replica
+   dc_failover up -d --no-deps web bot
+   dc_failover ps
+   ```
+
+4. Проверить вход тестовым студентом, расписание и создание тестовой заявки;
+   проверить логи web/bot. До восстановления топологии все операции запуска делать
+   через `dc_failover ... --no-deps`. Старую primary не включать: она не содержит
+   новые записи и после promotion принадлежит другой ветви WAL.
+
+Возврат требует отдельного восстановления: сохранить копию новой primary,
+пересоздать старую БД как standby от неё (`pg_basebackup` либо проверенный `pg_rewind`),
+проверить догон репликации и выполнить согласованное переключение с остановкой записей.
+Простое удаление failover-файла и запуск старого тома запрещены. Это не автоматический failover;
+на рабочем приложении аварийное переключение пока не испытывалось.
+
+Источники: [streaming replication PostgreSQL 16](https://www.postgresql.org/docs/16/warm-standby.html),
+[pg_basebackup](https://www.postgresql.org/docs/16/app-pgbasebackup.html),
+[ограничение WAL для слотов](https://www.postgresql.org/docs/16/runtime-config-replication.html).
 
 Данные:
 

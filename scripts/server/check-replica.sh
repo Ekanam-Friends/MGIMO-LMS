@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+# Запускать из корня проекта на сервере; override автоматически подхватится compose.
+docker compose exec -T db psql -X -U lms -d lms -c "
+SELECT application_name, state, sync_state,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) AS lag_bytes,
+       write_lag, flush_lag, replay_lag
+FROM pg_stat_replication;
+SELECT slot_name, active, wal_status,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) AS retained_bytes
+FROM pg_replication_slots;"
+docker compose -f docker-compose.yml -f docker-compose.replica.yml exec -T db-replica psql -X -U lms -d lms -c "
+SELECT pg_is_in_recovery(), current_setting('transaction_read_only') AS read_only,
+       pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn();"
+test "$(docker compose exec -T db psql -X -At -U lms -d lms -c \
+    "SELECT count(*) FROM pg_stat_replication WHERE application_name='mgimo_lms_replica' AND state='streaming'")" = 1
+test "$(docker compose -f docker-compose.yml -f docker-compose.replica.yml exec -T db-replica \
+    psql -X -At -U lms -d lms -c "SELECT pg_is_in_recovery() AND current_setting('transaction_read_only')='on'")" = t
