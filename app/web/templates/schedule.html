@@ -9,8 +9,20 @@
   {% if not has_group %}
     <p class="alert">{{ _('Учебная группа не указана — расписание появится после привязки группы.') }}</p>
   {% endif %}
-  {# Десктоп — недельная сетка со слоями; телефон — список по дням. #}
-  <div class="only-desktop">{% include "partials/calendar.html" %}</div>
+  {# Как на главной: неделя слева, отдельная карточка слоёв справа. #}
+  <div class="only-desktop">
+    <div class="dashboard">
+      <div class="dashboard__col">
+        <section class="dash-block dash-calendar">
+          <div class="dash-block__header"><h2 class="dash-title">{{ _('Календарь') }}</h2></div>
+          {% with layers_outside = true %}{% include "partials/calendar.html" %}{% endwith %}
+        </section>
+      </div>
+      <aside class="dashboard__aside">
+        <section class="box cal-panel" aria-label="{{ _('Мои календари') }}">{% include "partials/calendar_layers.html" %}</section>
+      </aside>
+    </div>
+  </div>
   <div class="only-mobile">
     <div class="week-nav">
       <a class="week-nav__btn" href="/schedule?week={{ prev_week.isoformat() }}" aria-label="{{ _('Предыдущая неделя') }}">{{ icon("chev-left") }}</a>
