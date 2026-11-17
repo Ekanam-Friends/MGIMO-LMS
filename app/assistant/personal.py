@@ -97,8 +97,8 @@ async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: 
         raise ValueError("Не подтверждена учётная запись преподавателя")
     facts = []
 
-    def add(text):
-        facts.append({"id": f"fact-{len(facts) + 1}", "text": text, "url": "", "label": "Свои дисциплины"})
+    def add(text, label="Свои дисциплины"):
+        facts.append({"id": f"fact-{len(facts) + 1}", "text": text, "url": "", "label": label})
 
     status = await coverage(db, teacher_id, student_id)
     add(f"Снимок доступных учебных данных: дисциплин {status['courses']}, контрольных точек "
@@ -130,7 +130,7 @@ async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: 
         for name, result, points, day, sid in finals:
             add(f"Студент №{sid}: {name}: итог {FinalResult.TITLES.get(result, result)}, {points:g} баллов, дата {day}.")
         if len(rows) == 100 or len(finals) == 40:
-            add("Выборка ограничена; уточните дисциплину и период. Полная история не подтверждена.")
+            add("Выборка ограничена; уточните дисциплину и период. Полная история не подтверждена.", "Ограничение выборки")
     if "schedule" in scopes:
         schedule_query = select(Lesson).join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
         if student_id is not None:
@@ -145,7 +145,7 @@ async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: 
         if not rows:
             add(f"В загруженном снимке нет своих занятий этой группы за {start}–{end}.")
         if len(rows) > 60:
-            add("Показаны первые 60 занятий. Уточните период.")
+            add("Показаны первые 60 занятий. Уточните период.", "Ограничение выборки")
     if "requests" in scopes:
         add("Заявки и справки студента не входят в область доступа преподавателя.")
     return bounded_facts(facts)

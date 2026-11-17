@@ -91,3 +91,22 @@ async def test_teacher_llm_receives_only_scoped_facts(client, tmp_path):
     payload = json.dumps(provider.calls, ensure_ascii=False)
     assert "Своя математика" in payload and "Скрытая работа" not in payload
     assert "Другой предмет" not in payload and "секрет" not in payload
+
+
+async def test_teacher_large_grade_context_always_reports_truncation(client, tmp_path):
+    from app.assistant.conversation import Conversation
+    from app.assistant.personal import SqlTeachingEvidenceReader
+    from tests.test_assistant import Assistant, FakeProvider, config
+    await teacher_fixture(client)
+    async with client._transport.app.state.session_factory() as db:
+        db.add_all([Assessment(course_id=1, title=f"Работа {n}", max_points=10,
+                               created_at=datetime(2026, 9, 1)) for n in range(101)])
+        await db.commit()
+        conversation = Conversation("owner", float("inf"), actor_role="teacher", teacher_id=1)
+        conversation.request_grades()
+        conversation.grant_grades()
+        assistant = Assistant(config(tmp_path), FakeProvider({"scopes": ["grades"]}, {"fact_ids": ["fact-2"]}))
+        result = await assistant.chat(100, None, "Покажи все баллы моих студентов", [], None,
+                                      conversation, SqlTeachingEvidenceReader(db, 1))
+    assert result["status"] == "partial"
+    assert any(fact["label"] == "Ограничение выборки" for fact in result["facts"])
