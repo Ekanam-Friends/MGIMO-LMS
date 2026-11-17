@@ -5,13 +5,7 @@
 
 ## Как устроено
 
-```
-интернет ──443──> ikanam-caddy-1 (/opt/ikanam, общий Caddy)
-                     │ schedule.ekanamfriends.ru      → web:8000      (сеть ikanam_default)
-                     │ lms-university.ekanamfriends.ru → lms-web:8000 (сеть edge)
-                     ▼
-              mgimo-lms-web-1 ── mgimo-lms-db-1   (/opt/mgimo-lms, своя сеть, своя БД)
-```
+![Развёртывание на VPS: общий Caddy, отдельные сети и базы MGIMO-LMS и Ikanam, доступ команды к PostgreSQL через SSH-туннель.](diagrams/deployment.svg)
 
 - Проект кабинета — `/opt/mgimo-lms`: свой compose, свой PostgreSQL (порт наружу не
   публикуется), свой `.env` (создан на сервере, в репозиторий не попадает).

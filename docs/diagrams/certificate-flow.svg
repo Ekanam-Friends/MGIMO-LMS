@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
+<title id="title">Заявка без очереди в деканат</title><desc id="desc">Студент создаёт заявку в FastAPI, которая отправляется в Pyrus. После проверки в деканате и подписи декана подписанный вебхук запускает сверку через API. Статус сохраняется в PostgreSQL; кабинет показывает PDF, бот отправляет уведомление.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c96b4"/></marker></defs>
+<g font-family="Segoe UI, Arial, sans-serif"><rect width="1200" height="1080" rx="24" fill="#fff"/>
+<path d="M50 40h44" stroke="#2463ad" stroke-width="5" stroke-linecap="round"/>
+<text x="110" y="47" font-size="16" fill="#2463ad" font-weight="700">03 / СПРАВКИ И СОГЛАСОВАНИЕ</text>
+<text x="50" y="104" font-size="35" fill="#122844" font-weight="700">Заявка без очереди в деканат</text>
+<text x="50" y="143" font-size="20" fill="#536780" font-weight="400">Кабинет принимает запрос, Pyrus ведёт согласование, результат возвращается студенту</text>
+<g data-card="true">
+<rect x="50" y="230" width="270" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="267" font-size="23" fill="#122844" font-weight="650">Студент</text>
+<text x="72" y="296" font-size="18" fill="#536780" font-weight="400">Вид справки и назначение</text>
+</g>
+<g data-card="true">
+<rect x="420" y="230" width="300" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="442" y="267" font-size="23" fill="#122844" font-weight="650">Личный кабинет</text>
+<text x="442" y="296" font-size="18" fill="#536780" font-weight="400">FastAPI · проверка доступа</text>
+</g>
+<g data-card="true">
+<rect x="880" y="230" width="270" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="902" y="267" font-size="23" fill="#122844" font-weight="650">Задача в Pyrus</text>
+<text x="902" y="296" font-size="18" fill="#536780" font-weight="400">Очередь деканата</text>
+</g>
+<g data-card="true">
+<rect x="420" y="420" width="300" height="110" rx="17" fill="#edf8f4" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="442" y="457" font-size="23" fill="#176d64" font-weight="650">PostgreSQL</text>
+<text x="442" y="486" font-size="18" fill="#536780" font-weight="400">Вымышленный контингент</text>
+<text x="442" y="511" font-size="18" fill="#536780" font-weight="400">Заявка и история событий</text>
+</g>
+<g data-card="true">
+<rect x="880" y="440" width="270" height="100" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="902" y="477" font-size="23" fill="#122844" font-weight="650">Проверка в деканате</text>
+<text x="902" y="506" font-size="18" fill="#536780" font-weight="400">Первый шаг маршрута</text>
+</g>
+<g data-card="true">
+<rect x="880" y="620" width="270" height="100" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="902" y="657" font-size="23" fill="#122844" font-weight="650">Подпись декана</text>
+<text x="902" y="686" font-size="18" fill="#536780" font-weight="400">Второй шаг маршрута</text>
+</g>
+<g data-card="true">
+<rect x="420" y="620" width="300" height="120" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="442" y="657" font-size="23" fill="#122844" font-weight="650">Сверка с Pyrus</text>
+<text x="442" y="686" font-size="18" fill="#536780" font-weight="400">Проверка подписи вебхука</text>
+<text x="442" y="711" font-size="18" fill="#536780" font-weight="400">Перечитывание по API</text>
+</g>
+<g data-card="true">
+<rect x="50" y="620" width="270" height="120" rx="17" fill="#edf8f4" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="657" font-size="23" fill="#176d64" font-weight="650">Результат в ЛК</text>
+<text x="72" y="686" font-size="18" fill="#536780" font-weight="400">Статус и комментарий</text>
+<text x="72" y="711" font-size="18" fill="#536780" font-weight="400">PDF по шаблону</text>
+</g>
+<g data-card="true">
+<rect x="420" y="860" width="300" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="442" y="897" font-size="23" fill="#122844" font-weight="650">Событие заявки</text>
+<text x="442" y="926" font-size="18" fill="#536780" font-weight="400">Изменение статуса в БД</text>
+</g>
+<g data-card="true">
+<rect x="50" y="860" width="270" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="897" font-size="23" fill="#122844" font-weight="650">Telegram</text>
+<text x="72" y="926" font-size="18" fill="#536780" font-weight="400">Уведомление студенту</text>
+</g>
+<path d="M320 285 H420" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="337.5" y="251" width="65" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="370" y="270" text-anchor="middle" font-size="16" fill="#536780">заказ</text>
+<path d="M720 285 H880" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="776.5" y="251" width="47" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="800" y="270" text-anchor="middle" font-size="16" fill="#536780">API</text>
+<path d="M570 340 V420" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M1015 340 V440" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M1015 540 V620" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M880 300 H800 V680 H720" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="763" y="379" width="74" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="800" y="398" text-anchor="middle" font-size="16" fill="#536780">вебхук</text>
+<path d="M720 705 H775 V320 H880" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  stroke-dasharray="7 6"/>
+<path d="M570 620 V530" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M420 680 H320" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M570 740 V860" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M420 915 H320" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<text x="50" y="1020" font-size="18" fill="#536780" font-weight="400">Пунктир — фоновая сверка. Оба шага Pyrus в демо назначены одному сотруднику.</text>
+</g></svg>

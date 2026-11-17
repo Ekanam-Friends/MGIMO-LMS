@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
+<title id="title">Один кабинет. Общая база.</title><desc id="desc">Браузер через Caddy обращается к FastAPI. Telegram обслуживается отдельным aiogram-ботом. Оба работают с PostgreSQL. Импортёр получает расписание РУЗ. Pyrus согласует справки. Реализованный ассистент использует GigaChat и читает разрешённые данные кабинета; оценки доступны после согласия. Заявки через чат не создаются.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c96b4"/></marker></defs>
+<g font-family="Segoe UI, Arial, sans-serif"><rect width="1200" height="1120" rx="24" fill="#fff"/>
+<path d="M50 40h44" stroke="#2463ad" stroke-width="5" stroke-linecap="round"/>
+<text x="110" y="47" font-size="16" fill="#2463ad" font-weight="700">01 / АРХИТЕКТУРА</text>
+<text x="50" y="104" font-size="35" fill="#122844" font-weight="700">Один кабинет. Общая база.</text>
+<text x="50" y="143" font-size="20" fill="#536780" font-weight="400">Каналы доступа, серверные сервисы и внешние интеграции</text>
+<g data-card="true">
+<rect x="50" y="200" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="237" font-size="23" fill="#122844" font-weight="650">Веб-кабинет</text>
+<text x="72" y="266" font-size="18" fill="#536780" font-weight="400">Студент · преподаватель</text>
+<text x="72" y="291" font-size="18" fill="#536780" font-weight="400">Деканат · Jinja2 / HTMX</text>
+</g>
+<g data-card="true">
+<rect x="440" y="200" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="462" y="237" font-size="23" fill="#122844" font-weight="650">Pyrus</text>
+<text x="462" y="266" font-size="18" fill="#536780" font-weight="400">Согласование справок</text>
+<text x="462" y="291" font-size="18" fill="#536780" font-weight="400">Задачи и статусы</text>
+</g>
+<g data-card="true">
+<rect x="830" y="200" width="320" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="852" y="237" font-size="23" fill="#122844" font-weight="650">Telegram</text>
+<text x="852" y="266" font-size="18" fill="#536780" font-weight="400">Команды, расписание</text>
+<text x="852" y="291" font-size="18" fill="#536780" font-weight="400">Статусы и уведомления</text>
+</g>
+<rect x="30" y="400" width="1140" height="425" rx="22" fill="#f2f6fc" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="55" y="436" font-size="16" fill="#2463ad" font-weight="700">СЕРВЕР ПРИЛОЖЕНИЯ / VPS · DOCKER COMPOSE</text>
+<g data-card="true">
+<rect x="60" y="470" width="240" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="82" y="507" font-size="23" fill="#122844" font-weight="650">Caddy</text>
+<text x="82" y="536" font-size="18" fill="#536780" font-weight="400">HTTPS / reverse proxy</text>
+</g>
+<g data-card="true">
+<rect x="410" y="470" width="300" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="432" y="507" font-size="23" fill="#122844" font-weight="650">FastAPI</text>
+<text x="432" y="536" font-size="18" fill="#536780" font-weight="400">Сессии · роли · доступы</text>
+</g>
+<g data-card="true">
+<rect x="840" y="470" width="300" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="862" y="507" font-size="23" fill="#122844" font-weight="650">aiogram</text>
+<text x="862" y="536" font-size="18" fill="#536780" font-weight="400">Отдельный процесс бота</text>
+</g>
+<g data-card="true">
+<rect x="410" y="670" width="300" height="110" rx="17" fill="#edf8f4" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="432" y="707" font-size="23" fill="#176d64" font-weight="650">PostgreSQL</text>
+<text x="432" y="736" font-size="18" fill="#536780" font-weight="400">Учёба · заявки · события</text>
+</g>
+<g data-card="true">
+<rect x="840" y="670" width="300" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="862" y="707" font-size="23" fill="#122844" font-weight="650">Импорт расписания</text>
+<text x="862" y="736" font-size="18" fill="#536780" font-weight="400">ФИО → вымышленные</text>
+</g>
+<g data-card="true">
+<rect x="60" y="670" width="240" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="82" y="707" font-size="23" fill="#122844" font-weight="650">Защита данных</text>
+<text x="82" y="736" font-size="18" fill="#536780" font-weight="400">Пароли — argon2</text>
+<text x="82" y="761" font-size="18" fill="#536780" font-weight="400">Секреты — в .env</text>
+</g>
+<g data-card="true">
+<rect x="50" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="937" font-size="23" fill="#122844" font-weight="650">ИИ-ассистент</text>
+<text x="72" y="966" font-size="18" fill="#536780" font-weight="400">Публичный RAG · кабинет</text>
+<text x="72" y="991" font-size="18" fill="#536780" font-weight="400">Оценки — после согласия</text>
+</g>
+<g data-card="true">
+<rect x="440" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="462" y="937" font-size="23" fill="#122844" font-weight="650">GigaChat API</text>
+<text x="462" y="966" font-size="18" fill="#536780" font-weight="400">Выбор и аудит выдержек</text>
+<text x="462" y="991" font-size="18" fill="#536780" font-weight="400">Перевод RU / EN / FR / ZH</text>
+</g>
+<g data-card="true">
+<rect x="840" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="862" y="937" font-size="23" fill="#122844" font-weight="650">Открытый РУЗ</text>
+<text x="862" y="966" font-size="18" fill="#536780" font-weight="400">Источник расписания</text>
+</g>
+<path d="M200 315 V360 H45 V525 H60" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<rect x="107.5" y="331" width="65" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="140" y="350" text-anchor="middle" font-size="16" fill="#536780">HTTPS</text>
+<path d="M590 315 V365 H790 V525 H710" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<rect x="626" y="333" width="128" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="690" y="352" text-anchor="middle" font-size="16" fill="#536780">API / вебхук</text>
+<path d="M990 315 V470" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<rect x="948.5" y="351" width="83" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="990" y="370" text-anchor="middle" font-size="16" fill="#536780">Bot API</text>
+<path d="M300 525 H410" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M560 580 V670" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M990 580 V625 H600 V670" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<path d="M840 725 H710" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M990 900 V780" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="944" y="846" width="92" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="990" y="865" text-anchor="middle" font-size="16" fill="#536780">JSON API</text>
+<path d="M410 550 H360 V860 H200 V900" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M350 955 H440" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<text x="50" y="1070" font-size="18" fill="#536780" font-weight="400">Ассистент читает разрешённые данные. Создание заявок через чат не реализовано.</text>
+</g></svg>

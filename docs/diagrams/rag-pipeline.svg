@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1060" viewBox="0 0 1200 1060" role="img" aria-labelledby="title desc">
+<title id="title">От документа — к проверяемому ответу</title><desc id="desc">Реализованная цепочка: публичные PDF, извлечение текста и OCR, снимок фрагментов, поиск BM25, выбор выдержек GigaChat и отдельный аудит применимости. Эмбеддинги доступны как опция, по умолчанию выключены. Непроверенный снимок даёт только частичный справочный ответ; OCR и действие редакций требуют отдельной сверки.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c96b4"/></marker></defs>
+<g font-family="Segoe UI, Arial, sans-serif"><rect width="1200" height="1060" rx="24" fill="#fff"/>
+<path d="M50 40h44" stroke="#2463ad" stroke-width="5" stroke-linecap="round"/>
+<text x="110" y="47" font-size="16" fill="#2463ad" font-weight="700">02 / РЕАЛИЗОВАННАЯ RAG-ЦЕПОЧКА</text>
+<text x="50" y="104" font-size="35" fill="#122844" font-weight="700">От документа — к проверяемому ответу</text>
+<text x="50" y="143" font-size="20" fill="#536780" font-weight="400">Поиск по снимку корпуса, выбор выдержек и проверка через GigaChat</text>
+<rect x="30" y="185" width="1140" height="190" rx="22" fill="#f2f6fc" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="55" y="221" font-size="16" fill="#2463ad" font-weight="700">01 / ПОДГОТОВКА КОРПУСА</text>
+<g data-card="true">
+<rect x="50" y="240" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="277" font-size="23" fill="#122844" font-weight="650">Официальные PDF</text>
+<text x="72" y="306" font-size="18" fill="#536780" font-weight="400">Положения МГИМО</text>
+<text x="72" y="331" font-size="18" fill="#536780" font-weight="400">Источник и реквизиты</text>
+</g>
+<g data-card="true">
+<rect x="435" y="240" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="457" y="277" font-size="23" fill="#122844" font-weight="650">Извлечение текста</text>
+<text x="457" y="306" font-size="18" fill="#536780" font-weight="400">OCR для сканов</text>
+<text x="457" y="331" font-size="18" fill="#536780" font-weight="400">Разбиение на фрагменты</text>
+</g>
+<g data-card="true">
+<rect x="820" y="240" width="330" height="110" rx="17" fill="#edf8f4" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="842" y="277" font-size="23" fill="#176d64" font-weight="650">Снимок корпуса</text>
+<text x="842" y="306" font-size="18" fill="#536780" font-weight="400">Фрагменты · BM25</text>
+<text x="842" y="331" font-size="18" fill="#536780" font-weight="400">Эмбеддинги — опция</text>
+</g>
+<rect x="30" y="460" width="1140" height="190" rx="22" fill="#f2f6fc" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="55" y="496" font-size="16" fill="#2463ad" font-weight="700">02 / ОБРАБОТКА ВОПРОСА</text>
+<g data-card="true">
+<rect x="50" y="515" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="552" font-size="23" fill="#122844" font-weight="650">Вопрос студента</text>
+<text x="72" y="581" font-size="18" fill="#536780" font-weight="400">Запрос в кабинете</text>
+<text x="72" y="606" font-size="18" fill="#536780" font-weight="400">Контекст ситуации</text>
+</g>
+<g data-card="true">
+<rect x="435" y="515" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="457" y="552" font-size="23" fill="#122844" font-weight="650">Поиск фрагментов</text>
+<text x="457" y="581" font-size="18" fill="#536780" font-weight="400">BM25 · доступные редакции</text>
+<text x="457" y="606" font-size="18" fill="#536780" font-weight="400">Снимок и даты источника</text>
+</g>
+<g data-card="true">
+<rect x="820" y="515" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="842" y="552" font-size="23" fill="#122844" font-weight="650">Выбор выдержек</text>
+<text x="842" y="581" font-size="18" fill="#536780" font-weight="400">GigaChat API</text>
+<text x="842" y="606" font-size="18" fill="#536780" font-weight="400">Вызов только с бэкенда</text>
+</g>
+<rect x="30" y="735" width="1140" height="190" rx="22" fill="#f2f6fc" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="55" y="771" font-size="16" fill="#2463ad" font-weight="700">03 / ПРОВЕРКА И РЕЗУЛЬТАТ</text>
+<g data-card="true">
+<rect x="50" y="790" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="827" font-size="23" fill="#122844" font-weight="650">Аудит применимости</text>
+<text x="72" y="856" font-size="18" fill="#536780" font-weight="400">Второй вызов GigaChat</text>
+<text x="72" y="881" font-size="18" fill="#536780" font-weight="400">Ссылки и дословные поля</text>
+</g>
+<g data-card="true">
+<rect x="435" y="790" width="330" height="110" rx="17" fill="#edf8f4" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="457" y="827" font-size="23" fill="#176d64" font-weight="650">Ответ в кабинете</text>
+<text x="457" y="856" font-size="18" fill="#536780" font-weight="400">Выдержки и ограничения</text>
+<text x="457" y="881" font-size="18" fill="#536780" font-weight="400">Снимок: ответ частичный</text>
+</g>
+<g data-card="true">
+<rect x="820" y="790" width="330" height="110" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="842" y="827" font-size="23" fill="#122844" font-weight="650">Документ-источник</text>
+<text x="842" y="856" font-size="18" fill="#536780" font-weight="400">Ссылка · пункт / страница</text>
+<text x="842" y="881" font-size="18" fill="#536780" font-weight="400">Редакция документа</text>
+</g>
+<path d="M380 295 H435" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M765 295 H820" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M380 570 H435" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M765 570 H820" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M380 845 H435" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M765 845 H820" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M985 350 V410 H600 V515" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="694.5" y="391" width="191" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="790" y="410" text-anchor="middle" font-size="16" fill="#536780">контекст из корпуса</text>
+<path d="M985 625 V685 H405 V780 H215 V790" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<rect x="446" y="666" width="308" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="600" y="685" text-anchor="middle" font-size="16" fill="#536780">ответ и использованные фрагменты</text>
+<text x="50" y="980" font-size="18" fill="#536780" font-weight="400">Недостаточно оснований → уточнение или отказ. Историческая редакция требует подтверждения.</text>
+<text x="50" y="1012" font-size="18" fill="#536780" font-weight="400">Точность OCR и действие норм проверяются отдельно; аудит модели не заменяет ручную сверку.</text>
+</g></svg>
