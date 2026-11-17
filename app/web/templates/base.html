@@ -94,6 +94,7 @@
   <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 2C18 11 21 14 30 16C21 18 18 21 16 30C14 21 11 18 2 16C11 14 14 11 16 2Z"/></svg>
 </a>
 {% endif %}
+{% if viewer.user.role == "student" %}<script src="/static/language-return.js" defer></script>{% endif %}
 <script>
 (function () {
   var box = document.getElementById("bell");

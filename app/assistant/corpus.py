@@ -1,4 +1,4 @@
-"""Проверенный снимок корпуса, редакции и двухступенчатый гибридный поиск."""
+"""Проверенный снимок корпуса, редакции и гибридный поиск выдержек."""
 from __future__ import annotations
 
 import hashlib
@@ -84,9 +84,10 @@ class Chunk(BaseModel):
 
 
 _STEMMER = snowballstemmer.stemmer("russian")
-_STOP = set("как какой какая какие сколько когда где куда кто что нужно мне мне это для при или чтобы можно ли оформить получить подать документы документ студент студента обучающийся пожалуйста расскажи".split())
+_STOP = set("как какой какая какие сколько когда где куда кто что нужно мне меня мой моего моем моём могут это для при или чтобы можно ли оформить получить подать документы документ студент студента обучающийся пожалуйста расскажи".split())
 _ALIASES = {"академ": "академический отпуск", "общага": "общежитие", "общагу": "общежитие",
-            "стипуха": "стипендия", "матпомощь": "материальная помощь", "бюджет": "бесплатное обучение"}
+            "стипуха": "стипендия", "матпомощь": "материальная помощь", "бюджет": "бесплатное обучение",
+            "отчислить": "отчисление", "отчислят": "отчисление"}
 
 
 def terms(text: str) -> list[str]:
@@ -164,19 +165,13 @@ class Corpus:
         query = terms(expand(question))
         if not query or not rows:
             return []
-        by_doc: dict[str, list[Chunk]] = {}
-        for c in rows:
-            by_doc.setdefault(c.document_family or c.document_id, []).append(c)
-        docs = list(by_doc)
-        texts = [by_doc[d][0].title + " " + " ".join(c.text for c in by_doc[d]) for d in docs]
-        doc_scores = _bm25(query, texts)
-        selected = sorted(range(len(docs)), key=lambda i: doc_scores[i], reverse=True)[:2]
-        candidates = [c for i in selected if doc_scores[i] > 0 for c in by_doc[docs[i]]]
+        # Поиск по всем допустимым выдержкам: предварительный выбор двух документов
+        # терял прямую норму, если общие слова встречались в длинном постороннем акте.
+        candidates = rows
         scores = _bm25(query, [c.title + " " + c.text for c in candidates])
-        # Совпадение общей лексики не доказывает, что в корпусе есть нужная процедура.
-        meaningful = set(query)
-        relevant = [i for i, c in enumerate(candidates)
-                    if len(meaningful & set(terms(c.title + " " + c.text))) / len(meaningful) >= .5]
+        # Длина разговорного вопроса не должна отсекать норму по доле совпадений.
+        # Кандидат ещё не является доказательством: применимость проверяет аудит ответа.
+        relevant = [i for i, score in enumerate(scores) if score > 0]
         lexical = sorted(relevant, key=lambda i: scores[i], reverse=True)
         # Лексический канал сохраняет фильтр совпадения процедуры. Семантический
         # ищет по всему корпусу: иначе перефразирование отсекается ещё до векторов.

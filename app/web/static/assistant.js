@@ -45,7 +45,7 @@
   let pendingQuestion = '';
   let repeatingAfterConsent = false;
   let busy = false;
-  const labels = {answer:'Ответ по источникам',partial:'Частичный ответ',clarify:'Нужно уточнение',consent_required:'Разрешение на доступ к оценкам',not_found:'Нет подтверждения',error:'Не удалось проверить ответ',unavailable:'Ассистент недоступен',busy:'Подождите немного'};
+  const labels = {help:'Помощь ассистента',answer:'Ответ по источникам',partial:'Частичный ответ',clarify:'Нужно уточнение',consent_required:'Разрешение на доступ к оценкам',not_found:'Нет подтверждения',error:'Не удалось проверить ответ',unavailable:'Ассистент недоступен',busy:'Подождите немного'};
   async function action(payload) {
     const response = await fetch('/s/assistant/conversation', {method:'POST', credentials:'same-origin', redirect:'error',
       headers:{'Content-Type':'application/json','X-CSRF-Token':root.dataset.csrf}, body:JSON.stringify(payload)});
