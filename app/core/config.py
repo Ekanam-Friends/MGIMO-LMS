@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     llm_provider: str = ""
     gigachat_auth_key: SecretStr = SecretStr("")
     gigachat_scope: str = "GIGACHAT_API_PERS"
-    gigachat_model: str = "GigaChat-2"
+    gigachat_model: str = "GigaChat-2-Max"
     gigachat_translation_model: str = "GigaChat-2-Max"
     gigachat_ca_bundle: str = ""
     llm_embedding_model: str = ""
