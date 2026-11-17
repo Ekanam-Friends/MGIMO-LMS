@@ -74,7 +74,8 @@ async def main(argv: list[str] | None = None) -> int:
     engine = make_engine(settings.database_url)
     try:
         async with RuzClient(
-            settings.ruz_base_url, delay=settings.ruz_request_delay, timeout=settings.ruz_timeout
+            settings.ruz_base_url, delay=settings.ruz_request_delay, timeout=settings.ruz_timeout,
+            verify_tls=settings.ruz_verify_tls,
         ) as client:
             importer = ScheduleImporter(
                 make_session_factory(engine),

@@ -246,11 +246,13 @@ class Assistant:
         if plan.intent == "capabilities":
             result = await self._capabilities(as_of)
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
-        if any(s != "public" for s in plan.scopes) and student_id is None:
+        if any(s != "public" for s in plan.scopes) and student_id is None and conversation.actor_role != "teacher":
             return self._result("clarify", "Выберите демо-студента и начните новую беседу для ответа по учебным данным.")
         if "grades" in plan.scopes and not conversation.grades_allowed:
             conversation.request_grades()
-            subject = "вашим оценкам и баллам" if conversation.actor_role == "student" else "оценкам и баллам выбранного демо-студента"
+            subject = ("вашим оценкам и баллам" if conversation.actor_role == "student" else
+                       "оценкам и баллам ваших студентов по своим дисциплинам" if conversation.actor_role == "teacher" else
+                       "оценкам и баллам выбранного демо-студента")
             result = self._result("consent_required", f"Разрешить доступ к {subject} и передачу "
                 "этих данных GigaChat для ответа? Разрешение действует до очистки беседы, "
                 "закрытия вкладки или истечения двух часов. ФИО и контакты не передаются.")

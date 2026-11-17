@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import asyncio
 import time
+import logging
+from urllib.parse import urlsplit
 from datetime import date
 from typing import Any
 
@@ -36,12 +38,20 @@ class RuzClient:
         retries: int = 3,
         backoff: float = 5.0,
         transport: httpx.AsyncBaseTransport | None = None,
+        verify_tls: bool = True,
     ) -> None:
+        target = urlsplit(base_url)
+        if not verify_tls:
+            if target.scheme != "https" or target.hostname != "ruz.mgimo.ru" or target.port not in (None, 443) or target.username or target.password:
+                raise ValueError("Исключение TLS разрешено только для https://ruz.mgimo.ru:443")
+            logging.getLogger(__name__).warning("РУЗ: проверка TLS отключена явной настройкой только для ruz.mgimo.ru")
         self._http = httpx.AsyncClient(
             base_url=base_url,
             timeout=timeout,
             headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
             transport=transport,
+            verify=verify_tls,
+            follow_redirects=False,
         )
         self._delay = delay
         self._retries = retries
@@ -102,7 +112,7 @@ class RuzClient:
                 return response.json()
             except ValueError as exc:
                 raise RuzError(f"{path}: ответ не JSON") from exc
-        raise RuzError(f"{path}: не удалось после {self._retries + 1} попыток") from last_error
+        raise RuzError(f"{path}: не удалось после {self._retries + 1} попыток; причина: {last_error}") from last_error
 
     async def _throttle(self) -> None:
         """Между началами любых двух запросов — не меньше `delay`, в том числе при параллельной загрузке."""

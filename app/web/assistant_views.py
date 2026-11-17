@@ -10,7 +10,8 @@ from sqlalchemy import select
 from app.models import Student
 
 from app.assistant.service import BusyError
-from app.assistant.personal import SqlPersonalEvidenceReader
+from app.assistant.personal import SqlPersonalEvidenceReader, SqlTeachingEvidenceReader
+from app.assistant import teaching
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
 from app.web.views import render
 from app.web.i18n import language_for
@@ -43,6 +44,16 @@ def demo_access(request):
     return request.app.state.assistant.cfg.assistant_demo_student_access
 
 
+async def selected_student(request, viewer, db, student_id):
+    query = select(Student.id).where(Student.id == student_id)
+    if viewer.user.role == "teacher":
+        query = query.where(Student.id.in_(teaching.student_ids(viewer.teacher_id)))
+    elif not demo_access(request):
+        raise HTTPException(403, "Доступ к демо-студентам отключён")
+    if await db.scalar(query) is None:
+        raise HTTPException(404)
+
+
 async def read_json(request: Request):
     if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
         raise HTTPException(415, "Нужен JSON")
@@ -73,16 +84,17 @@ async def conversation_action(request: Request, viewer: Viewer = Depends(check_c
             if data.student_id is not None and data.student_id != student_id:
                 raise HTTPException(404)
         elif data.student_id is not None:
-            if not demo_access(request):
-                raise HTTPException(403, "Доступ к демо-студентам отключён")
-            student_id = await db.scalar(select(Student.id).where(Student.id == data.student_id))
-            if student_id is None:
-                raise HTTPException(404)
+            await selected_student(request, viewer, db, data.student_id)
+            student_id = data.student_id
         try:
             token = store.start(owner, student_id, viewer.user.role, language_for(viewer))
+            if viewer.user.role == "teacher":
+                store.get(token, owner).teacher_id = viewer.teacher_id
         except RuntimeError:
             raise HTTPException(429, "Слишком много бесед. Повторите позднее") from None
         result = {"conversation_token": token}
+        if viewer.user.role == "teacher" and student_id is not None:
+            result["data_status"] = await teaching.coverage(db, viewer.teacher_id, student_id)
     else:
         conversation = store.get(data.conversation_token, owner)
         if conversation is None or conversation.actor_role != viewer.user.role:
@@ -103,7 +115,7 @@ async def assistant_page(request: Request, viewer: Viewer = Depends(current_view
     if viewer.user.role == "student":
         viewer.student_id
     response = render(request, "assistant.html", viewer, enabled=request.app.state.assistant.enabled,
-                      demo_access=demo_access(request))
+                      demo_access=demo_access(request) or viewer.user.role == "teacher")
     response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -111,11 +123,13 @@ async def assistant_page(request: Request, viewer: Viewer = Depends(current_view
 @router.get("/s/assistant/students")
 async def assistant_students(request: Request, q: str = "", viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)):
     require_role(viewer)
-    if viewer.user.role == "student" or not demo_access(request):
+    if viewer.user.role == "student" or (viewer.user.role != "teacher" and not demo_access(request)):
         raise HTTPException(404)
     if len(q) > 100:
         raise HTTPException(400)
     query = select(Student.id, Student.full_name).order_by(Student.full_name, Student.id).limit(30)
+    if viewer.user.role == "teacher":
+        query = query.where(Student.id.in_(teaching.student_ids(viewer.teacher_id)))
     if q.strip():
         query = query.where(Student.full_name.icontains(q.strip(), autoescape=True))
     rows = (await db.execute(query)).all()
@@ -141,12 +155,25 @@ async def assistant_ask(request: Request, viewer: Viewer = Depends(check_csrf), 
             raise HTTPException(404)
     else:
         student_id = conversation.student_id
-        if student_id is not None and not demo_access(request):
-            raise HTTPException(403, "Доступ к демо-студентам отключён")
+        if viewer.user.role == "teacher" and conversation.teacher_id != viewer.teacher_id:
+            raise HTTPException(404)
+        if student_id is not None:
+            await selected_student(request, viewer, db, student_id)
     try:
         answer = await request.app.state.assistant.chat(viewer.user.id, student_id, data.question.strip(),
-            data.history, data.as_of, conversation, SqlPersonalEvidenceReader(db))
+            data.history, data.as_of, conversation,
+            SqlTeachingEvidenceReader(db, viewer.teacher_id) if viewer.user.role == "teacher" else SqlPersonalEvidenceReader(db))
     except BusyError:
         return JSONResponse({"status": "busy", "message": "Запрос уже выполняется или достигнут лимит. Подождите минуту."},
                             status_code=429, headers={"Retry-After": "60", "Cache-Control": "no-store"})
     return JSONResponse(answer, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
+
+
+@router.get("/s/assistant/students/{student_id}/data-status")
+async def teacher_data_status(student_id: int, request: Request, viewer: Viewer = Depends(current_viewer),
+                              db: AsyncSession = Depends(get_db)):
+    if viewer.user.role != "teacher":
+        raise HTTPException(404)
+    await selected_student(request, viewer, db, student_id)
+    return JSONResponse(await teaching.coverage(db, viewer.teacher_id, student_id),
+                        headers={"Cache-Control": "no-store"})

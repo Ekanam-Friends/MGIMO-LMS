@@ -96,7 +96,7 @@ async def login_form(request: Request) -> HTMLResponse:
 async def login(
     request: Request, login: str = Form(""), password: str = Form(""), db: AsyncSession = Depends(get_db)
 ) -> Response:
-    user = await auth.authenticate(db, login, password)
+    user = await auth.authenticate(db, login, password, release_read_transaction=True)
     if user is None:
         return templates.TemplateResponse(
             request, "login.html", {"viewer": None, "path": "/login", "error": "Неверный логин или пароль", "login": login},

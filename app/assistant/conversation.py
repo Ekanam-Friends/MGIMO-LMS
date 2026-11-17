@@ -11,6 +11,7 @@ class Conversation:
     student_id: int | None = None
     actor_role: str = "student"
     language: str = "ru"
+    teacher_id: int | None = None
 
     @property
     def grades_allowed(self) -> bool:

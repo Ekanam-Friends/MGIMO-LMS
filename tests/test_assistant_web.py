@@ -52,7 +52,7 @@ async def test_staff_public_chat_and_demo_access_disabled_by_default(client):
                              headers={"X-CSRF-Token":csrf})).status_code == 403
 
 
-@pytest.mark.parametrize("role", ["teacher", "staff"])
+@pytest.mark.parametrize("role", ["staff"])
 async def test_demo_roles_select_any_student_and_consent_is_bound(client, role):
     from sqlalchemy import update
     from app.models.auth import User

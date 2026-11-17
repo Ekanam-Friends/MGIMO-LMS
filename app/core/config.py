@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     ruz_request_delay: float = 0.5
     ruz_concurrency: int = 2
     ruz_timeout: float = 120.0
+    ruz_verify_tls: bool = True
+    """False — явное исключение только для HTTPS ruz.mgimo.ru при истёкшем сертификате."""
 
     fake_name_salt: str = "mgimo-lms"
 

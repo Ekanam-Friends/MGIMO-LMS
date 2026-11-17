@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.grades.service import record_book
-from app.models import Lesson, LessonGroup, Student
+from app.models import Assessment, Course, CourseEnrollment, Discipline, FinalGrade, Lesson, LessonGroup, Score, Student, lesson_teachers
 from app.models.certificates import CertificateKind, CertificateRequest, PaperStatus, RequestStatus
 from app.models.grades import FinalResult
 from .evidence import bounded_facts
@@ -18,6 +18,15 @@ class SqlPersonalEvidenceReader:
 
     async def collect(self, student_id, scopes, today, start, end):
         return await collect(self.db, student_id, scopes, today, start, end)
+
+
+class SqlTeachingEvidenceReader:
+    """SQL-адаптер ограничивает контекст учётной записью преподавателя."""
+    def __init__(self, db: AsyncSession, teacher_id: int):
+        self.db, self.teacher_id = db, teacher_id
+
+    async def collect(self, student_id, scopes, today, start, end):
+        return await collect_teaching(self.db, self.teacher_id, student_id, scopes, today, start, end)
 
 
 async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: date,
@@ -77,4 +86,66 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
         if len(rows) > 20:
             add("Выбраны последние 20 заявок. Полная история доступна в разделе справок.", "/mfc/certificates", "Ограничение выборки")
     # Не отправляем провайдеру неограниченный журнал оценок.
+    return bounded_facts(facts)
+
+
+async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: list[str],
+                           today: date, start: date, end: date) -> list[dict]:
+    """Ни полная зачётка, ни заявки студента не читаются для преподавателя."""
+    from .teaching import course_ids, coverage
+    if teacher_id is None:
+        raise ValueError("Не подтверждена учётная запись преподавателя")
+    facts = []
+
+    def add(text):
+        facts.append({"id": f"fact-{len(facts) + 1}", "text": text, "url": "", "label": "Свои дисциплины"})
+
+    status = await coverage(db, teacher_id, student_id)
+    add(f"Снимок доступных учебных данных: дисциплин {status['courses']}, контрольных точек "
+        f"{status['assessments']}, выставленных баллов {status['scores']}. "
+        f"Последнее наблюдение своих занятий при импорте: {status['schedule_imported_at'] or 'не подтверждено'}. "
+        "Отсутствие записи не доказывает отсутствие события вне загруженного снимка.")
+    enrolled = select(Course.id).join(CourseEnrollment).where(Course.id.in_(course_ids(teacher_id, today)))
+    if student_id is not None:
+        enrolled = enrolled.where(CourseEnrollment.student_id == student_id)
+    if "grades" in scopes:
+        rows = (await db.execute(select(Discipline.name, Course.semester, Assessment.title,
+            Assessment.max_points, Score.points, Score.graded_at, Score.student_id).select_from(Course)
+            .join(Discipline).join(Assessment).outerjoin(Score,
+                (Score.assessment_id == Assessment.id) &
+                ((Score.student_id == student_id) if student_id is not None else Score.student_id.in_(
+                    select(CourseEnrollment.student_id).where(CourseEnrollment.course_id == Course.id).correlate(Course))))
+            .where(Course.id.in_(enrolled)).order_by(Course.id, Assessment.id).limit(100))).all()
+        for name, sem, title, mx, points, graded_at, sid in rows:
+            add((f"Студент №{sid}: " if sid is not None else "") + f"{name}, семестр {sem}; {title}: " +
+                (f"{points:g} из {mx:g}; выставлено {graded_at.isoformat()}." if points is not None
+                 else "баллы в снимке не выставлены."))
+        finals_query = select(Discipline.name, FinalGrade.result, FinalGrade.total_points,
+            FinalGrade.graded_on, FinalGrade.student_id).select_from(FinalGrade).join(Course).join(Discipline)
+        finals_query = finals_query.where(Course.id.in_(enrolled), FinalGrade.student_id.in_(
+            select(CourseEnrollment.student_id).where(CourseEnrollment.course_id == Course.id).correlate(Course)))
+        if student_id is not None:
+            finals_query = finals_query.where(FinalGrade.student_id == student_id)
+        finals = (await db.execute(finals_query.order_by(FinalGrade.graded_on.desc(), FinalGrade.id.desc()).limit(40))).all()
+        for name, result, points, day, sid in finals:
+            add(f"Студент №{sid}: {name}: итог {FinalResult.TITLES.get(result, result)}, {points:g} баллов, дата {day}.")
+        if len(rows) == 100 or len(finals) == 40:
+            add("Выборка ограничена; уточните дисциплину и период. Полная история не подтверждена.")
+    if "schedule" in scopes:
+        schedule_query = select(Lesson).join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
+        if student_id is not None:
+            schedule_query = schedule_query.join(LessonGroup).join(Student, Student.study_group_id == LessonGroup.group_id)
+            schedule_query = schedule_query.where(Student.id == student_id)
+        rows = (await db.scalars(schedule_query.where(lesson_teachers.c.teacher_id == teacher_id,
+            Lesson.date >= start, Lesson.date <= end, Lesson.status == "active")
+            .order_by(Lesson.date, Lesson.begins_at, Lesson.id).limit(61))).all()
+        for row in rows[:60]:
+            add(f"{row.date} {row.begins_at:%H:%M}–{row.ends_at:%H:%M}: {row.discipline}; "
+                f"подгруппа {row.subgroup or 'вся группа'}; импорт {row.last_seen_at.isoformat()}.")
+        if not rows:
+            add(f"В загруженном снимке нет своих занятий этой группы за {start}–{end}.")
+        if len(rows) > 60:
+            add("Показаны первые 60 занятий. Уточните период.")
+    if "requests" in scopes:
+        add("Заявки и справки студента не входят в область доступа преподавателя.")
     return bounded_facts(facts)

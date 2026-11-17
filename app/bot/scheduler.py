@@ -179,7 +179,8 @@ async def bootstrap_schedule(ctx: Context, *, transport: object | None = None) -
     log.info("расписание есть у %s групп из %s — догружаю семестр ещё %s групп", len(have), target, missing)
     cfg = ctx.settings
     extra = {"transport": transport} if transport is not None else {}  # подмена РУЗ в тестах
-    async with RuzClient(cfg.ruz_base_url, delay=cfg.ruz_request_delay, timeout=cfg.ruz_timeout, **extra) as client:
+    async with RuzClient(cfg.ruz_base_url, delay=cfg.ruz_request_delay, timeout=cfg.ruz_timeout,
+                         verify_tls=cfg.ruz_verify_tls, **extra) as client:
         importer = ScheduleImporter(ctx.sf, client, fake_name_salt=cfg.fake_name_salt,
                                     concurrency=cfg.ruz_concurrency, report_additions=False)
         stats = await importer.run(
@@ -206,7 +207,8 @@ async def import_linked_groups(ctx: Context) -> None:
         return
     today = datetime.now(MOSCOW).date()
     cfg = ctx.settings
-    async with RuzClient(cfg.ruz_base_url, delay=cfg.ruz_request_delay, timeout=cfg.ruz_timeout) as client:
+    async with RuzClient(cfg.ruz_base_url, delay=cfg.ruz_request_delay, timeout=cfg.ruz_timeout,
+                         verify_tls=cfg.ruz_verify_tls) as client:
         importer = ScheduleImporter(ctx.sf, client, fake_name_salt=cfg.fake_name_salt, concurrency=cfg.ruz_concurrency)
         stats = await importer.run(today - DAILY_BACK, today + DAILY_AHEAD, group_filter=lambda g: g.id in group_ids)
     log.info("импорт РУЗ по %s группам: %s, изменения %s", len(group_ids), stats.status, stats.changes or "нет")
