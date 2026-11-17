@@ -113,6 +113,7 @@ intent=capabilities только если пользователь спраши�
 есть в его базе. Вопрос о конкретном правиле всегда intent=question.
 intent=greeting для простого приветствия или благодарности без содержательного вопроса:
 «Привет», «Спасибо». «Привет, за что могут отчислить?» — intent=question.
+Для greeting и capabilities scopes всегда ["public"]. Значение general запрещено.
 search_query — краткая формулировка нормативной процедуры для текстового поиска:
 «за что могут отчислить из моего вуза» → «основания отчисления»;
 «условия академического отпуска» → «академический отпуск условия предоставления».
@@ -233,14 +234,14 @@ class Assistant:
         history = [redact_question(h) for h in history[-4:]]
         if conversation.language != "ru":
             question, history = await for_search(self.provider, question, history, conversation.language)
+        if re.fullmatch(r"\s*(?:привет|здравствуй(?:те)?|доброе утро|добрый (?:день|вечер)|спасибо|благодарю)[.!?,\s]*", question, re.I):
+            result = self._greeting()
+            return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
         plan = parse_json(await self.provider.complete(ROUTE,
             {"question": question, "history": history, "today": today.isoformat(),
              "actor_role": conversation.actor_role}), Plan)
         if plan.intent == "greeting":
-            result = self._result("help", "Здравствуйте! Помогу найти информацию в положениях МГИМО, "
-                "посмотреть расписание и заявки. Например, спросите об основаниях отчисления "
-                "или напишите: «На какие темы ты можешь ответить?». Оценки доступны только после "
-                "вашего разрешения. Важные выводы сверяйте с оригиналами документов.")
+            result = self._greeting()
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
         if plan.intent == "capabilities":
             result = await self._capabilities(as_of)
@@ -296,6 +297,12 @@ class Assistant:
         if conversation.language != "ru":
             result = await for_display(self.provider, result, conversation.language)
         return result
+
+    def _greeting(self):
+        return self._result("help", "Здравствуйте! Помогу найти информацию в положениях МГИМО, "
+            "посмотреть расписание и заявки. Например, спросите об основаниях отчисления "
+            "или напишите: «На какие темы ты можешь ответить?». Оценки доступны только после "
+            "вашего разрешения. Важные выводы сверяйте с оригиналами документов.")
 
     async def _capabilities(self, as_of):
         today = moscow_today()
