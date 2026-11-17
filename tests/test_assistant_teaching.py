@@ -80,7 +80,15 @@ async def test_teacher_llm_receives_only_scoped_facts(client, tmp_path):
     from app.assistant.bootstrap import create_assistant as Assistant
     from tests.test_assistant import FakeProvider, config
     await teacher_fixture(client)
-    provider = FakeProvider({"scopes": ["grades"]}, {"fact_ids": ["fact-2"]})
+    class SchemaProvider(FakeProvider):
+        def __init__(self, *replies):
+            super().__init__(*replies)
+            self.schemas = []
+
+        async def complete(self, system, data, **kwargs):
+            self.schemas.append(kwargs.get("response_schema"))
+            return await super().complete(system, data, **kwargs)
+    provider = SchemaProvider({"scopes": ["grades"]}, {"fact_ids": ["fact-2"]})
     assistant = Assistant(config(tmp_path), provider)
     conversation = Conversation("owner", float("inf"), actor_role="teacher", teacher_id=1)
     conversation.request_grades()
@@ -91,6 +99,9 @@ async def test_teacher_llm_receives_only_scoped_facts(client, tmp_path):
     payload = json.dumps(provider.calls, ensure_ascii=False)
     assert "Своя математика" in payload and "Скрытая работа" not in payload
     assert "Другой предмет" not in payload and "секрет" not in payload
+    assert set(provider.schemas[0]["properties"]["intent"]["enum"]) == {"question", "greeting", "capabilities"}
+    assert "fact-2" in provider.schemas[1]["properties"]["fact_ids"]["items"]["enum"]
+    assert provider.schemas[1]["properties"]["fact_ids"]["maxItems"] == 12
 
 
 async def test_teacher_large_grade_context_always_reports_truncation(client, tmp_path):
