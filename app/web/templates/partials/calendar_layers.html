@@ -1,0 +1,19 @@
+{#- Переключатели слоёв календаря и подсказки (решение 0006). Рисуется либо внутри .cal слева от
+    недели (страница «Расписание»), либо отдельной карточкой в правой колонке главной — тогда
+    неделя занимает всю ширину. Слои прячутся CSS-правилами body:has(...), поэтому место
+    переключателей на странице не важно. -#}
+<p class="cal__side-title">{{ _('Мои календари') }}</p>
+{% for key, title in cv.LAYERS %}
+  <label class="cal-layer cal-layer--{{ key }}">
+    <input type="checkbox" class="cal-layer__input" data-layer="{{ key }}" checked>
+    <span class="cal-layer__box" aria-hidden="true"></span><span>{{ title }}</span>
+  </label>
+{% endfor %}
+{% if not cal.has_group %}
+  <p class="cal__hint">{{ _('Учебная группа не указана — пары появятся после привязки группы.') }}</p>
+{% elif not cal.has_choices %}
+  <p class="cal__hint">{{ _('Элективы и подгруппы не выбраны.') }} <a href="/electives">{{ _('Выбрать →') }}</a></p>
+{% else %}
+  <p class="cal__hint"><a href="/electives">{{ _('Изменить элективы и подгруппы') }}</a></p>
+{% endif %}
+<p class="cal__hint">{{ _('Нажмите на событие, чтобы увидеть аудиторию и время. Бледные активности открыты для записи.') }}</p>

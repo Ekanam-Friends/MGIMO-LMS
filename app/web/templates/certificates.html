@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
 {% from "partials/_cert.html" import status_badge %}
-{% block title %}Справки и выписки{% endblock %}
-{% block header %}<nav class="breadcr"><a href="/" aria-label="Главная">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>Справки и выписки</span></nav>{% endblock %}
+{% block title %}{{ _('Справки и выписки') }}{% endblock %}
+{% block header %}<nav class="breadcr"><a href="/" aria-label="{{ _('Главная') }}">{{ icon("home", 18) }}</a>{{ icon("chev-right", 16) }}<span>{{ _('Справки и выписки') }}</span></nav>{% endblock %}
 {% block content %}
 <div class="page page--narrow">
   <div class="page__head">
-    <h1 class="title-1">Справки и выписки</h1>
-    <a class="btn btn--primary" href="#order">Заказать справку</a>
+    <h1 class="title-1">{{ _('Справки и выписки') }}</h1>
+    <a class="btn btn--primary" href="#order">{{ _('Заказать справку') }}</a>
   </div>
-  {% if created %}<p class="alert alert--ok" role="status">Заявка №{{ created }} принята. Статус обновится, когда деканат возьмёт её в работу.</p>{% endif %}
+  {% if created %}<p class="alert alert--ok" role="status">{{ _('Заявка №') }}{{ created }} {{ _('принята. Статус обновится, когда деканат возьмёт её в работу.') }}</p>{% endif %}
 
   <section class="panel">
-    <h2 class="panel__title">Заказанные справки</h2>
-    <p class="alert alert--accent">В случае ошибки в справке закажите её повторно — в поле «Куда требуется» укажите, что исправить.</p>
+    <h2 class="panel__title">{{ _('Заказанные справки') }}</h2>
+    <p class="alert alert--accent">{{ _('В случае ошибки в справке закажите её повторно — в поле «Куда требуется» укажите, что исправить.') }}</p>
     {% if rows %}
     <div class="table-wrap">
       <table class="table">
-        <thead><tr><th>Номер</th><th>Наименование</th><th>Дата</th><th>Статус</th><th>Скачать</th><th>Выдача на бумажном носителе</th></tr></thead>
+        <thead><tr><th>{{ _('Номер') }}</th><th>{{ _('Наименование') }}</th><th>{{ _('Дата') }}</th><th>{{ _('Статус') }}</th><th>{{ _('Скачать') }}</th><th>{{ _('Выдача на бумажном носителе') }}</th></tr></thead>
         <tbody>
         {% for r in rows %}
           {% set paper = certs.paper_label(r) %}
@@ -28,14 +28,14 @@
             <td data-label="Статус">{{ status_badge(certs.electronic_label(r), r.status) }}</td>
             <td data-label="Скачать">
               {% if r.status == RequestStatus.READY and r.pdf and not certs.download_expired(r) %}
-                <a class="icon-btn" href="/mfc/certificates/{{ r.id }}/pdf" aria-label="Скачать PDF">{{ icon("download") }}</a>
+                <a class="icon-btn" href="/mfc/certificates/{{ r.id }}/pdf" aria-label="{{ _('Скачать PDF') }}">{{ icon("download") }}</a>
               {% else %}<span class="icon-btn icon-btn--off" aria-hidden="true">{{ icon("download") }}</span>{% endif %}
             </td>
             <td data-label="Бумажный оригинал" class="table__paper">
               {% if paper is none %}
                 <form method="post" action="/mfc/certificates/{{ r.id }}/paper">
                   <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
-                  <button class="link-btn" type="submit">Выдать на бумажном носителе</button>
+                  <button class="link-btn" type="submit">{{ _('Выдать на бумажном носителе') }}</button>
                 </form>
               {% else %}{{ paper }}{% endif %}
             </td>
@@ -45,31 +45,31 @@
       </table>
     </div>
     {% else %}
-      <p class="muted">Вы ещё не заказывали справки.</p>
+      <p class="muted">{{ _('Вы ещё не заказывали справки.') }}</p>
     {% endif %}
   </section>
 
   <section class="panel" id="order">
-    <h2 class="panel__title">Заказать справку</h2>
+    <h2 class="panel__title">{{ _('Заказать справку') }}</h2>
     {% if error %}<p class="alert alert--error" role="alert">{{ error }}</p>{% endif %}
     <form method="post" action="/mfc/certificates" class="form">
       <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
       <fieldset class="radio-list">
-        <legend class="field__label">Вид справки</legend>
+        <legend class="field__label">{{ _('Вид справки') }}</legend>
         {% for code, title in kinds.items() %}
           <label class="radio"><input type="radio" name="kind" value="{{ code }}" {% if loop.first %}checked{% endif %}>
-            <span>{{ title }}{% if code in paper_only %}<small class="muted"> — только на бумаге, до 5 рабочих дней</small>{% else %}<small class="muted"> — электронно с ЭП, бумага по запросу</small>{% endif %}</span></label>
+            <span>{{ title }}{% if code in paper_only %}<small class="muted"> {{ _('— только на бумаге, до 5 рабочих дней') }}</small>{% else %}<small class="muted"> {{ _('— электронно с ЭП, бумага по запросу') }}</small>{% endif %}</span></label>
         {% endfor %}
       </fieldset>
       <label class="field">
-        <span class="field__label">Куда требуется</span>
-        <input class="field__input" name="purpose" maxlength="500" placeholder="Например: по месту работы родителей">
+        <span class="field__label">{{ _('Куда требуется') }}</span>
+        <input class="field__input" name="purpose" maxlength="500" placeholder="{{ _('Например: по месту работы родителей') }}">
       </label>
       <label class="field field--short">
-        <span class="field__label">Количество экземпляров</span>
+        <span class="field__label">{{ _('Количество экземпляров') }}</span>
         <input class="field__input" type="number" name="copies" min="1" max="5" value="1">
       </label>
-      <button class="btn btn--primary" type="submit">Заказать</button>
+      <button class="btn btn--primary" type="submit">{{ _('Заказать') }}</button>
     </form>
   </section>
 </div>

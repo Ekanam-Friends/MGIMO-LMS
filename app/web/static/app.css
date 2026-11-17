@@ -94,7 +94,7 @@ small { font-size: 12px; }
 .main { padding: 32px; flex: 1; }
 
 /* --- главная --- */
-.dashboard { display: grid; grid-template-columns: minmax(0, 820px) 300px; gap: 24px; justify-content: center; }
+.dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; max-width: 1360px; margin: 0 auto; }
 .dashboard__col { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
 .dashboard__row { display: grid; gap: 24px; }
 .dashboard__row--grades { grid-template-columns: 1.5fr 1fr; gap: 12px; }
@@ -123,6 +123,30 @@ small { font-size: 12px; }
 .ref-card__title { font-weight: 600; }
 .ref-card__date { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .ref-card--empty .ref-card__date { color: var(--accent); }
+/* Деканат на главной: пусто — тихая надпись по центру строки, без карточки */
+.ref-empty { margin: 0; padding: 12px 16px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.ref-empty a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+.ref-empty a:hover { text-decoration: underline; }
+/* есть заявки — до трёх строками в одной карточке (вариант M1) */
+.req-all { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+.req-list { background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+.req-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); transition: background .15s; }
+.req-row:hover { background: #fafafc; }
+.req-row__ico { flex: none; width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; background: var(--bg); color: var(--muted); }
+.req-row__ico--ok { background: #eaf6ee; color: var(--green); }
+.req-row__main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.req-row__name { font-weight: 600; font-size: 14px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.req-row__meta { font-size: 12px; line-height: 18px; color: var(--muted); }
+.req-row__badge { flex: none; }
+.req-add { display: flex; align-items: center; gap: 8px; padding: 14px 16px; color: var(--accent); font-weight: 700; font-size: 14px; transition: background .15s; }
+.req-add:hover { background: var(--accent-soft); }
+@media (max-width: 640px) {
+  .req-all span { display: none; }
+  .req-row { flex-wrap: wrap; row-gap: 6px; }
+  .req-row__main { flex-basis: calc(100% - 48px); }
+  .req-row__name { white-space: normal; }
+  .req-row__badge { margin-left: 48px; }
+}
 
 .services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .service { background: var(--surface); border-radius: var(--radius); padding: 12px; display: flex; align-items: center; gap: 8px; min-height: 52px; }
@@ -453,6 +477,15 @@ textarea.field__input { resize: vertical; }
 
 .cal { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; background: var(--surface); border-radius: var(--radius-l); padding: 16px; }
 .cal__side { display: flex; flex-direction: column; gap: 10px; }
+.cal--wide { grid-template-columns: minmax(0, 1fr); }
+/* «Мои календари» карточкой в правой колонке главной */
+.cal-panel { gap: 10px; }
+.cal-panel .cal__side-title { font-size: 16px; line-height: 22px; font-weight: 600; margin: 0; }
+/* Десктоп: верх панели — вровень с карточкой календаря (под заголовком «Календарь»:
+   28px строка заголовка + 16px отступ dash-block), до «Популярных сервисов» — 32px, как между блоками. */
+@media (min-width: 1024px) {
+  .dashboard__aside > .cal-panel { margin-top: 44px; margin-bottom: 20px; }
+}
 .cal__side-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
 .cal-layer { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; line-height: 18px; }
 .cal-layer__input { position: absolute; opacity: 0; pointer-events: none; }
@@ -465,9 +498,10 @@ textarea.field__input { resize: vertical; }
 .cal-layer--activity { --c: var(--layer-activity); }
 .cal__hint { font-size: 12px; color: var(--muted); line-height: 1.4; }
 .cal__hint a { color: var(--accent); font-weight: 600; }
-.cal:has(.cal-layer__input[data-layer="core"]:not(:checked)) .ev--core,
-.cal:has(.cal-layer__input[data-layer="elective"]:not(:checked)) .ev--elective,
-.cal:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity { display: none; }
+/* body, а не .cal: на главной переключатели стоят в правой колонке, вне блока календаря */
+body:has(.cal-layer__input[data-layer="core"]:not(:checked)) .ev--core,
+body:has(.cal-layer__input[data-layer="elective"]:not(:checked)) .ev--elective,
+body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity { display: none; }
 
 .cal__main { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .cal__toolbar { display: flex; align-items: center; gap: 8px; }
@@ -544,6 +578,13 @@ textarea.field__input { resize: vertical; }
 @media (max-width: 1023px) {
   .dashboard__aside { order: 0; }
   .services--column { grid-template-columns: repeat(2, 1fr); }
+  /* Одна колонка: «Мои календари» — сразу под календарём, а не после всего контента.
+     Колонки растворяются в общей сетке, порядок задаётся order. */
+  .dashboard__col, .dashboard__aside { display: contents; }
+  .dashboard__col > .dash-block { order: 3; }
+  .dashboard__col > .dash-calendar { order: 1; }
+  .dashboard__aside > .cal-panel { order: 2; }
+  .dashboard__aside > .dash-services { order: 4; }
 }
 
 /* раскрытая карточка события в сетке (popover) */

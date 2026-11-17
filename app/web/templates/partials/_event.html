@@ -30,16 +30,16 @@
   <div id="{{ pid }}" popover class="ev-pop ev-pop--{{ e.layer }}" role="dialog" aria-label="{{ e.title }}">
     <div class="ev-pop__head">
       <p class="ev-card__layer">{{ {"core": "Обязательная пара", "elective": "Электив / подгруппа", "activity": "Внеучебная активность"}[e.layer] }}</p>
-      <button type="button" class="ev-pop__close" popovertarget="{{ pid }}" popovertargetaction="hide" aria-label="Закрыть">{{ icon("close", 18) }}</button>
+      <button type="button" class="ev-pop__close" popovertarget="{{ pid }}" popovertargetaction="hide" aria-label="{{ _('Закрыть') }}">{{ icon("close", 18) }}</button>
     </div>
-    <h3 class="ev-pop__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</h3>
+    <h3 class="ev-pop__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">{{ _('Отменено') }}</span>{% endif %}</h3>
     <ul class="lesson-card__details">
       <li>{{ icon("clock", 16) }}<span><b>{{ e.begins_at | hhmm }} – {{ e.ends_at | hhmm }}</b>, {{ sv.WEEKDAYS_FULL[d.weekday()] | lower }}, {{ d.day }} {{ sv.MONTHS_GEN[d.month - 1] }}</span></li>
       {% if e.layer == "activity" %}
         {% if e.place %}<li>{{ icon("pin", 16) }}<span>{{ e.place }}</span></li>{% endif %}
         {% if e.organizer %}<li class="lesson-card__muted">{{ e.organizer }}</li>{% endif %}
       {% else %}
-        <li>{{ icon("door", 16) }}<span>Аудитория: <b>{{ e.auditorium or "не указана" }}</b></span></li>
+        <li>{{ icon("door", 16) }}<span>{{ _('Аудитория:') }} <b>{{ e.auditorium or "не указана" }}</b></span></li>
         {% if e.building %}<li>{{ icon("pin", 16) }}<span>{{ e.building }}</span></li>{% endif %}
         {% for t in e.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}
         {% if e.subgroup %}<li class="lesson-card__muted">{{ e.subgroup }}</li>{% endif %}
@@ -60,7 +60,7 @@
 {% macro event_card(e, week, back) -%}
   <article class="lesson-card ev-card ev-card--{{ e.layer }}{% if e.cancelled %} lesson-card--cancelled{% endif %}{% if e.layer == 'activity' and not e.signed %} ev-card--available{% endif %}">
     <p class="ev-card__layer">{{ {"core": "Обязательная пара", "elective": "Электив / подгруппа", "activity": "Внеучебная активность"}[e.layer] }}</p>
-    <h3 class="lesson-card__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">Отменено</span>{% endif %}</h3>
+    <h3 class="lesson-card__title">{{ e.title }}{% if e.cancelled %} <span class="tag tag--red">{{ _('Отменено') }}</span>{% endif %}</h3>
     <ul class="lesson-card__details">
       {% if e.place %}<li>{{ icon("pin", 16) }}<span>{{ e.place }}</span></li>{% endif %}
       {% for t in e.teachers %}<li class="lesson-card__teacher">{{ icon("teacher", 16) }}<span>{{ t }}</span></li>{% endfor %}

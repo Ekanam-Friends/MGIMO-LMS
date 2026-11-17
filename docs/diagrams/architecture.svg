@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1120" viewBox="0 0 1200 1120" role="img" aria-labelledby="title desc">
-<title id="title">Один кабинет. Общая база.</title><desc id="desc">Браузер через Caddy обращается к FastAPI. Telegram обслуживается отдельным aiogram-ботом. Оба работают с PostgreSQL. Импортёр получает расписание РУЗ. Pyrus согласует справки. ИИ-ассистент и API модели показаны как план.</desc>
+<title id="title">Один кабинет. Общая база.</title><desc id="desc">Браузер через Caddy обращается к FastAPI. Telegram обслуживается отдельным aiogram-ботом. Оба работают с PostgreSQL. Импортёр получает расписание РУЗ. Pyrus согласует справки. Реализованный ассистент использует GigaChat и читает разрешённые данные кабинета; оценки доступны после согласия. Заявки через чат не создаются.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c96b4"/></marker></defs>
 <g font-family="Segoe UI, Arial, sans-serif"><rect width="1200" height="1120" rx="24" fill="#fff"/>
 <path d="M50 40h44" stroke="#2463ad" stroke-width="5" stroke-linecap="round"/>
@@ -58,28 +58,28 @@
 <text x="82" y="761" font-size="18" fill="#536780" font-weight="400">Секреты — в .env</text>
 </g>
 <g data-card="true">
-<rect x="50" y="900" width="300" height="115" rx="17" fill="#fff7e8" stroke="#d4a45b" stroke-width="1.5" stroke-dasharray="7 5"/>
-<text x="72" y="927" font-size="13" fill="#925c13" font-weight="700">В ПЛАНЕ</text>
-<text x="72" y="957" font-size="23" fill="#925c13" font-weight="650">ИИ-ассистент</text>
-<text x="72" y="986" font-size="18" fill="#536780" font-weight="400">RAG и действия студента</text>
+<rect x="50" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="72" y="937" font-size="23" fill="#122844" font-weight="650">ИИ-ассистент</text>
+<text x="72" y="966" font-size="18" fill="#536780" font-weight="400">Публичный RAG · кабинет</text>
+<text x="72" y="991" font-size="18" fill="#536780" font-weight="400">Оценки — после согласия</text>
 </g>
 <g data-card="true">
-<rect x="440" y="900" width="300" height="115" rx="17" fill="#fff7e8" stroke="#d4a45b" stroke-width="1.5" stroke-dasharray="7 5"/>
-<text x="462" y="927" font-size="13" fill="#925c13" font-weight="700">В ПЛАНЕ</text>
-<text x="462" y="957" font-size="23" fill="#925c13" font-weight="650">API модели</text>
-<text x="462" y="986" font-size="18" fill="#536780" font-weight="400">GigaChat / YandexGPT</text>
+<rect x="440" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
+<text x="462" y="937" font-size="23" fill="#122844" font-weight="650">GigaChat API</text>
+<text x="462" y="966" font-size="18" fill="#536780" font-weight="400">Выбор и аудит выдержек</text>
+<text x="462" y="991" font-size="18" fill="#536780" font-weight="400">Перевод RU / EN / FR / ZH</text>
 </g>
 <g data-card="true">
 <rect x="840" y="900" width="300" height="115" rx="17" fill="white" stroke="#d8e3f0" stroke-width="1.5" />
 <text x="862" y="937" font-size="23" fill="#122844" font-weight="650">Открытый РУЗ</text>
 <text x="862" y="966" font-size="18" fill="#536780" font-weight="400">Источник расписания</text>
 </g>
-<path d="M200 315 V470" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
-<rect x="167.5" y="351" width="65" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
-<text x="200" y="370" text-anchor="middle" font-size="16" fill="#536780">HTTPS</text>
-<path d="M590 315 V365 H560 V470" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
-<rect x="506" y="333" width="128" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
-<text x="570" y="352" text-anchor="middle" font-size="16" fill="#536780">API / вебхук</text>
+<path d="M200 315 V360 H45 V525 H60" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<rect x="107.5" y="331" width="65" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="140" y="350" text-anchor="middle" font-size="16" fill="#536780">HTTPS</text>
+<path d="M590 315 V365 H790 V525 H710" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
+<rect x="626" y="333" width="128" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
+<text x="690" y="352" text-anchor="middle" font-size="16" fill="#536780">API / вебхук</text>
 <path d="M990 315 V470" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)" marker-start="url(#arrow)" />
 <rect x="948.5" y="351" width="83" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
 <text x="990" y="370" text-anchor="middle" font-size="16" fill="#536780">Bot API</text>
@@ -90,7 +90,7 @@
 <path d="M990 900 V780" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
 <rect x="944" y="846" width="92" height="27" rx="6" fill="#fff" stroke="#fff" stroke-width="1.5" />
 <text x="990" y="865" text-anchor="middle" font-size="16" fill="#536780">JSON API</text>
-<path d="M410 550 H360 V860 H200 V900" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  stroke-dasharray="7 6"/>
-<path d="M350 955 H440" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  stroke-dasharray="7 6"/>
-<text x="50" y="1070" font-size="18" fill="#536780" font-weight="400">Сплошные связи — существующие сервисы. Пунктир — планируемая интеграция ИИ.</text>
+<path d="M410 550 H360 V860 H200 V900" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<path d="M350 955 H440" fill="none" stroke="#7c96b4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow)"  />
+<text x="50" y="1070" font-size="18" fill="#536780" font-weight="400">Ассистент читает разрешённые данные. Создание заявок через чат не реализовано.</text>
 </g></svg>

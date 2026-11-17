@@ -1,0 +1,50 @@
+[
+  {
+    "identical": true,
+    "width": 360,
+    "sha256": "6A0D444F211E62AF65B8891010B980BC396D7C64FDE970A802DCDD9206AAB915",
+    "before": "docs/process/screenshots/2026-11-17-pr37-anna-360-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-anna-360-after.png",
+    "role": "anna"
+  },
+  {
+    "identical": true,
+    "width": 1440,
+    "sha256": "0C38427873B56B960215DC9530A048A60664126929F2876F71454D0D9C0F9967",
+    "before": "docs/process/screenshots/2026-11-17-pr37-anna-1440-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-anna-1440-after.png",
+    "role": "anna"
+  },
+  {
+    "identical": true,
+    "width": 360,
+    "sha256": "BB9197365DA3A9B9669E513ED412E7594F53E46337C26F6208C86565CAF2E103",
+    "before": "docs/process/screenshots/2026-11-17-pr37-demo_teacher-360-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-demo_teacher-360-after.png",
+    "role": "demo_teacher"
+  },
+  {
+    "identical": true,
+    "width": 1440,
+    "sha256": "DA6E79213FFD940BE024E647BB657F9B64364953D65F01505808B3CE01EB2A1D",
+    "before": "docs/process/screenshots/2026-11-17-pr37-demo_teacher-1440-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-demo_teacher-1440-after.png",
+    "role": "demo_teacher"
+  },
+  {
+    "identical": true,
+    "width": 360,
+    "sha256": "D0A4A4F5DBC17BDC3464216648CE5C72C1A6CE8B8210CDD9EF68459D8B66F6E7",
+    "before": "docs/process/screenshots/2026-11-17-pr37-demo_staff-360-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-demo_staff-360-after.png",
+    "role": "demo_staff"
+  },
+  {
+    "identical": true,
+    "width": 1440,
+    "sha256": "4C3775B91ECECA3773D6344918CCA3264EFB03FFE0B8085F14C1E055558AF39E",
+    "before": "docs/process/screenshots/2026-11-17-pr37-demo_staff-1440-before.png",
+    "after": "docs/process/screenshots/2026-11-17-pr37-demo_staff-1440-after.png",
+    "role": "demo_staff"
+  }
+]

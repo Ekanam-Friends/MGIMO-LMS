@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -61,6 +62,25 @@ class Settings(BaseSettings):
     bot_bootstrap_groups: int = 0
     """Если покрытие текущего семестра подтверждено меньше чем у N групп, бот догружает семестр
     недостающих групп (до N). 0 — выключено. Решение 0011."""
+
+    # Ассистент: публичные документы и минимальные данные кабинета; оценки после согласия.
+    llm_provider: str = ""
+    gigachat_auth_key: SecretStr = SecretStr("")
+    gigachat_scope: str = "GIGACHAT_API_PERS"
+    gigachat_model: str = "GigaChat-2"
+    gigachat_translation_model: str = "GigaChat-2-Max"
+    gigachat_ca_bundle: str = ""
+    llm_embedding_model: str = ""
+    rag_use_embeddings: bool = False
+    assistant_demo_student_access: bool = False
+    """Только для базы вымышленных студентов: выбор любого студента преподавателем и сотрудником."""
+    rag_corpus_dir: str = "/data/regulations"
+    rag_top_k: int = Field(default=5, ge=1, le=6)
+    rag_lexical_weight: float = Field(default=1., gt=0, le=10, allow_inf_nan=False)
+    rag_semantic_weight: float = Field(default=1., gt=0, le=10, allow_inf_nan=False)
+    rag_max_source_age_days: int = Field(default=30, ge=1, le=365)
+    rag_requests_per_minute: int = Field(default=6, ge=1, le=30)
+    rag_concurrent_requests: int = Field(default=1, ge=1, le=4)
 
     @property
     def bot_link_enabled(self) -> bool:

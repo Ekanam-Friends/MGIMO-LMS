@@ -1,0 +1,16 @@
+# Только после остановки старой primary и ручного pg_promote; см. docs/deploy.md.
+# Применять последним, поверх основного compose, серверного override и replica.
+services:
+  db:
+    restart: "no"
+  db-replica:
+    # После promotion standby.signal исчезает: обычный entrypoint и новый healthcheck.
+    entrypoint: [docker-entrypoint.sh]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U lms -d lms']
+  web:
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@db-replica:5432/lms
+  bot:
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@db-replica:5432/lms
