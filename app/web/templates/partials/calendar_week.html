@@ -3,7 +3,7 @@
 {#- Неделя календаря (десктоп). Меняется целиком при листании и записи на активность;
     переключатели слоёв снаружи (partials/calendar.html) и при этом не сбрасываются. -#}
 {% set q = "&size=" ~ cal.size %}
-<div id="cal-main" class="cal__main">
+<div id="cal-main" class="cal__main" data-week="{{ cal.days[0].isoformat() }}" data-date-param="{{ 'week' if cal.size == 'full' else 'd' }}">
   <div class="cal__toolbar">
     <a class="week-nav__btn" href="?{{ 'week' if cal.size == 'full' else 'd' }}={{ cal.prev_week.isoformat() }}"
        hx-get="/partials/calendar?week={{ cal.prev_week.isoformat() }}{{ q }}" hx-target="#cal-main" hx-swap="outerHTML" aria-label="{{ _('Предыдущая неделя') }}">{{ icon("chev-left", 18) }}</a>

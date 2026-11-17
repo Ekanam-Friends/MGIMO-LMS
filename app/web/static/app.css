@@ -82,6 +82,20 @@ small { font-size: 12px; }
 .header__name { font-size: 12px; font-weight: 600; }
 .header__logout button { background: none; border: 0; color: var(--muted); padding: 4px; }
 .header__logout button:hover { color: var(--accent); }
+.header-language { position: relative; flex: none; }
+.header-language summary { display: flex; align-items: center; gap: 4px; min-height: 40px; padding: 6px; cursor: pointer; list-style: none; font-size: 12px; font-weight: 700; }
+.header-language summary::-webkit-details-marker { display: none; }
+.header-language__menu { position: absolute; right: 0; top: 100%; z-index: 25; min-width: 156px; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: 0 6px 20px rgba(23, 21, 32, .12); }
+.header-language__menu button { display: block; width: 100%; min-height: 44px; padding: 8px 12px; text-align: left; border: 0; border-radius: 5px; background: transparent; color: var(--text); }
+.header-language__menu button:hover, .header-language__menu button[aria-current] { background: var(--accent-soft); color: var(--accent); }
+.assistant-shortcut {
+  position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 21; display: grid; place-items: center; width: 60px; height: 60px;
+  border-radius: 50%; background: var(--accent); color: #fff;
+  box-shadow: 0 6px 20px rgba(223, 41, 53, .28);
+}
+.assistant-shortcut:hover { background: #c51f2b; }
+.assistant-shortcut:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
 .avatar {
   width: 36px; height: 36px; border-radius: 50%; background: var(--accent-soft); color: var(--accent);
   display: grid; place-items: center; font-weight: 700;
@@ -290,6 +304,7 @@ small { font-size: 12px; }
   .menu-toggle:checked ~ .layout .menu-backdrop { display: block; position: fixed; inset: 0; background: rgba(23, 21, 32, .4); z-index: 35; }
   .header { padding: 12px 16px; min-height: 60px; }
   .header__title { font-size: 16px; }
+  .assistant-shortcut { right: max(16px, env(safe-area-inset-right)); bottom: calc(84px + env(safe-area-inset-bottom)); width: 56px; height: 56px; }
   .main { padding: 16px 16px 88px; }
   .dashboard { grid-template-columns: 1fr; }
   .dashboard__aside { order: -1; }
@@ -302,6 +317,8 @@ small { font-size: 12px; }
   .title-1 { font-size: 32px; }
 }
 @media (max-width: 640px) {
+  .header { gap: 8px; }
+  .header__right { gap: 6px; }
   .dashboard__row--grades, .dashboard__row--two { grid-template-columns: 1fr; }
   .header__name { display: none; }
   .title-1 { font-size: 28px; }
@@ -478,6 +495,22 @@ textarea.field__input { resize: vertical; }
 .cal { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; background: var(--surface); border-radius: var(--radius-l); padding: 16px; }
 .cal__side { display: flex; flex-direction: column; gap: 10px; }
 .cal--wide { grid-template-columns: minmax(0, 1fr); }
+.cal--wide { gap: 10px; }
+/* «Расписание»: слои строкой плашек над неделей (вариант D2) */
+.cal-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.cal-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 12%, var(--surface)); border: 1px solid transparent; font-size: 12px; font-weight: 600;
+  line-height: 16px; color: var(--text); cursor: pointer; white-space: nowrap; position: relative; transition: background .15s, border-color .15s, color .15s; }
+.cal-chip:hover { border-color: color-mix(in srgb, var(--c) 50%, transparent); }
+.cal-chip__mark { width: 8px; height: 8px; border-radius: 2px; background: var(--c); border: 1.5px solid var(--c); flex: none; }
+.cal-chip:has(.cal-layer__input:not(:checked)) { background: transparent; border-color: var(--line); border-style: dashed; color: var(--muted); font-weight: 500; }
+.cal-chip .cal-layer__input:not(:checked) + .cal-chip__mark { background: transparent; opacity: .6; }
+.cal-chip:has(.cal-layer__input:focus-visible) { outline: 2px solid var(--c); outline-offset: 2px; }
+.cal-chips__set { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.cal-chips__set:hover { color: var(--accent); background: var(--bg); }
+.cal-chips__hint { margin: 2px 0 0 44px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* «Мои календари» карточкой в правой колонке главной */
 .cal-panel { gap: 10px; }
 .cal-panel .cal__side-title { font-size: 16px; line-height: 22px; font-weight: 600; margin: 0; }

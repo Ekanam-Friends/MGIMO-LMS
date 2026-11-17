@@ -1,9 +1,11 @@
-{#- Календарь из трёх слоёв (решение 0006): «Мои календари» и неделя.
-    layers_outside=true — переключатели рисует сама страница (главная: в правой колонке),
-    а неделя занимает всю ширину. Выбор слоёв запоминается в localStorage. -#}
-<section class="cal cal--{{ cal.size }}{% if layers_outside %} cal--wide{% endif %}" aria-label="{{ _('Календарь') }}">
-  {% if not layers_outside %}<div class="cal__side">{% include "partials/calendar_layers.html" %}</div>{% endif %}
+{#- Календарь из трёх слоёв (решение 0006).
+    layers_outside=true — переключатели рисует сама страница (главная: карточкой в правой колонке);
+    иначе («Расписание») — строка плашек над неделей (partials/calendar_chips.html), подсказка под сеткой.
+    Неделя в обоих случаях на всю ширину карточки. Выбор слоёв запоминается в localStorage. -#}
+<section class="cal cal--{{ cal.size }} cal--wide" aria-label="{{ _('Календарь') }}">
+  {% if not layers_outside %}{% include "partials/calendar_chips.html" %}{% endif %}
   {% include "partials/calendar_week.html" %}
+  {% if not layers_outside %}<p class="cal-chips__hint">Нажмите на событие, чтобы увидеть аудиторию и время. Бледные активности открыты для записи.</p>{% endif %}
 </section>
 <script>
 // После загрузки всей страницы: переключатели могут стоять ниже по разметке (правая колонка главной).
