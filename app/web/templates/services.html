@@ -26,6 +26,22 @@
     <p class="alert">{{ _('Учётная запись сотрудника: Telegram-бот и календарь доступны только студентам.') }}</p>
   {% endif %}
 
+  <section class="panel tg" id="max">
+    <h2 class="profile__name">Расписание в MAX</h2>
+    <p>Тот же бот, что в Telegram, — для мессенджера MAX: расписание на сегодня и неделю, переносы
+      пар, статусы справок. <b>В разработке</b> — пока подключите Telegram-бота выше, он присылает то же самое.</p>
+  </section>
+
+  <section class="panel tg" id="app">
+    <h2 class="profile__name">Приложение МГИМО</h2>
+    <p>Официальное мобильное приложение университета. Кабинет-концепт с ним не связан, ссылки ведут
+      в магазины приложений.</p>
+    <div class="tg__actions">
+      <a class="btn btn--primary" href="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener">App Store</a>
+      <a class="btn btn--ghost" href="{{ MGIMO_APP.android }}" target="_blank" rel="noopener">Google Play</a>
+    </div>
+  </section>
+
   <section class="panel tg">
     <h2 class="profile__name">{{ _('Сервисы вуза') }}</h2>
     <ul class="svc-list">

@@ -3,3 +3,17 @@
   {% if label in ("Срок скачивания истёк",) %}{% set tone = "grey" %}{% endif %}
   <span class="badge badge--{{ tone }}">{{ label }}</span>
 {%- endmacro %}
+
+{#- Строка заявки в блоке «Деканат» на главной: вид, номер, дата, что с готовой справкой, статус. -#}
+{% macro request_row(r) -%}
+  <a class="req-row" href="{{ r.href }}">
+    <span class="req-row__ico{% if r.highlight %} req-row__ico--ok{% endif %}" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+    <span class="req-row__main">
+      <span class="req-row__name">{{ r.title }}</span>
+      <span class="req-row__meta">№{{ r.number }} · {{ r.created_at | ddmmyyyy }}
+        {%- if r.paper_note %} · {{ r.paper_note }}
+        {%- elif r.download_until %} · PDF до {{ r.download_until | ddmmyyyy }}{% endif %}</span>
+    </span>
+    <span class="badge badge--{{ r.tone }} req-row__badge">{{ r.label }}</span>
+  </a>
+{%- endmacro %}

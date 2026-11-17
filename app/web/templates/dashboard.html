@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "partials/_cert.html" import status_badge %}
+{% from "partials/_cert.html" import status_badge, request_row with context %}
 {% block content %}
 <div class="dashboard">
   <div class="dashboard__col">
     {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
-    <section class="dash-block">
+    <section class="dash-block dash-calendar">
       <div class="dash-block__header"><h2 class="dash-title">{{ _('Календарь') }}</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="{{ _('Расписание на неделю') }}">{{ icon("arrow") }}</a></div>
-      <div class="only-desktop">{% include "partials/calendar.html" %}</div>
+      <div class="only-desktop">{% with layers_outside = true %}{% include "partials/calendar.html" %}{% endwith %}</div>
       <div class="only-mobile">{% include "partials/day_schedule.html" %}</div>
     </section>
 
@@ -45,33 +45,43 @@
       </div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">{{ _('Деканат') }}</h2><a class="dash-link" href="/mfc/certificates" aria-label="{{ _('Справки и выписки') }}">{{ icon("arrow") }}</a></div>
-      <div class="dashboard__row dashboard__row--two">
-        {% for r in requests %}
-          <a class="ref-card" href="/mfc/certificates/{{ r.id }}">
-            <p class="ref-card__title">{{ KINDS.get(r.kind, r.kind) }}</p>
-            <p class="ref-card__date">{{ r.created_at | ddmmyyyy }}</p>
-            {{ status_badge(certs.electronic_label(r), r.status) }}
-          </a>
-        {% else %}
-          <a class="ref-card ref-card--empty" href="/mfc/certificates">
-            <p class="ref-card__title">{{ _('Справок пока нет') }}</p>
-            <p class="ref-card__date">{{ _('Заказать справку об обучении →') }}</p>
-          </a>
-        {% endfor %}
-      </div>
+    {# Деканат (вариант M1 дизайн-ревью 2026-11-16): пусто — тихая надпись по центру;
+       есть заявки — до трёх последних строками в одной карточке и «+ Заказать справку». #}
+    <section class="dash-block{% if not requests %} dash-block--empty{% endif %}">
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Деканат') }}</h2>
+        <a class="dash-link req-all" href="/mfc/certificates" aria-label="{{ _('Все заявки в деканат') }}">{% if requests %}<span>{{ _('Все заявки') }}</span>{% endif %}{{ icon("arrow") }}</a></div>
+      {% if requests %}
+        <div class="req-list">
+          {% for r in requests %}{{ request_row(r) }}{% endfor %}
+          <a class="req-add" href="/mfc/certificates#order"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>{{ _('Заказать справку') }}</span></a>
+        </div>
+      {% else %}
+        <p class="ref-empty">{{ _('Справок пока нет') }}<br><a href="/mfc/certificates#order">{{ _('Заказать справку об обучении') }}</a></p>
+      {% endif %}
     </section>
 
   </div>
 
   <aside class="dashboard__aside">
+    {# Переключатели слоёв календаря — здесь, а не слева от недели: сетка недели шире. #}
+    <section class="box cal-panel only-desktop" aria-label="{{ _('Мои календари') }}">{% include "partials/calendar_layers.html" %}</section>
+    <section class="dash-block dash-services">
     <div class="dash-block__header"><h2 class="dash-title">{{ _('Популярные сервисы') }}</h2><a class="dash-link" href="/services" aria-label="{{ _('Сервисы') }}">{{ icon("arrow") }}</a></div>
     <div class="services services--column">
-      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Календарь .ics", "#3BA55C")] %}
-        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Расписание в MAX", "#6A5AE0"), ("Календарь .ics", "#3BA55C")] %}
+        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Расписание в MAX": "/services#max", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
       {% endfor %}
+      {# Официальное приложение вуза: ссылка в магазин приложений по платформе (см. app_links ниже). #}
+      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>{{ _('Приложение МГИМО') }}</span></a>
     </div>
+    </section>
   </aside>
 </div>
+<script>
+// iPhone и iPad — в App Store, остальные — в Google Play.
+document.querySelectorAll(".js-app-link").forEach(function (a) {
+  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (ios) a.href = a.dataset.ios;
+});
+</script>
 {% endblock %}
