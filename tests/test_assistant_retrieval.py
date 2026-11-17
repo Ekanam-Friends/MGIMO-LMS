@@ -87,9 +87,19 @@ async def test_search_rewrite_does_not_replace_question_seen_by_auditor(tmp_path
 
 
 async def test_greeting_needs_neither_corpus_nor_personal_data(tmp_path):
-    provider = FakeProvider({"scopes": ["public"], "intent": "greeting"})
+    provider = FakeProvider()
     result = await create_assistant(config(tmp_path), provider).chat(
         1, None, "Привет", [], None, Conversation("owner", float("inf")), None)
     assert result["status"] == "help" and "Здравствуйте" in result["message"]
     assert result["snapshot"] is None and result["summary"] is None
-    assert len(provider.calls) == 1
+    assert not provider.calls
+
+
+async def test_greeting_with_substantive_question_still_routes_to_corpus(tmp_path):
+    write_corpus(tmp_path, [chunk()])
+    provider = FakeProvider({"scopes": ["public"], "search_query": "академический отпуск"},
+                            {"status": "not_found"})
+    result = await create_assistant(config(tmp_path), provider).chat(
+        1, None, "Привет, какие условия академического отпуска?", [], None,
+        Conversation("owner", float("inf")), None)
+    assert result["status"] == "not_found" and len(provider.calls) == 2
