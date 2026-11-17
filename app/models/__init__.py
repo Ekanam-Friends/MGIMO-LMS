@@ -17,8 +17,11 @@ from app.models.grades import (
     Score,
 )
 from app.models.notifications import Announcement, NotificationRead
+from app.models.knowledge import KnowledgeDocument
+from app.models.document_notice import DocumentNotice, DocumentRecipient
 from app.models.schedule import (
     Faculty,
+    GroupScheduleCoverage,
     ImportRun,
     Lesson,
     LessonChange,
@@ -30,6 +33,9 @@ from app.models.schedule import (
 from app.models.telegram import BotCursor, BotNotice, TelegramLink, TelegramLinkCode
 
 __all__ = [
+    "DocumentNotice",
+    "DocumentRecipient",
+    "KnowledgeDocument",
     "Announcement",
     "NotificationRead",
     "Activity",
@@ -51,6 +57,7 @@ __all__ = [
     "CertificateRequest",
     "CertificateRequestEvent",
     "Faculty",
+    "GroupScheduleCoverage",
     "ImportRun",
     "Lesson",
     "LessonChange",

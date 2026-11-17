@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "partials/_cert.html" import status_badge, request_row %}
+{% from "partials/_cert.html" import status_badge, request_row with context %}
 {% block content %}
 <div class="dashboard">
   <div class="dashboard__col">
     {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
     <section class="dash-block dash-calendar">
-      <div class="dash-block__header"><h2 class="dash-title">Календарь</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="Расписание на неделю">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Календарь') }}</h2><a class="dash-link" href="/schedule?week={{ day.isoformat() }}" aria-label="{{ _('Расписание на неделю') }}">{{ icon("arrow") }}</a></div>
       <div class="only-desktop">{% with layers_outside = true %}{% include "partials/calendar.html" %}{% endwith %}</div>
       <div class="only-mobile">{% include "partials/day_schedule.html" %}</div>
     </section>
 
     <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Текущая успеваемость</h2><a class="dash-link" href="/grades" aria-label="Успеваемость">{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Текущая успеваемость') }}</h2><a class="dash-link" href="/grades" aria-label="{{ _('Успеваемость') }}">{{ icon("arrow") }}</a></div>
       <div class="dashboard__row dashboard__row--grades">
         <a class="box" href="/grades">
-          <p class="box__title">Результаты по дисциплинам текущего семестра</p>
+          <p class="box__title">{{ _('Результаты по дисциплинам текущего семестра') }}</p>
           {% set courses = (book.current.courses if book.current else []) | selectattr("percent", "ne", none) | list %}
           {% if courses %}
           <ul class="mini-bars">
@@ -25,19 +25,19 @@
                 <span class="mini-bars__val">{{ c.percent | round | int }}%</span></li>
             {% endif %}{% endfor %}
           </ul>
-          <p class="box__note">Доля набранных баллов от возможного на сегодня · сначала слабые места</p>
+          <p class="box__note">{{ _('Доля набранных баллов от возможного на сегодня · сначала слабые места') }}</p>
           {% else %}
-          <p class="box__note">Преподаватели ещё не выставили баллы в этом семестре</p>
+          <p class="box__note">{{ _('Преподаватели ещё не выставили баллы в этом семестре') }}</p>
           {% endif %}
         </a>
         <div class="dashboard__stack">
           <a class="box" href="/grades#debts">
-            <p class="box__title">Академические долги</p>
-            {% if book.debts %}<p class="big-num big-num--red">{{ book.debts | length }}</p><p class="box__note">{{ book.debts[0].card.discipline }}{% if book.debts | length > 1 %} и ещё {{ book.debts | length - 1 }}{% endif %}</p>
-            {% else %}<p class="big-num big-num--green">0</p><p class="box__note">Долгов нет</p>{% endif %}
+            <p class="box__title">{{ _('Академические долги') }}</p>
+            {% if book.debts %}<p class="big-num big-num--red">{{ book.debts | length }}</p><p class="box__note">{{ book.debts[0].card.discipline }}{% if book.debts | length > 1 %} {{ _('и ещё') }} {{ book.debts | length - 1 }}{% endif %}</p>
+            {% else %}<p class="big-num big-num--green">0</p><p class="box__note">{{ _('Долгов нет') }}</p>{% endif %}
           </a>
           <a class="box" href="/grades#record">
-            <p class="box__title">Средний балл</p>
+            <p class="box__title">{{ _('Средний балл') }}</p>
             {% set g = book.gpa %}
             <div class="gauge{% if g %} gauge--on{% endif %}" style="--p: {{ ((g - 2) / 3 * 100) | round if g else 0 }}" aria-label="Средний балл {{ g or 'нет' }}"><span>{{ "%.2f" | format(g) | replace(".", ",") if g else "—" }}</span></div>
           </a>
@@ -48,15 +48,15 @@
     {# Деканат (вариант M1 дизайн-ревью 2026-11-16): пусто — тихая надпись по центру;
        есть заявки — до трёх последних строками в одной карточке и «+ Заказать справку». #}
     <section class="dash-block{% if not requests %} dash-block--empty{% endif %}">
-      <div class="dash-block__header"><h2 class="dash-title">Деканат</h2>
-        <a class="dash-link req-all" href="/mfc/certificates" aria-label="Все заявки в деканат">{% if requests %}<span>Все заявки</span>{% endif %}{{ icon("arrow") }}</a></div>
+      <div class="dash-block__header"><h2 class="dash-title">{{ _('Деканат') }}</h2>
+        <a class="dash-link req-all" href="/mfc/certificates" aria-label="{{ _('Все заявки в деканат') }}">{% if requests %}<span>{{ _('Все заявки') }}</span>{% endif %}{{ icon("arrow") }}</a></div>
       {% if requests %}
         <div class="req-list">
-          {% for r in requests %}{{ request_row(r, certs, KINDS) }}{% endfor %}
-          <a class="req-add" href="/mfc/certificates#order"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Заказать справку</span></a>
+          {% for r in requests %}{{ request_row(r) }}{% endfor %}
+          <a class="req-add" href="/mfc/certificates#order"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>{{ _('Заказать справку') }}</span></a>
         </div>
       {% else %}
-        <p class="ref-empty">Справок пока нет<br><a href="/mfc/certificates#order">Заказать справку об обучении</a></p>
+        <p class="ref-empty">{{ _('Справок пока нет') }}<br><a href="/mfc/certificates#order">{{ _('Заказать справку об обучении') }}</a></p>
       {% endif %}
     </section>
 
@@ -64,15 +64,15 @@
 
   <aside class="dashboard__aside">
     {# Переключатели слоёв календаря — здесь, а не слева от недели: сетка недели шире. #}
-    <section class="box cal-panel only-desktop" aria-label="Мои календари">{% include "partials/calendar_layers.html" %}</section>
+    <section class="box cal-panel only-desktop" aria-label="{{ _('Мои календари') }}">{% include "partials/calendar_layers.html" %}</section>
     <section class="dash-block dash-services">
-    <div class="dash-block__header"><h2 class="dash-title">Популярные сервисы</h2><a class="dash-link" href="/services" aria-label="Сервисы">{{ icon("arrow") }}</a></div>
+    <div class="dash-block__header"><h2 class="dash-title">{{ _('Популярные сервисы') }}</h2><a class="dash-link" href="/services" aria-label="{{ _('Сервисы') }}">{{ icon("arrow") }}</a></div>
     <div class="services services--column">
       {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Расписание в MAX", "#6A5AE0"), ("Календарь .ics", "#3BA55C")] %}
         <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Расписание в MAX": "/services#max", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
       {% endfor %}
       {# Официальное приложение вуза: ссылка в магазин приложений по платформе (см. app_links ниже). #}
-      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>Приложение МГИМО</span></a>
+      <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>{{ _('Приложение МГИМО') }}</span></a>
     </div>
     </section>
   </aside>

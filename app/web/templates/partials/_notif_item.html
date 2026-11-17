@@ -8,7 +8,7 @@
   </summary>
   <div class="notif__body">
     {% if it.body %}<p>{{ it.body }}</p>{% endif %}
-    {% if it.href %}<a class="notif__link" href="{{ it.href }}">Перейти</a>{% endif %}
-    {% if not it.body and not it.href %}<p class="muted">Подробностей нет.</p>{% endif %}
+    {% if it.href %}<a class="notif__link" href="{{ it.href }}">{{ _('Перейти') }}</a>{% endif %}
+    {% if not it.body and not it.href %}<p class="muted">{{ _('Подробностей нет.') }}</p>{% endif %}
   </div>
 </details>

@@ -1,7 +1,7 @@
 {#- Календарь из трёх слоёв (решение 0006): «Мои календари» и неделя.
     layers_outside=true — переключатели рисует сама страница (главная: в правой колонке),
     а неделя занимает всю ширину. Выбор слоёв запоминается в localStorage. -#}
-<section class="cal cal--{{ cal.size }}{% if layers_outside %} cal--wide{% endif %}" aria-label="Календарь">
+<section class="cal cal--{{ cal.size }}{% if layers_outside %} cal--wide{% endif %}" aria-label="{{ _('Календарь') }}">
   {% if not layers_outside %}<div class="cal__side">{% include "partials/calendar_layers.html" %}</div>{% endif %}
   {% include "partials/calendar_week.html" %}
 </section>

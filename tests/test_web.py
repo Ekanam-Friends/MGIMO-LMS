@@ -66,7 +66,7 @@ async def client(tmp_path, monkeypatch):
         await s.commit()
     await engine.dispose()
 
-    settings = Settings(database_url=url, cookie_secure=False, pyrus_login="", demo_password="")
+    settings = Settings(_env_file=None, database_url=url, cookie_secure=False, pyrus_login="", demo_password="")
     app = create_app(settings)
     async with app.router.lifespan_context(app):
         transport = httpx.ASGITransport(app=app)

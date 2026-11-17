@@ -5,19 +5,15 @@
 {%- endmacro %}
 
 {#- Строка заявки в блоке «Деканат» на главной: вид, номер, дата, что с готовой справкой, статус. -#}
-{% macro request_row(r, certs, kinds) -%}
-  {% set ready = r.status == "ready" %}
-  {% set expired = ready and certs.download_expired(r) %}
-  {% set tone = "grey" if expired else {"ready": "green", "rejected": "red", "need_info": "red", "in_review": "orange"}.get(r.status, "grey") %}
-  {% set label = ("Срок скачивания истёк" if expired else "Готова") if ready else {"accepted": "Принята", "in_review": "На согласовании", "need_info": "Нужна информация", "rejected": "Отказ"}.get(r.status, r.status) %}
-  <a class="req-row" href="/mfc/certificates/{{ r.id }}">
-    <span class="req-row__ico{% if ready and not expired %} req-row__ico--ok{% endif %}" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+{% macro request_row(r) -%}
+  <a class="req-row" href="{{ r.href }}">
+    <span class="req-row__ico{% if r.highlight %} req-row__ico--ok{% endif %}" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
     <span class="req-row__main">
-      <span class="req-row__name">{{ kinds.get(r.kind, r.kind) }}</span>
-      <span class="req-row__meta">№{{ "%07d" | format(r.id) }} · {{ r.created_at | ddmmyyyy }}
-        {%- if r.paper_status != "none" %} · {{ certs.paper_label(r) | lower }}
-        {%- elif ready and r.pdf and not expired and r.download_until %} · PDF до {{ r.download_until | ddmmyyyy }}{% endif %}</span>
+      <span class="req-row__name">{{ r.title }}</span>
+      <span class="req-row__meta">№{{ r.number }} · {{ r.created_at | ddmmyyyy }}
+        {%- if r.paper_note %} · {{ r.paper_note }}
+        {%- elif r.download_until %} · PDF до {{ r.download_until | ddmmyyyy }}{% endif %}</span>
     </span>
-    <span class="badge badge--{{ tone }} req-row__badge">{{ label }}</span>
+    <span class="badge badge--{{ r.tone }} req-row__badge">{{ r.label }}</span>
   </a>
 {%- endmacro %}

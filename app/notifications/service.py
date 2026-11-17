@@ -33,7 +33,7 @@ from app.models.notifications import Audience, Source
 LIMIT = 30
 ALL_LIMIT = 1000
 HORIZON = timedelta(days=45)
-KINDS = {"ann", "cert", "grade"}
+KINDS = {"ann", "cert", "grade", "doc"}
 TITLE_MAX = 200
 BODY_MAX = 2000
 
@@ -119,6 +119,20 @@ async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int
             for ev, name in rows]
 
 
+async def _documents(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
+    from app.models.document_notice import DocumentNotice, DocumentRecipient
+    from app.models.knowledge import KnowledgeDocument
+    rows = (await db.execute(select(KnowledgeDocument.id, KnowledgeDocument.title,
+        KnowledgeDocument.source_url, DocumentNotice.confirmed_at)
+        .join(DocumentNotice, DocumentNotice.document_id == KnowledgeDocument.id)
+        .join(DocumentRecipient, DocumentRecipient.document_id == KnowledgeDocument.id)
+        .where(DocumentRecipient.student_id == student_id, DocumentNotice.confirmed_at >= since)
+        .order_by(DocumentNotice.confirmed_at.desc()).limit(limit))).all()
+    return [Item("doc", did, Source.DEAN, "Новый документ: " + title,
+        "Деканат отметил, что документ касается вас. Откройте публичный источник.", at, url)
+        for did, title, url, at in rows]
+
+
 async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None,
                limit: int = LIMIT) -> list[Item]:
     """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного."""
@@ -127,6 +141,7 @@ async def feed(db: AsyncSession, user: User, student: Student | None, *, now: da
     if student is not None:
         items += await _certificates(db, student.id, since, limit)
         items += await _grades(db, student.id, since, limit)
+        items += await _documents(db, student.id, since, limit)
     items.sort(key=lambda i: i.created_at, reverse=True)
     items = items[:limit]
     if items:

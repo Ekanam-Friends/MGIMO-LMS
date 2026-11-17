@@ -24,7 +24,8 @@ router = APIRouter(prefix="/d")
 async def staff_home(request: Request, viewer: Viewer = Depends(staff_viewer),
                      db: AsyncSession = Depends(get_db)) -> HTMLResponse:
     mine = await notes.own(db, viewer.user.id, limit=5)
-    return render(request, "staff/home.html", viewer, mine=mine, work=STAFF_WORK, resources=TEACHER_RESOURCES)
+    work = [*STAFF_WORK, ("База знаний", "загрузка документов для ассистента", "#447ABC", "/d/documents")]
+    return render(request, "staff/home.html", viewer, mine=mine, work=work, resources=TEACHER_RESOURCES)
 
 
 @router.get("/services", response_class=HTMLResponse)
