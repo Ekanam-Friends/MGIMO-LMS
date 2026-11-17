@@ -30,6 +30,24 @@ async def test_language_requires_csrf_and_rejects_unknown_code(client):
     assert (await client.post("/profile/language", data={"language":"xx","csrf":csrf})).status_code == 400
 
 
+@pytest.mark.parametrize("return_to,expected", [
+    ("/schedule?week=2026-11-16", "/schedule?week=2026-11-16"),
+    ("/", "/"),
+    ("https://example.org/", "/profile"),
+    ("//example.org/", "/profile"),
+    ("/\\example.org/", "/profile"),
+    ("/\n/example.org/", "/profile"),
+])
+async def test_header_language_returns_only_to_local_page(client, return_to, expected):
+    csrf = await login(client)
+    response = await client.post("/profile/language", data={
+        "language": "en", "csrf": csrf, "return_to": return_to,
+    })
+    assert response.status_code == 303
+    assert response.headers["location"] == expected
+    assert '<html lang="en">' in (await client.get("/")).text
+
+
 async def test_translated_question_is_used_for_search_without_answer_history():
     provider = FakeProvider({"question":"Как оформить академический отпуск?","history":["Условия отпуска"]})
     question, history = await for_search(provider, "Comment demander un congé académique ?", ["Conditions"], "fr")

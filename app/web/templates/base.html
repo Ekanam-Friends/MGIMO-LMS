@@ -50,6 +50,18 @@
         {% block header %}<p class="header__title">{{ "Кабинет преподавателя" if viewer.teacher else ("Кабинет деканата" if is_staff else "Личный кабинет студента") }}</p>{% endblock %}
       </div>
       <div class="header__right">
+        {% if viewer.user.role == "student" %}
+        <details class="header-language">
+          <summary aria-label="{{ _('Язык') }}" title="{{ _('Язык') }}">{{ interface_language(viewer)|upper }} <span aria-hidden="true">⌄</span></summary>
+          <form method="post" action="/profile/language" class="header-language__menu">
+            <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+            <input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
+            {% for code, title in LANGUAGES.items() %}
+            <button type="submit" name="language" value="{{ code }}" lang="{{ code }}"{% if interface_language(viewer) == code %} aria-current="true"{% endif %}>{{ title }}</button>
+            {% endfor %}
+          </form>
+        </details>
+        {% endif %}
         {% if not is_staff %}
         <div class="bell" id="bell">
           <button type="button" class="header__bell" aria-label="{{ _('Уведомления') }}" aria-expanded="false" aria-controls="bell-panel"
@@ -77,6 +89,11 @@
     <a href="{{ t.href }}" class="tabbar__link{% if (t.href == '/' and path == '/') or (t.href != '/' and path.startswith(t.href)) %} tabbar__link--active{% endif %}">{{ icon(t.icon, 22) }}<span>{{ t.title }}</span></a>
   {% endfor %}
 </nav>
+{% if path == home %}
+<a href="/s/assistant" class="assistant-shortcut" aria-label="{{ _('ИИ-ассистент') }}" title="{{ _('ИИ-ассистент') }}">
+  <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 2C18 11 21 14 30 16C21 18 18 21 16 30C14 21 11 18 2 16C11 14 14 11 16 2Z"/></svg>
+</a>
+{% endif %}
 <script>
 (function () {
   var box = document.getElementById("bell");

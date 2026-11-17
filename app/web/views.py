@@ -64,14 +64,17 @@ def render(request: Request, name: str, viewer: Viewer | None, **ctx) -> HTMLRes
 
 
 @router.post("/profile/language")
-async def set_interface_language(language: str = Form(...), viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)):
+async def set_interface_language(language: str = Form(...), return_to: str = Form("/profile"), viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)):
     if viewer.user.role != "student":
         raise HTTPException(404)
     if language not in LANGUAGES:
         raise HTTPException(400, "Неподдерживаемый язык")
     viewer.user.interface_language = language
     await db.commit()
-    return RedirectResponse("/profile", status_code=303)
+    # Возвращаем на текущий экран; внешние адреса и управляющие символы запрещены.
+    if not return_to.startswith("/") or return_to.startswith("//") or "\\" in return_to or any(ord(c) < 32 or ord(c) == 127 for c in return_to):
+        return_to = "/profile"
+    return RedirectResponse(return_to, status_code=303)
 
 
 def _parse_day(raw: str | None, default: date) -> date:
