@@ -1,7 +1,7 @@
 """Серверная область преподавателя: свои дисциплины, зачисления и снимок данных."""
 from datetime import date
 
-from sqlalchemy import and_, exists, func, or_, select
+from sqlalchemy import func, select, union
 
 from app.grades.scale import academic_year
 from app.models import Assessment, Course, CourseEnrollment, Discipline, Lesson, LessonGroup, Score, Student, lesson_teachers
@@ -10,15 +10,19 @@ from app.models import Assessment, Course, CourseEnrollment, Discipline, Lesson,
 def course_ids(teacher_id: int, today: date | None = None):
     # У дисциплины может быть несколько преподавателей в РУЗ, но только один
     # ведущий ведомости. Остальным доступно чтение этой дисциплины у своих групп.
-    imported = exists(select(Lesson.id).join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
+    pairs = select(LessonGroup.group_id, Lesson.discipline).select_from(Lesson).join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
+    pairs = (pairs
         .join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
-        .where(LessonGroup.group_id == Course.group_id, Lesson.discipline == Discipline.name,
-               lesson_teachers.c.teacher_id == teacher_id, Lesson.status == "active",
+        .where(lesson_teachers.c.teacher_id == teacher_id, Lesson.status == "active",
                Lesson.date >= date(int(academic_year(today or date.today())[:4]), 9, 1),
-               Lesson.date < date(int(academic_year(today or date.today())[:4]) + 1, 9, 1)))
-    return select(Course.id).join(Discipline, Discipline.id == Course.discipline_id).where(or_(
-        Course.teacher_id == teacher_id,
-        and_(Course.academic_year == academic_year(today or date.today()), imported)))
+               Lesson.date < date(int(academic_year(today or date.today())[:4]) + 1, 9, 1))
+        .distinct().subquery())
+    imported = select(Course.id).join(Discipline, Discipline.id == Course.discipline_id).join(pairs,
+        (pairs.c.group_id == Course.group_id) & (pairs.c.discipline == Discipline.name))
+    imported = imported.where(Course.academic_year == academic_year(today or date.today()))
+    # Сначала находим небольшое множество пар «группа–дисциплина», а не
+    # выполняем коррелированный EXISTS для каждой ведомости всей большой БД.
+    return union(select(Course.id).where(Course.teacher_id == teacher_id), imported)
 
 
 def student_ids(teacher_id: int):

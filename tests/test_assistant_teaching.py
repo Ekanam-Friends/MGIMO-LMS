@@ -5,7 +5,7 @@ import json
 from sqlalchemy import delete, update
 
 from app.assistant.personal import collect_teaching
-from app.models import Assessment, Course, CourseEnrollment, Discipline, Score, Teacher
+from app.models import Assessment, Course, CourseEnrollment, Discipline, Lesson, Score, Teacher, lesson_teachers
 from app.models.auth import User
 from tests.test_web import client, login
 
@@ -110,3 +110,18 @@ async def test_teacher_large_grade_context_always_reports_truncation(client, tmp
                                       conversation, SqlTeachingEvidenceReader(db, 1))
     assert result["status"] == "partial"
     assert any(fact["label"] == "Ограничение выборки" for fact in result["facts"])
+
+
+async def test_second_imported_teacher_reads_same_subject_without_becoming_ledger_owner(client):
+    await teacher_fixture(client)
+    async with client._transport.app.state.session_factory() as db:
+        db.add(Teacher(id=2, ruz_oid=102, full_name="Выдумкин Второй Преподаватель"))
+        await db.flush()
+        await db.execute(update(Lesson).where(Lesson.id == 100).values(discipline="Своя математика"))
+        await db.execute(lesson_teachers.insert().values(lesson_id=100, teacher_id=2))
+        await db.commit()
+        facts = await collect_teaching(db, 2, None, ["grades"], date(2026, 11, 17),
+                                       date(2026, 11, 1), date(2026, 11, 30))
+        assert (await db.get(Course, 1)).teacher_id == 1
+    text = json.dumps(facts, ensure_ascii=False)
+    assert "7 из 10" in text and "Другой предмет" not in text
