@@ -12,7 +12,7 @@ class CorpusRepository(Protocol):
 
 class PersonalEvidenceReader(Protocol):
     async def collect(self, student_id: int | None, scopes: list[str], today: date,
-                      start: date, end: date) -> list[dict]: ...
+                      start: date, end: date, *, question: str = "") -> list[dict]: ...
 
 
 class LanguageModel(Protocol):

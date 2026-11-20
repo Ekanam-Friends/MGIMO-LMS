@@ -39,7 +39,7 @@ def test_snapshot_fragments_preserve_cross_page_clause():
 
 async def test_no_grade_read_or_transfer_before_permission(tmp_path, monkeypatch):
     reads = []
-    async def collector(*args):
+    async def collector(*args, **kwargs):
         reads.append(args)
         return [{"id":"fact-1", "text":"Тест: 75 баллов", "url":"/grades", "label":"Успеваемость"}]
     monkeypatch.setattr("app.assistant.personal.collect", collector)
@@ -107,7 +107,7 @@ async def test_grades_only_include_current_student(client):
 
 
 async def test_invented_personal_evidence_fails_closed(tmp_path, monkeypatch):
-    async def collector(*args):
+    async def collector(*args, **kwargs):
         return [{"id":"fact-1", "text":"Реальная запись", "url":"/grades", "label":"Успеваемость"}]
     monkeypatch.setattr("app.assistant.personal.collect", collector)
     provider = FakeProvider({"scopes":["grades"]}, {"fact_ids":["invented"]})

@@ -69,7 +69,7 @@ async def test_translation_keeps_original_evidence_and_rejects_extra_ids():
 
 async def test_foreign_language_grade_request_does_not_read_grades_before_consent(tmp_path, monkeypatch):
     reads = []
-    async def collect(*args):
+    async def collect(*args, **kwargs):
         reads.append(args)
         return []
     monkeypatch.setattr("app.assistant.personal.collect", collect)
@@ -89,3 +89,13 @@ async def test_translation_rejects_changed_deadline_but_accepts_date_format_chan
         await for_display(bad, result, "en")
     good = FakeProvider({"message":"Source", "texts":{"summary":"No later than 10 days, 2026-11-16"}})
     assert (await for_display(good, result, "en"))["summary"]["translation"].startswith("No later than 10")
+
+
+async def test_unknown_reference_clarification_uses_interface_language(tmp_path):
+    provider = FakeProvider({"question": "Какие условия ее получения?", "history": []},
+                            {"message": "Which scholarship or certificate do you mean?", "texts": {}})
+    result = await Assistant(config(tmp_path), provider).chat(
+        1, 1, "What are the conditions for receiving it?", [], None,
+        Conversation("owner", float("inf"), language="en"), None)
+    assert result["status"] == "clarify" and result["language"] == "en"
+    assert "Which scholarship" in result["message"] and len(provider.calls) == 2

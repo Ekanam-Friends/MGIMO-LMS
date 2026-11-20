@@ -1,4 +1,4 @@
-/* История только в памяти вкладки. Никакого HTML из ответов модели и localStorage. */
+/* Вкладка передаёт историю вопросов; сервер хранит её до очистки или истечения беседы. Без HTML модели и localStorage. */
 (() => {
   const t = window.lmsT || (value => value);
   const tf = (key, values) => t(key).replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
@@ -97,6 +97,9 @@
     const article = el('article', '', log); article.className = 'assistant__message';
     el('h2', labels[data.status] || labels.error, article);
     el('p', data.message || 'Повторите запрос позднее.', article);
+    if (data.status === 'error') {
+      const a = el('a', 'Открыть разделы кабинета', article); a.href = '/services';
+    }
     if (data.translation_notice) el('p', data.translation_notice, article);
     if (data.status === 'consent_required') {
       const requestedQuestion = input.value;
@@ -128,7 +131,7 @@
       for (const fact of data.facts) {
         const li = el('li', '', list); el('p', fact.translation || fact.text, li);
         if (fact.translation) {const original = el('details', '', li); el('summary', 'Оригинал на русском', original); el('p', fact.text, original, true);}
-        if (/^\/(grades|schedule(?:\?week=\d{4}-\d{2}-\d{2})?|mfc\/certificates(?:\/\d+)?)$/.test(fact.url)) {
+        if (/^\/(grades|electives|schedule(?:\?week=\d{4}-\d{2}-\d{2})?|mfc\/certificates(?:\/\d+)?)$/.test(fact.url)) {
           const a = el('a', `${t('Открыть:')} ${t(fact.label)}`, li); a.href = fact.url;
         }
       }
@@ -138,15 +141,18 @@
       el('h3', 'Краткий ответ · выдержка', article);
       el('p', data.summary.translation || data.summary.text, article); source(article, data.summary);
     }
-    if (data.steps?.length) {
+    const visibleSteps = (data.steps || []).filter(step => step.id !== data.summary?.id || step.responsible || step.deadline || step.form);
+    if (visibleSteps.length) {
       el('h3', 'Шаги по положениям', article);
       const list = el('ol', '', article);
-      for (const step of data.steps) {
-        const li = el('li', '', list); el('p', step.translation || step.text, li);
+      for (const step of visibleSteps) {
+        const li = el('li', '', list);
+        const repeatsSummary = data.summary?.id === step.id;
+        if (!repeatsSummary) el('p', step.translation || step.text, li);
         for (const [key, label] of [['responsible','Кто'],['deadline','Срок'],['form','Бланк']]) {
           if (step[key]) el('p', `${t(label)}: ${step[key]}`, li);
         }
-        source(li, step);
+        if (!repeatsSummary) source(li, step);
       }
     }
     if (data.snapshot) {
@@ -202,7 +208,7 @@
       }
       if (!response.ok && response.status !== 429) throw new Error();
       const data = await response.json(); show(data);
-      if (['answer','partial','clarify'].includes(data.status)) {history.push(question); if(history.length > 4) history.shift();}
+      if (['answer','partial','clarify','not_found'].includes(data.status)) {history.push(question); if(history.length > 4) history.shift();}
       if (!['error','unavailable','busy','consent_required'].includes(data.status)) input.value = '';
     } catch (_) {
       show({status:'error', message:'Не удалось получить ответ. Проверьте соединение и вход в кабинет. Вопрос сохранён в поле ввода.'});

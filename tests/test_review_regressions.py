@@ -65,7 +65,7 @@ def test_grade_history_does_not_displace_requests_or_schedule():
 
 
 async def test_model_cannot_hide_context_limit(tmp_path):
-    async def collect(*args):
+    async def collect(*args, **kwargs):
         return [{"id": "a", "text": "Факт", "url": "/grades", "label": "Успеваемость"},
                 {"id": "fact-limit", "text": "Есть пропуски", "url": "", "label": "Ограничение выборки"}]
     provider = FakeProvider({"scopes": ["grades"]}, {"fact_ids": ["a"]})
