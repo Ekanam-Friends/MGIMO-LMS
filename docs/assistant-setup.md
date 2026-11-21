@@ -2,7 +2,10 @@
 
 Реализация находится в `app/assistant/`, интерфейс — `/s/assistant`.
 Сначала подготовьте корпус и ключ. Без настройки показывается состояние недоступности,
-а не выдуманные ответы. Настоящий GigaChat и официальный корпус этой задачей не проверены.
+а не выдуманные ответы. 21 ноября 2026 на production проверены конкретные сценарии
+с настоящим GigaChat-2-Max; результаты и пределы проверки описаны в
+[журнале выкладки](process/pr45-production-2026-11-21.md). Полнота корпуса,
+действие редакций и точность всего OCR этой проверкой не подтверждаются.
 
 ## Зависимости и конфигурация
 
@@ -18,7 +21,7 @@ python -m pip install -e ".[dev,rag]"
 LLM_PROVIDER=gigachat
 GIGACHAT_AUTH_KEY=<из личного кабинета GigaChat>
 GIGACHAT_SCOPE=GIGACHAT_API_PERS
-GIGACHAT_MODEL=GigaChat-2
+GIGACHAT_MODEL=GigaChat-2-Max
 GIGACHAT_CA_BUNDLE=/data/ca/russian-trusted-ca.pem
 RAG_CORPUS_DIR=/data/regulations
 RAG_TOP_K=5
