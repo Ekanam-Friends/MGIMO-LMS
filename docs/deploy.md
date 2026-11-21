@@ -15,6 +15,14 @@
   - блок `lms-university.ekanamfriends.ru { … reverse_proxy lms-web:8000 }` в конце `Caddyfile`;
   - `caddy.networks: [default, edge]` и внешняя сеть `edge` в `docker-compose.override.yml`.
 
+## Kubernetes — второй вариант запуска
+
+Тот же образ можно поднять в k3s или minikube одной командой `sh scripts/k8s-up.sh`
+(манифесты — `deploy/k8s/`, решение [0028](decisions/0028-kubernetes-manifests.md)).
+Инструкция для тех, кто не работал с Kubernetes, и чек-лист первого запуска —
+[kubernetes.md](kubernetes.md). Стенд на VPS этим не затрагивается и остаётся на docker
+compose; в живом кластере манифесты пока не запускались, проверены статически.
+
 ## Выкладка
 
 Проверено 17 ноября 2026: на стенде код dev `0f57321` (после PR #43),

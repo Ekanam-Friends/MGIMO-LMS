@@ -280,3 +280,31 @@ YAML workflow дополнительно разобран установленн
   доступно. Seed, генератор и ручной массовый импорт не запускались.
 - После успешной проверки оставлены три последних полных копии БД;
   состояние выкладки — verified в `.deploy-state-0f57321.json`.
+
+## 2026-11-21 — манифесты Kubernetes, задача #25
+
+- **Кто ставил:** raxlin4ik; задача капитана Legpopov ([#25](https://github.com/Ekanam-Friends/MGIMO-LMS/issues/25)).
+- **Промпт (пересказ):** «навайбкодить задачу #25 — web, bot, db (или внешняя БД) в k3s/minikube,
+  секреты из Secret, одна команда запуска, решение в docs/decisions, инструкция в docs; капитан
+  сделает ревью и запустит на сервере». Уточнения постановщика: kustomize, PostgreSQL 16 в
+  StatefulSet и вариант внешней БД, web в одной реплике (сверка Pyrus в процессе), бот ровно
+  в одной, Redis с `CACHE_URL` для задачи #24, Ingress (Traefik), скрипты up/down, валидатор
+  для CI, compose не трогать. Kubernetes пользователь не знает — инструкция для новичка.
+- **Что сделал ИИ (Claude Code):** `deploy/k8s/` (base, postgres, overlays k3s / minikube /
+  external-db), `scripts/k8s-up.sh` и `k8s-down.sh` (POSIX sh, идемпотентные),
+  `scripts/k8s-validate.py`, тест `tests/test_k8s_manifests.py`, workflow `k8s-validate.yml`,
+  решение [0028](../decisions/0028-kubernetes-manifests.md), инструкция [kubernetes.md](../kubernetes.md).
+  Перед написанием прочитал код: где приложение пишет на диск (корпус, `/tmp` для загрузок),
+  что пустой `PYRUS_FORM_ID` роняет настройки (проверено запуском pydantic), что бот не читает корпус.
+- **С первого раза:** структура kustomize, манифесты прошли строгие JSON-схемы Kubernetes 1.29/1.33
+  (pip-пакет `kubernetes-validate`) без правок; разбор `.env` скриптом (кавычки, CRLF, `export`,
+  пустые значения) — проверено прогоном с заглушками kubectl/k3s/docker.
+- **Пришлось переделать:** патч external-db сначала ссылался на файл соседнего overlay
+  (kustomize запрещает файлы вне каталога) — заменён своей копией; валидатор требовал у бота
+  ровно одну реплику и не принимал `replicas: 0`, которое скрипт ставит без токена; тест читал
+  вывод двух kubectl из одного конвейера в общем логе, порядок строк перемешивался — заглушка
+  теперь сохраняет файлы отдельно. Записи — в [ai-mistakes](../process/ai-mistakes.md).
+- **Не проверено:** в живом кластере не запускалось (на машине нет docker/kubectl/k3s) —
+  проверено статически. Первый запуск — капитан на сервере по чек-листу из kubernetes.md.
+  Pytest: 282 passed, 23 failed — те же 23, что и до изменения (5 в `test_certificates.py` —
+  шрифт PDF на macOS, 18 — в локальном venv нет `pymupdf`).
