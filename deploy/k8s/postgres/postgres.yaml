@@ -1,0 +1,153 @@
+# PostgreSQL 16 внутри кластера — для стенда в k3s/minikube (решение 0028).
+# Одна реплика без репликации: hot standby для VPS описан отдельно (решение 0014, compose).
+# Пароль — POSTGRES_PASSWORD из Secret lms-secrets. Он применяется только при ПЕРВОЙ
+# инициализации тома; смена пароля в .env потом не меняет пароль в базе (docs/kubernetes.md).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: db
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/part-of: mgimo-lms
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/component: db
+        app.kubernetes.io/part-of: mgimo-lms
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        # Пользователь postgres в образе postgres:16-alpine.
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_DB
+              value: lms
+            - name: POSTGRES_USER
+              value: lms
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lms-secrets
+                  key: POSTGRES_PASSWORD
+            # Подкаталог: в корне тома у части провайдеров хранилища лежит lost+found,
+            # и initdb отказывается работать в непустом каталоге.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "lms", "-d", "lms", "-h", "127.0.0.1"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "lms", "-d", "lms", "-h", "127.0.0.1"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+            # Сокет и lock-файл; в образе каталог есть, но на томе надёжнее.
+            - name: run
+              mountPath: /var/run/postgresql
+      volumes:
+        - name: run
+          emptyDir: {}
+  # Том создаётся один раз и переживает удаление StatefulSet и scripts/k8s-down.sh
+  # (без --purge). StorageClass не указан — берётся класс кластера по умолчанию
+  # (local-path в k3s, standard в minikube).
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+        labels:
+          app.kubernetes.io/name: postgres
+          app.kubernetes.io/part-of: mgimo-lms
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+---
+# Headless Service — обязательная пара StatefulSet; имя postgres — хост в DATABASE_URL.
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: db
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: mgimo-lms
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
+---
+# К базе ходят только web и bot этого namespace (в k3s правило соблюдается).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: db
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/part-of: mgimo-lms
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["web", "bot"]
+      ports:
+        - protocol: TCP
+          port: 5432

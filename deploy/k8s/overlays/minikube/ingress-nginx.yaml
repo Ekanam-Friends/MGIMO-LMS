@@ -1,0 +1,9 @@
+# ingress-nginx по умолчанию режет тело запроса на 1 МБ, а сотрудник загружает PDF до 50 МБ
+# (app/web/document_views.py). Traefik в k3s такого лимита не ставит.
+- op: add
+  path: /spec/ingressClassName
+  value: nginx
+- op: add
+  path: /metadata/annotations
+  value:
+    nginx.ingress.kubernetes.io/proxy-body-size: 60m

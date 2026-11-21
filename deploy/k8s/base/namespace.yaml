@@ -1,0 +1,8 @@
+# Всё, что относится к кабинету, живёт в одном namespace: его легко посмотреть
+# (kubectl -n mgimo-lms get all) и целиком удалить (scripts/k8s-down.sh --purge).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mgimo-lms
+  labels:
+    app.kubernetes.io/part-of: mgimo-lms

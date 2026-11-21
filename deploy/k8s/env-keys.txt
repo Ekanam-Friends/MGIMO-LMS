@@ -1,0 +1,29 @@
+# Как переменные из .env попадают в кластер (решение 0028). Читают scripts/k8s-up.sh
+# и scripts/k8s-validate.py — список один, чтобы скрипт и проверка не разошлись.
+#
+#   secret  KEY — секрет: только в Secret lms-secrets, никогда в ConfigMap и в репозитории.
+#   managed KEY — задаёт кластер/скрипт; значение из .env игнорируется.
+#   envonly KEY — несекретная настройка, у которой нет безопасного значения по умолчанию
+#                 в base/config.env; берётся только из .env (ConfigMap lms-env).
+# Остальные несекретные ключи .env попадают в ConfigMap lms-env и перекрывают base/config.env.
+
+secret POSTGRES_PASSWORD
+secret DATABASE_URL
+secret FAKE_NAME_SALT
+secret PYRUS_LOGIN
+secret PYRUS_SECURITY_KEY
+secret DEMO_PASSWORD
+secret TELEGRAM_BOT_TOKEN
+# Прокси может содержать логин и пароль в адресе.
+secret TELEGRAM_PROXY
+secret GIGACHAT_AUTH_KEY
+
+# DATABASE_URL собирается из POSTGRES_PASSWORD для базы в кластере; при K8S_OVERLAY=external-db
+# берётся из .env (поэтому он и в secret, и здесь — скрипт учитывает режим).
+managed DATABASE_URL
+managed RAG_CORPUS_DIR
+managed CACHE_URL
+managed PUBLIC_BASE_URL
+managed COOKIE_SECURE
+
+envonly PYRUS_FORM_ID

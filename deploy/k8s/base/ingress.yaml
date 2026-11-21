@@ -1,0 +1,24 @@
+# Вход снаружи — только web. Хост lms.local — пример; scripts/k8s-up.sh подставляет K8S_HOST.
+# ingressClassName задаёт overlay: traefik (k3s) или nginx (minikube).
+# TLS по умолчанию выключен; при K8S_TLS_SECRET=<имя Secret типа tls> скрипт добавляет блок tls
+# (как получить сертификат — docs/kubernetes.md, раздел «HTTPS»).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  rules:
+    - host: lms.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  name: http
