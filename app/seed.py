@@ -7,8 +7,8 @@
 всего ведомостей у группы student1 / student2, — чтобы жюри могло поставить оценку и тут же
 увидеть её у студента. Пока ведомостей нет (generate не запускали), их не создаём.
 
-Пароль всех тестовых учёток — DEMO_PASSWORD из .env (в коде его нет). При повторном запуске
-пароль обновляется, если DEMO_PASSWORD сменили.
+Пароль новых тестовых учёток — DEMO_PASSWORD из .env (в коде его нет).
+Пароли существующих учёток сохраняются: источником их проверки остаётся БД.
 
 Группы студентов — реальные группы из импорта РУЗ (чтобы расписание было живым), а ФИО,
 зачётки, приказы — вымышленные. Если группы в БД нет (РУЗ не импортирован), студент
@@ -21,7 +21,6 @@ import asyncio
 import sys
 from datetime import date, datetime, time, timedelta
 
-from argon2 import PasswordHasher
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -120,13 +119,6 @@ async def _seed_calendar(db) -> None:
                     db.add(ActivitySignup(student_id=student.id, activity_id=a.id, created_at=utcnow()))
 
 
-async def _set_password(user: User, password: str) -> None:
-    try:
-        PasswordHasher().verify(user.password_hash, password)
-    except Exception:
-        user.password_hash = hash_password(password)
-
-
 async def seed() -> None:
     cfg = get_settings()
     if not cfg.demo_password:
@@ -161,14 +153,11 @@ async def seed() -> None:
                             role=Role.STUDENT, student_id=student.id, created_at=utcnow()))
             else:
                 user.student_id = student.id
-                await _set_password(user, cfg.demo_password)
 
         staff = await db.scalar(select(User).where(User.login == STAFF_LOGIN))
         if staff is None:
             db.add(User(login=STAFF_LOGIN, password_hash=hash_password(cfg.demo_password),
                         role=Role.STAFF, created_at=utcnow()))
-        else:
-            await _set_password(staff, cfg.demo_password)
         await db.flush()
         await _seed_calendar(db)
         await db.commit()
@@ -209,7 +198,6 @@ async def link_demo_teachers(db: AsyncSession, password: str | None = None) -> l
                         teacher_id=teacher_id, created_at=utcnow()))
         else:
             user.role, user.teacher_id = Role.TEACHER, teacher_id
-            await _set_password(user, password)
         teacher = await db.get(Teacher, teacher_id)
         out.append((login, teacher.full_name if teacher else str(teacher_id)))
     return out
