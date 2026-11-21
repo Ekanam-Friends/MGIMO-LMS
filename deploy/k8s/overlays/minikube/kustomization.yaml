@@ -1,0 +1,15 @@
+# minikube: PostgreSQL в кластере, Ingress через аддон ingress-nginx
+# (minikube addons enable ingress). Хранилище — класс standard по умолчанию.
+# Образ загружается командой minikube image load (делает scripts/k8s-up.sh).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - ../../postgres
+
+patches:
+  - path: ingress-nginx.yaml
+    target:
+      kind: Ingress
+      name: web

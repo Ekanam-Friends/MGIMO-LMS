@@ -1,0 +1,15 @@
+# k3s (вариант по умолчанию): PostgreSQL в кластере, Ingress через встроенный Traefik.
+# Хранилище — local-path (класс по умолчанию в k3s), отдельно указывать не нужно.
+# Запуск: sh scripts/k8s-up.sh (или K8S_OVERLAY=k3s sh scripts/k8s-up.sh).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - ../../postgres
+
+patches:
+  - path: ingress-class.yaml
+    target:
+      kind: Ingress
+      name: web

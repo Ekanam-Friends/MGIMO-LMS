@@ -297,3 +297,56 @@ YAML workflow дополнительно разобран установленн
   очистка и выход; переполнения и ошибок JS нет. Сохранены три полных бэкапа БД.
 - Отчёт: ../process/pr45-production-2026-11-21.md. Состояние VPS — verified
   в `.deploy-state-4b02297.json`. OCR, полнота корпуса и нагрузка не принимались.
+## 2026-11-21 — манифесты Kubernetes, задача #25
+
+- **Кто ставил:** raxlin4ik; задача капитана Legpopov ([#25](https://github.com/Ekanam-Friends/MGIMO-LMS/issues/25)).
+- **Промпт (пересказ):** «навайбкодить задачу #25 — web, bot, db (или внешняя БД) в k3s/minikube,
+  секреты из Secret, одна команда запуска, решение в docs/decisions, инструкция в docs; капитан
+  сделает ревью и запустит на сервере». Уточнения постановщика: kustomize, PostgreSQL 16 в
+  StatefulSet и вариант внешней БД, web в одной реплике (сверка Pyrus в процессе), бот ровно
+  в одной, Redis с `CACHE_URL` для задачи #24, Ingress (Traefik), скрипты up/down, валидатор
+  для CI, compose не трогать. Kubernetes пользователь не знает — инструкция для новичка.
+- **Что сделал ИИ (Claude Code):** `deploy/k8s/` (base, postgres, overlays k3s / minikube /
+  external-db), `scripts/k8s-up.sh` и `k8s-down.sh` (POSIX sh, идемпотентные),
+  `scripts/k8s-validate.py`, тест `tests/test_k8s_manifests.py`, workflow `k8s-validate.yml`,
+  решение [0028](../decisions/0028-kubernetes-manifests.md), инструкция [kubernetes.md](../kubernetes.md).
+  Перед написанием прочитал код: где приложение пишет на диск (корпус, `/tmp` для загрузок),
+  что пустой `PYRUS_FORM_ID` роняет настройки (проверено запуском pydantic), что бот не читает корпус.
+- **С первого раза:** структура kustomize, манифесты прошли строгие JSON-схемы Kubernetes 1.29/1.33
+  (pip-пакет `kubernetes-validate`) без правок; разбор `.env` скриптом (кавычки, CRLF, `export`,
+  пустые значения) — проверено прогоном с заглушками kubectl/k3s/docker.
+- **Пришлось переделать:** патч external-db сначала ссылался на файл соседнего overlay
+  (kustomize запрещает файлы вне каталога) — заменён своей копией; валидатор требовал у бота
+  ровно одну реплику и не принимал `replicas: 0`, которое скрипт ставит без токена; тест читал
+  вывод двух kubectl из одного конвейера в общем логе, порядок строк перемешивался — заглушка
+  теперь сохраняет файлы отдельно. Записи — в [ai-mistakes](../process/ai-mistakes.md).
+- **Не проверено:** в живом кластере не запускалось (на машине нет docker/kubectl/k3s) —
+  проверено статически. Первый запуск — капитан на сервере по чек-листу из kubernetes.md.
+  Pytest: 282 passed, 23 failed — те же 23, что и до изменения (5 в `test_certificates.py` —
+  шрифт PDF на macOS, 18 — в локальном venv нет `pymupdf`).
+
+## 2026-11-21 — исправления по ревью ветки feature/kubernetes (#25)
+
+- **Кто ставил:** raxlin4ik по итогам ревью ветки (задача капитана Legpopov). Промпт (пересказ):
+  «ревью нашло шесть проблем — проверь каждую по коду и исправь отдельным коммитом».
+- **Что нашло ревью и что сделано** (каждое подтверждено чтением кода до правки):
+  1. Список секретов был открыт по умолчанию: ключ `.env`, не помеченный `secret`, уходил в ConfigMap
+     открытым текстом. Теперь закрыто по умолчанию: в ConfigMap — только `config`/`envonly` из
+     `env-keys.txt`, неописанные ключи — в Secret с предупреждением; валидатор требует описать каждый
+     ключ `.env.example` и `config.env`, тест проверяет самодельный `MY_CUSTOM_TOKEN`.
+  2. `git status --untracked-files=no` не видел новый файл в `app/` — образ не пересобирался.
+     Флаг убран, любой неотслеживаемый файл даёт тег с меткой времени.
+  3. Временный `secrets.env` лежал в `deploy/k8s/.build` во время `docker build` и попадал в контекст.
+     Файлы с секретами — в `mktemp -d` вне репозитория; `deploy/k8s/.build` и `deploy/k8s/secrets.env`
+     в `.dockerignore`.
+  4. Во временной kustomization не было `namespace:` для merge над `lms-config` — добавлен; в чек-лист
+     добавлена проверка `kubectl kustomize deploy/k8s/.build`.
+  5. В инструкции был «nerdctl для k3s» — на голом k3s он не работает; nerdctl убран и из скрипта,
+     описан обход через сборку на другой машине и `K8S_SKIP_BUILD`.
+  6. При доступе через port-forward ссылки календаря вели на `lms.local` — добавлен `K8S_PUBLIC_URL`
+     (например `http://localhost:8000`), `COOKIE_SECURE` выводится из схемы адреса; описано в kubernetes.md.
+- **Проверка:** валидатор (JSON-схемы 1.29/1.33), `sh -n`, прогон скриптов с заглушками, pytest:
+  301 passed, 5 failed — только `test_certificates.py` (шрифт PDF на macOS; `pymupdf` в venv уже стоит).
+  В живом кластере по-прежнему не запускалось.
+
+- 2026-11-21, при отправке ветки: GitHub отклонил push — у OAuth-входа нет права `workflow` на файлы `.github/workflows/`. Workflow перенесён образцом в `deploy/k8s/ci/k8s-validate.yml.example`; проверка манифестов по-прежнему идёт в `pytest` (`tests/test_k8s_manifests.py`).

@@ -1,0 +1,15 @@
+# Внешняя БД: PostgreSQL в кластере НЕ разворачивается. DATABASE_URL целиком берётся из .env
+# и кладётся в Secret lms-secrets (хост базы должен быть доступен из подов — не localhost).
+# Ingress — Traefik, как в k3s; для minikube замените traefik на nginx в ingress-class.yaml.
+# Запуск: K8S_OVERLAY=external-db sh scripts/k8s-up.sh
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+  - path: ingress-class.yaml
+    target:
+      kind: Ingress
+      name: web

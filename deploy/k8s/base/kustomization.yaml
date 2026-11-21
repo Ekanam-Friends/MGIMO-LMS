@@ -1,0 +1,32 @@
+# Общая часть для всех вариантов: web, bot, redis, Ingress и настройки.
+# PostgreSQL сюда не входит: он подключается overlay-ями k3s/minikube (каталог ../postgres),
+# а overlay external-db его не разворачивает.
+#
+# Secret lms-secrets и ConfigMap lms-env здесь не описаны намеренно: их из .env создаёт
+# scripts/k8s-up.sh (в репозитории секретов нет, решение 0028).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mgimo-lms
+
+resources:
+  - namespace.yaml
+  - web.yaml
+  - bot.yaml
+  - redis.yaml
+  - ingress.yaml
+
+# Имя получает суффикс-хэш содержимого: правка config.env сама перезапускает web и bot.
+configMapGenerator:
+  - name: lms-config
+    envs:
+      - config.env
+
+generatorOptions:
+  labels:
+    app.kubernetes.io/part-of: mgimo-lms
+
+# Образ собирается из Dockerfile репозитория; тег подставляет scripts/k8s-up.sh.
+images:
+  - name: mgimo-lms
+    newTag: local
