@@ -19,6 +19,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from app.cache import cache_from_settings, set_cache
 from app.certificates.pyrus_client import PyrusClient
 from app.assistant.provider import GigaChat
 from app.assistant.bootstrap import create_assistant
@@ -56,6 +57,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         cfg = settings or get_settings()
         app.state.settings = cfg
+        # Кэш чтений процесса web (решение 0027): Redis при CACHE_URL, иначе словарь в памяти.
+        app.state.cache = cache_from_settings(cfg)
+        set_cache(app.state.cache)
         provider = None
         if cfg.llm_provider == "gigachat" and cfg.gigachat_auth_key.get_secret_value():
             try:
@@ -96,6 +100,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if client is not None:
                 await client.aclose()
             await engine.dispose()
+            await app.state.cache.aclose()
 
     app = FastAPI(title="MGIMO-LMS (концепт для конкурса)", lifespan=lifespan)
     app.add_middleware(DocumentBodyLimit)

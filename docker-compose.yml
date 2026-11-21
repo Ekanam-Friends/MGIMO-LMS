@@ -36,6 +36,27 @@ services:
       timeout: 3s
       retries: 10
 
+  # Общий кэш чтений web и бота (решение 0027): импорт расписания в боте инвалидирует кэш web.
+  # Порт не публикуется — Redis виден только в сети проекта. Данные — только кэш: без
+  # сохранения на диск, при нехватке памяти вытесняются давно не читанные ключи (allkeys-lru).
+  redis:
+    <<: *logging
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru",
+              "--save", "", "--appendonly", "no"]
+    mem_limit: 96m
+    # Уникальное имя в сети: бот на сервере подключён ещё и к сети Ikanam, где короткое
+    # имя `redis` могло бы указать на чужой сервис (как было с `db`, см. docs/deploy.md).
+    networks:
+      default:
+        aliases: [lms-redis]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   web:
     <<: *logging
     build: .
@@ -43,9 +64,13 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@db:5432/lms
+      CACHE_URL: redis://lms-redis:6379/0
     depends_on:
       db:
         condition: service_healthy
+      # Не service_healthy: без Redis кабинет работает (fail-open), просто без кэша.
+      redis:
+        condition: service_started
     expose:
       - "8000"
     networks:
@@ -62,10 +87,13 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://lms:${POSTGRES_PASSWORD}@db:5432/lms
+      CACHE_URL: redis://lms-redis:6379/0
     command: ["python", "-m", "app.bot.main"]
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
       web:
         condition: service_started
 

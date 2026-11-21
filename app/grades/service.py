@@ -17,6 +17,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.service import utcnow
+from app.cache import cached, get_cache
+from app.cache.invalidation import SCHEDULE
 from app.grades import scale
 from app.grades.queries import latest_final_clause
 from app.models import Lesson, LessonGroup, Student, StudyGroup, Teacher
@@ -567,6 +569,28 @@ class RecordBook:
         return round(sum(vals) / len(vals), 1) if vals else None
 
 
+async def _next_exam(db: AsyncSession, student: Student, today: date) -> tuple[date, str] | None:
+    """Ближайший экзамен группы из расписания — через кэш расписания (решение 0027)."""
+
+    async def load() -> tuple[date, str] | None:
+        found = (await db.execute(
+            select(Lesson.date, Lesson.discipline).join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
+            .where(LessonGroup.group_id == student.study_group_id, Lesson.date >= today,
+                   or_(Lesson.kind_of_work.like("Экзам%"), Lesson.kind_of_work.like("экзам%")))
+            .order_by(Lesson.date).limit(1)
+        )).first()
+        return (found[0], found[1]) if found else None
+
+    cache = get_cache()
+    gens = await cache.generations(SCHEDULE)
+    if gens is None:
+        return await load()
+    key = f"exam:s{student.id}:g{student.study_group_id}:{today.isoformat()}:{gens[0]}"
+    return await cached(key, cache.schedule_ttl, load,
+                        dump=lambda v: {"exam": [v[0].isoformat(), v[1]] if v else None},
+                        restore=lambda raw: (date.fromisoformat(raw["exam"][0]), raw["exam"][1]) if raw["exam"] else None)
+
+
 async def record_book(db: AsyncSession, student_id: int, today: date | None = None, *, events: int = 8) -> RecordBook:
     """Всё, что видит студент в «Успеваемости». Только курсы, куда записан студент из сессии."""
     today = today or date.today()
@@ -617,15 +641,7 @@ async def record_book(db: AsyncSession, student_id: int, today: date | None = No
     debts = [c for s in semesters for c in s.courses if c.debt]
 
     student = await db.get(Student, student_id)
-    next_exam = None
-    if student and student.study_group_id:
-        found = (await db.execute(
-            select(Lesson.date, Lesson.discipline).join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
-            .where(LessonGroup.group_id == student.study_group_id, Lesson.date >= today,
-                   or_(Lesson.kind_of_work.like("Экзам%"), Lesson.kind_of_work.like("экзам%")))
-            .order_by(Lesson.date).limit(1)
-        )).first()
-        next_exam = (found[0], found[1]) if found else None
+    next_exam = await _next_exam(db, student, today) if student and student.study_group_id else None
 
     recent = list((await db.scalars(
         select(GradeEvent).where(GradeEvent.student_id == student_id)
