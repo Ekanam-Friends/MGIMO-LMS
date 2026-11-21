@@ -1,2 +1,7 @@
 scripts/** text eol=lf
 *.sh text eol=lf
+
+# Материалы интервью хранятся только для разработки, без включения в выкладку.
+interview/ export-ignore
+interview/** export-ignore
+interview/raw/** filter=lfs diff=lfs merge=lfs -text
