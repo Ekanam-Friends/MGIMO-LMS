@@ -263,8 +263,7 @@ K8S_HOST=lms.example.ru K8S_TLS_SECRET=lms-tls sh scripts/k8s-up.sh
 
 ## Что проверено без кластера
 
-- `scripts/k8s-validate.py` (тест `tests/test_k8s_manifests.py`, workflow
-  `.github/workflows/k8s-validate.yml`): разбор всех YAML; сборка трёх overlay упрощённым
+- `scripts/k8s-validate.py` (тест `tests/test_k8s_manifests.py`, образец workflow `deploy/k8s/ci/k8s-validate.yml` — чтобы включить проверку в GitHub Actions, скопируйте его в `.github/workflows/` (нужен доступ с правом `workflow`)): разбор всех YAML; сборка трёх overlay упрощённым
   kustomize; ссылки на файлы; селекторы и порты Service, Ingress, NetworkPolicy; PVC,
   ConfigMap, Secret; пробы, ресурсы, securityContext; число реплик и стратегия web/bot;
   отсутствие Secret в репозитории; каждая переменная `.env.example` попадает в ConfigMap или Secret,

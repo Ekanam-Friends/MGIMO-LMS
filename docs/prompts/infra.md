@@ -332,3 +332,5 @@ YAML workflow дополнительно разобран установленн
 - **Проверка:** валидатор (JSON-схемы 1.29/1.33), `sh -n`, прогон скриптов с заглушками, pytest:
   301 passed, 5 failed — только `test_certificates.py` (шрифт PDF на macOS; `pymupdf` в venv уже стоит).
   В живом кластере по-прежнему не запускалось.
+
+- 2026-11-21, при отправке ветки: GitHub отклонил push — у OAuth-входа нет права `workflow` на файлы `.github/workflows/`. Workflow перенесён образцом в `deploy/k8s/ci/k8s-validate.yml`; проверка манифестов по-прежнему идёт в `pytest` (`tests/test_k8s_manifests.py`).
