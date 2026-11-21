@@ -108,7 +108,7 @@ kustomization (`deploy/k8s/.build/`, в .gitignore, с `namespace: mgimo-lms`, �
 `--purge` — namespace целиком после подтверждения.
 
 **Проверка без кластера.** `scripts/k8s-validate.py` (нужен только PyYAML; запускается
-тестом `tests/test_k8s_manifests.py` и образец workflow `deploy/k8s/ci/k8s-validate.yml` — чтобы включить проверку в GitHub Actions, скопируйте его в `.github/workflows/` (нужен доступ с правом `workflow`))
+тестом `tests/test_k8s_manifests.py` и образец workflow `deploy/k8s/ci/k8s-validate.yml.example` — чтобы включить проверку в GitHub Actions, скопируйте его в `.github/workflows/k8s-validate.yml` (нужен доступ с правом `workflow`))
 собирает каждый overlay упрощённым kustomize и проверяет ссылки kustomization, селекторы
 и порты Service, Ingress, PVC, ConfigMap/Secret, пробы, ресурсы, securityContext, реплики,
 отсутствие секретов, покрытие переменных `.env.example` и совпадение имён с `Settings`;
