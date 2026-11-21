@@ -1,39 +1,37 @@
 """Уточнения маршрута до чтения личных данных; нормы остаются в корпусе."""
 import re
 
-TOPICS = [(r"стипенд|стипух", "стипендии"),
-          (r"академ.{0,15}отпуск", "академического отпуска"),
-          (r"материальн.{0,10}помощ", "материальной помощи")]
-
-
-def resolve_reference(question, history):
-    if not re.search(r"\b(?:ее|её|его|этой|этого)\b", question, re.I):
-        return question
-    if any(re.search(pattern, question, re.I) for pattern, _ in TOPICS):
-        return question
-    for previous in reversed(history):
-        for pattern, subject in TOPICS:
-            if re.search(pattern, previous, re.I):
-                return re.sub(r"\b(?:ее|её|его|этой|этого)\b", subject, question, flags=re.I)
-    return None
-
-
 def normalize_scopes(question, scopes):
     q = question.lower().replace("ё", "е")
-    # Общие правила не требуют чтения оценок, даже если маршрутизатор так решил.
-    scholarship = bool(re.search(r"стипенд|стипух", q))
     personal = bool(re.search(r"\b(?:я|мне|меня|мои|моих|моим|моя|мой|мое|наши|наших)\b|положен|полагает|имею ли право", q))
-    if scholarship and not personal:
-        return ["public"]
-    if re.search(r"прогул|пропущ|пропуск.{0,15}(?:пар|занят)|не (?:приду|пойду)", q) and not re.search(r"сколько|мои|у меня", q):
-        return ["public"]
-    if re.search(r"домашн.{0,12}(?:задан|работ)|\bдз\b", q):
-        if not personal and re.search(r"правил|порядок|критери|условия|как.{0,15}(?:оценива|сдава)", q):
-            return ["public"]
-        result = ["homework"]
-        if re.search(r"оценк|балл", q):
+    homework = bool(re.search(r"домашн.{0,12}(?:задан|работ)|\bдз\b", q))
+    rules = bool(re.search(r"правил|порядок|критери|условия|академ.{0,15}отпуск|отчислен|как.{0,15}(?:оценива|сдава|оформ|получ)", q))
+    grades = bool(re.search(r"оценк|балл|зачетк|успеваем|долг", q))
+    schedule = bool(re.search(r"расписан|когда у (?:меня|нас)|как зовут|кто (?:у меня )?(?:ведет|преподает)|имя преподавател", q))
+    requests = bool(re.search(r"статус.{0,30}(?:заяв|справ)|(?:заяв|справ).{0,30}статус|мои заяв|моя заяв", q))
+    scholarship = bool(re.search(r"стипенд|стипух", q))
+    absence = bool(re.search(r"прогул|пропущ|пропуск.{0,15}(?:пар|занят)|не (?:приду|пойду)", q))
+    public_rule = ((scholarship and not personal) or
+                   (absence and not re.search(r"сколько|мои|у меня", q)) or
+                   (homework and rules and not personal))
+    if public_rule:
+        # Общая норма не открывает кабинет; независимые части вопроса сохраняем.
+        homework_request = homework and (personal or not rules or
+            bool(re.search(r"(?:и|а также)\s+(?:мои\s+)?(?:домашние (?:задания|работы)|дз)\b", q)))
+        return (["public"] + (["homework"] if homework_request else [])
+                + (["schedule"] if schedule else []) + (["requests"] if requests else [])
+                + (["grades"] if re.search(r"(?:покажи|мои|наши).{0,30}(?:балл|оценк)|(?:и|а также)\s+(?:мои\s+)?(?:балл|оценк)", q)
+                   or (grades and "grades" in scopes and re.search(r"\s(?:и|а также)\s", q)) else []))
+    result = list(dict.fromkeys(scopes))
+    if homework:
+        result = [scope for scope in result if scope not in {"grades", "public"}]
+        result = ["homework"] + [scope for scope in result if scope != "homework"]
+        if grades:
             result.append("grades")
-        return result
-    if re.search(r"как зовут|кто (?:у меня )?(?:ведет|преподает)|имя преподавател", q):
-        return ["schedule"]
-    return list(dict.fromkeys(scopes))
+        if rules or scholarship:
+            result.append("public")
+    if schedule and "schedule" not in result:
+        result.append("schedule")
+    if requests and "requests" not in result:
+        result.append("requests")
+    return list(dict.fromkeys(result))

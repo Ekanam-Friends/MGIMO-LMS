@@ -93,9 +93,10 @@ async def test_translation_rejects_changed_deadline_but_accepts_date_format_chan
 
 async def test_unknown_reference_clarification_uses_interface_language(tmp_path):
     provider = FakeProvider({"question": "Какие условия ее получения?", "history": []},
+                            {"scopes": ["public"], "clarification": "О получении чего идёт речь?"},
                             {"message": "Which scholarship or certificate do you mean?", "texts": {}})
     result = await Assistant(config(tmp_path), provider).chat(
         1, 1, "What are the conditions for receiving it?", [], None,
         Conversation("owner", float("inf"), language="en"), None)
     assert result["status"] == "clarify" and result["language"] == "en"
-    assert "Which scholarship" in result["message"] and len(provider.calls) == 2
+    assert "Which scholarship" in result["message"] and len(provider.calls) == 3

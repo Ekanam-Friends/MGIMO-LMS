@@ -1,17 +1,17 @@
 """Минимальные факты кабинета. student_id поступает только из серверной сессии."""
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
-import re
+from datetime import date, timedelta
 
 from sqlalchemy import select, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.grades.service import record_book
+from app.grades.queries import latest_final_clause
 from app.models import Assessment, Course, CourseEnrollment, Discipline, FinalGrade, Lesson, LessonGroup, Score, Student, Teacher, lesson_teachers
 from app.models.certificates import CertificateKind, CertificateRequest, PaperStatus, RequestStatus
 from app.models.grades import FinalResult, AssessmentKind
 from app.models.schedule import LessonStatus
 from app.schedule.choices import elective_catalog, get_choices, selected_lesson, subgroup_parts
+from app.schedule.query import ScheduleQuery
 from .evidence import bounded_facts
 
 
@@ -20,8 +20,8 @@ class SqlPersonalEvidenceReader:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def collect(self, student_id, scopes, today, start, end, *, question=""):
-        return await collect(self.db, student_id, scopes, today, start, end, question=question)
+    async def collect(self, student_id, scopes, today, start, end, *, schedule=None):
+        return await collect(self.db, student_id, scopes, today, start, end, schedule=schedule)
 
 
 class SqlTeachingEvidenceReader:
@@ -29,12 +29,12 @@ class SqlTeachingEvidenceReader:
     def __init__(self, db: AsyncSession, teacher_id: int):
         self.db, self.teacher_id = db, teacher_id
 
-    async def collect(self, student_id, scopes, today, start, end, *, question=""):
-        return await collect_teaching(self.db, self.teacher_id, student_id, scopes, today, start, end)
+    async def collect(self, student_id, scopes, today, start, end, *, schedule=None):
+        return await collect_teaching(self.db, self.teacher_id, student_id, scopes, today, start, end, schedule=schedule)
 
 
 async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: date,
-                  start: date, end: date, *, question: str = "") -> list[dict]:
+                  start: date, end: date, *, schedule: ScheduleQuery | None = None) -> list[dict]:
     facts = []
 
     def add(text, url, label):
@@ -76,12 +76,11 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
             add("Список заданий или длинные описания сокращены; сначала показаны ближайшие сроки. "
                 "Полные тексты и история доступны в успеваемости.", "/grades", "Ограничение выборки")
     if "schedule" in scopes:
-        q = question.lower().replace("ё", "е")
-        # Для вопроса без явной даты не предлагаем уже закончившиеся пары.
-        nearest = bool(re.search(r"когда|ближайш|следующ", q)) and not re.search(
-            r"сегодня|завтра|вчера|недел|понедельник|вторник|сред[ау]|четверг|пятниц|суббот|воскресень|\d", q)
+        schedule = schedule or ScheduleQuery()
+        nearest, now = schedule.nearest, schedule.now
+        if nearest and now is None:
+            raise ValueError("Для ближайшего занятия нужен момент времени")
         if nearest:
-            now = datetime.now(ZoneInfo("Europe/Moscow"))
             start, end = now.date(), now.date() + timedelta(days=13)
         query = (select(Lesson).join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
             .join(Student, Student.study_group_id == LessonGroup.group_id)
@@ -89,10 +88,9 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
         if nearest:
             query = query.where(Lesson.status == LessonStatus.ACTIVE,
                 or_(Lesson.date > now.date(), (Lesson.date == now.date()) & (Lesson.ends_at > now.time().replace(tzinfo=None))))
-        # Имена языковых дисциплин отбираются до лимита, без выдуманных имён преподавателей.
-        for needle in ("английск", "немецк", "французск", "испанск", "китайск"):
-            if needle in q:
-                query = query.where(Lesson.discipline.ilike(f"%{needle}%"))
+        # Любая дисциплина отбирается ДО ограничения ближайшим временным слотом.
+        if schedule.discipline:
+            query = query.where(Lesson.discipline.icontains(schedule.discipline, autoescape=True))
         student = await db.get(Student, student_id)
         catalog = await elective_catalog(db, student.study_group_id if student else None)
         choices = await get_choices(db, student_id)
@@ -160,7 +158,7 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
 
 
 async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: list[str],
-                           today: date, start: date, end: date) -> list[dict]:
+                           today: date, start: date, end: date, *, schedule: ScheduleQuery | None = None) -> list[dict]:
     """Ни полная зачётка, ни заявки студента не читаются для преподавателя."""
     from .teaching import course_ids, coverage
     if teacher_id is None:
@@ -201,25 +199,40 @@ async def collect_teaching(db, teacher_id: int, student_id: int | None, scopes: 
             add((f"Студент №{sid}: " if sid is not None else "") + f"{name}, семестр {sem}; {title}: " +
                 (f"{points:g} из {mx:g}; выставлено {graded_at.isoformat()}." if points is not None
                  else "баллы в снимке не выставлены."))
-        finals_query = select(Discipline.name, FinalGrade.result, FinalGrade.total_points,
+        finals_query = select(Discipline.name, Course.id, Course.semester, Course.academic_year,
+            FinalGrade.attempt, FinalGrade.result, FinalGrade.total_points,
             FinalGrade.graded_on, FinalGrade.student_id).select_from(FinalGrade).join(Course).join(Discipline)
-        finals_query = finals_query.where(Course.id.in_(enrolled), FinalGrade.student_id.in_(
+        finals_query = finals_query.where(latest_final_clause(), Course.id.in_(enrolled), FinalGrade.student_id.in_(
             select(CourseEnrollment.student_id).where(CourseEnrollment.course_id == Course.id).correlate(Course)))
         if student_id is not None:
             finals_query = finals_query.where(FinalGrade.student_id == student_id)
         finals = (await db.execute(finals_query.order_by(FinalGrade.graded_on.desc(), FinalGrade.id.desc()).limit(40))).all()
-        for name, result, points, day, sid in finals:
-            add(f"Студент №{sid}: {name}: итог {FinalResult.TITLES.get(result, result)}, {points:g} баллов, дата {day}.")
+        for name, cid, semester, year, attempt, result, points, day, sid in finals:
+            add(f"Студент №{sid}: {name}, курс №{cid}, семестр {semester}, {year}, попытка {attempt}: "
+                f"итог {FinalResult.TITLES.get(result, result)}, {points:g} баллов, дата {day}.")
         if len(rows) == 100 or len(finals) == 40:
             add("Выборка ограничена; уточните дисциплину и период. Полная история не подтверждена.", "Ограничение выборки")
     if "schedule" in scopes:
+        schedule = schedule or ScheduleQuery()
         schedule_query = select(Lesson).join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
         if student_id is not None:
             schedule_query = schedule_query.join(LessonGroup).join(Student, Student.study_group_id == LessonGroup.group_id)
             schedule_query = schedule_query.where(Student.id == student_id)
+        if schedule.nearest:
+            if schedule.now is None:
+                raise ValueError("Для ближайшего занятия нужен момент времени")
+            now = schedule.now
+            start, end = now.date(), now.date() + timedelta(days=13)
+            schedule_query = schedule_query.where(or_(Lesson.date > start,
+                (Lesson.date == start) & (Lesson.ends_at > now.time().replace(tzinfo=None))))
+        if schedule.discipline:
+            schedule_query = schedule_query.where(Lesson.discipline.icontains(schedule.discipline, autoescape=True))
         rows = (await db.scalars(schedule_query.where(lesson_teachers.c.teacher_id == teacher_id,
             Lesson.date >= start, Lesson.date <= end, Lesson.status == "active")
             .order_by(Lesson.date, Lesson.begins_at, Lesson.id).limit(61))).all()
+        if schedule.nearest and rows:
+            first = rows[0]
+            rows = [row for row in rows if (row.date, row.begins_at) == (first.date, first.begins_at)]
         for row in rows[:60]:
             add(f"{row.date} {row.begins_at:%H:%M}–{row.ends_at:%H:%M}: {row.discipline}; "
                 f"подгруппа {row.subgroup or 'вся группа'}; импорт {row.last_seen_at.isoformat()}.")

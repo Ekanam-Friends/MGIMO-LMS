@@ -4,6 +4,7 @@ from typing import Protocol
 
 from .corpus import Corpus
 from .conversation import Conversation
+from app.schedule.query import ScheduleQuery
 
 
 class CorpusRepository(Protocol):
@@ -12,7 +13,7 @@ class CorpusRepository(Protocol):
 
 class PersonalEvidenceReader(Protocol):
     async def collect(self, student_id: int | None, scopes: list[str], today: date,
-                      start: date, end: date, *, question: str = "") -> list[dict]: ...
+                      start: date, end: date, *, schedule: ScheduleQuery | None = None) -> list[dict]: ...
 
 
 class LanguageModel(Protocol):

@@ -11,6 +11,7 @@ from app.assistant.bootstrap import create_assistant
 from app.assistant.conversation import Conversation
 from app.assistant.errors import ProviderError
 from app.assistant.personal import collect
+from app.schedule.query import ScheduleQuery
 from app.assistant.provider import GigaChat
 from app.models import (Assessment, Course, CourseEnrollment, Discipline, ElectiveChoice,
                         Lesson, LessonGroup, Teacher, lesson_teachers)
@@ -27,7 +28,8 @@ async def test_thanks_does_not_restart_or_call_provider(tmp_path):
 
 
 async def test_failed_question_keeps_topic_on_server(tmp_path, monkeypatch):
-    p = FakeProvider({"scopes": ["public"]}, {"scopes": ["grades"], "search_query": "справка о болезни"})
+    p = FakeProvider({"scopes": ["public"]}, {"scopes": ["grades"],
+        "standalone_question": "Какие условия получения стипендии?", "search_query": "стипендия условия"})
     assistant = create_assistant(config(tmp_path), p)
     async def public(*args, **kwargs):
         return assistant._result("not_found", "Подтверждений нет")
@@ -37,15 +39,16 @@ async def test_failed_question_keeps_topic_on_server(tmp_path, monkeypatch):
     second = await assistant.chat(1, 1, "Какие условия ее получения?", [], None, c, None)
     assert first["status"] == second["status"] == "not_found"
     assert c.history == ["А что по стипухе?", "Какие условия ее получения?"]
-    assert "стипендии" in p.calls[1][1]["question"]
+    assert p.calls[1][1]["question"] == "Какие условия ее получения?"
+    assert "Подтверждений нет" in p.calls[1][1]["dialogue"][1]["content"]
     assert not c.grades_pending
 
 
 async def test_unknown_reference_asks_instead_of_inventing_procedure(tmp_path):
-    p = FakeProvider()
+    p = FakeProvider({"scopes": ["public"], "clarification": "Уточните, о получении чего идёт речь?"})
     r = await create_assistant(config(tmp_path), p).chat(
         1, 1, "Какие условия ее получения?", [], None, Conversation("owner", float("inf")), None)
-    assert r["status"] == "clarify" and not p.calls
+    assert r["status"] == "clarify" and len(p.calls) == 1
 
 
 @pytest.mark.parametrize("question", ["Какие условия получения повышенной стипендии?",
@@ -105,7 +108,7 @@ async def test_schedule_uses_saved_subgroup_and_teacher(client):
         await db.execute(lesson_teachers.insert().values(lesson_id=101, teacher_id=1))
         await db.commit()
         facts = await collect(db, 1, ["schedule"], date(2026, 11, 5), date(2026, 11, 5), date(2026, 11, 5),
-                              question="Как зовут моего преподавателя по английскому?")
+                              schedule=ScheduleQuery(discipline="английск"))
     data = json.dumps(facts, ensure_ascii=False)
     assert "Примерова Тестина" in data and "01-англ" in data
     assert "02-нем" not in data and "Чужая дисциплина" not in data
@@ -117,7 +120,6 @@ async def test_nearest_schedule_omits_finished_lesson(client, monkeypatch):
         @classmethod
         def now(cls, tz=None):
             return cls(2026, 11, 5, 18, 30, tzinfo=tz)
-    monkeypatch.setattr("app.assistant.personal.datetime", Clock)
     async with client._transport.app.state.session_factory() as db:
         db.add(ElectiveChoice(student_id=1, kind="subgroup", value="01-англ (1ТЕСТ-01)"))
         db.add(Lesson(id=300, date=date(2026, 11, 6), begins_at=time(9), ends_at=time(10, 20),
@@ -131,7 +133,7 @@ async def test_nearest_schedule_omits_finished_lesson(client, monkeypatch):
         db.add_all([LessonGroup(lesson_id=i, group_id=10) for i in (300, 301)])
         await db.commit()
         facts = await collect(db, 1, ["schedule"], date(2026, 11, 5), date(2026, 11, 5), date(2026, 11, 11),
-                              question="Когда у меня английский?")
+                              schedule=ScheduleQuery(discipline="английск", nearest=True, now=Clock.now()))
     text = json.dumps(facts, ensure_ascii=False)
     assert "2026-11-06 09:00" in text and "2026-11-05 10:35" not in text
     assert "2026-11-07 09:00" not in text

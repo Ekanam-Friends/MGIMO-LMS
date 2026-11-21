@@ -1,4 +1,4 @@
-/* Вкладка передаёт историю вопросов; сервер хранит её до очистки или истечения беседы. Без HTML модели и localStorage. */
+/* История беседы хранится только на сервере до очистки или истечения. Без HTML модели и localStorage. */
 (() => {
   const t = window.lmsT || (value => value);
   const tf = (key, values) => t(key).replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
@@ -12,7 +12,6 @@
   const log = document.getElementById('assistant-messages');
   const progress = document.getElementById('assistant-progress');
   const welcome = document.getElementById('assistant-welcome');
-  const history = [];
   const ack = document.getElementById('assistant-acknowledged');
   const start = document.getElementById('assistant-start');
   const warning = document.getElementById('assistant-warning');
@@ -172,7 +171,7 @@
     busy = true; controls();
     try {
       await action({action:'clear', conversation_token:conversationToken});
-      conversationToken = ''; pendingQuestion = ''; history.length = 0; log.replaceChildren(); input.value = ''; progress.textContent = ''; welcome.hidden = false;
+      conversationToken = ''; pendingQuestion = ''; log.replaceChildren(); input.value = ''; progress.textContent = ''; welcome.hidden = false;
       if (student) {
         warning.hidden = false; start.disabled = !ack.checked || root.dataset.enabled !== 'true';
         studentStatus.textContent = 'Выберите демо-студента и начните новую беседу. Разрешение на оценки отозвано.';
@@ -201,14 +200,13 @@
     try {
       const response = await fetch('/s/assistant/ask', {method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token':root.dataset.csrf},
         credentials:'same-origin', redirect:'error', signal:controller.signal,
-        body:JSON.stringify({question, history:history.slice(-4), as_of:day.value || null, conversation_token:conversationToken})});
+        body:JSON.stringify({question, as_of:day.value || null, conversation_token:conversationToken})});
       if (response.status === 403) {
         conversationToken = ''; warning.hidden = false; welcome.hidden = false; start.disabled = !ack.checked || root.dataset.enabled !== 'true';
         throw new Error();
       }
       if (!response.ok && response.status !== 429) throw new Error();
       const data = await response.json(); show(data);
-      if (['answer','partial','clarify','not_found'].includes(data.status)) {history.push(question); if(history.length > 4) history.shift();}
       if (!['error','unavailable','busy','consent_required'].includes(data.status)) input.value = '';
     } catch (_) {
       show({status:'error', message:'Не удалось получить ответ. Проверьте соединение и вход в кабинет. Вопрос сохранён в поле ввода.'});
