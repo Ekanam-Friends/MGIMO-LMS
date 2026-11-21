@@ -26,7 +26,8 @@
 
 ```
 deploy/k8s/
-  env-keys.txt          какие переменные .env секретные (secret), какие задаёт кластер (managed)
+  env-keys.txt          какие переменные .env несекретные (config, envonly), секретные (secret),
+                        какие задаёт кластер (managed); неописанные — в Secret
   secrets.env.example   шаблон отдельного файла секретов (обычно не нужен — берётся .env)
   base/                 общее: namespace, web, bot, redis, Ingress, config.env -> ConfigMap lms-config
   postgres/             PostgreSQL 16 с постоянным томом
@@ -47,7 +48,11 @@ scripts/k8s-validate.py проверка манифестов без класт�
 
 ## Шаг 1. Кластер и инструменты
 
-Нужны: `kubectl`, кластер (k3s **или** minikube) и сборщик образа (`docker`; для k3s подойдёт и `nerdctl`).
+Нужны: `kubectl`, кластер (k3s **или** minikube) и `docker` для сборки образа. Для minikube без
+docker скрипт соберёт образ внутри minikube (`minikube image build`). nerdctl на голом k3s не
+подходит: он не видит containerd k3s и без buildkitd не собирает — поэтому скрипт его не использует.
+Если docker на узле k3s ставить нельзя, соберите образ на другой машине, `docker save` → скопируйте →
+`sudo k3s ctr images import <файл>` и запустите скрипт с `K8S_SKIP_BUILD=1 K8S_IMAGE_TAG=<тег>`.
 
 ### Вариант А: k3s на Linux-сервере (по умолчанию)
 
@@ -93,7 +98,12 @@ cp .env.example .env
 кластера из `.env` **не берутся** — их задаёт скрипт (список `managed` в `deploy/k8s/env-keys.txt`).
 
 `.env` в `.gitignore`, в репозиторий не попадает. В кластере секреты из него лежат в Secret
-`lms-secrets`, остальные настройки — в ConfigMap `lms-env`.
+`lms-secrets`, несекретные настройки — в ConfigMap `lms-env`. Список **закрыт по умолчанию**: в ConfigMap
+(открытым текстом) уходят только ключи, помеченные `config`/`envonly` в `deploy/k8s/env-keys.txt`;
+любой другой ключ (например, ваш новый `*_TOKEN`) скрипт кладёт в Secret и печатает
+«ключ X не описан в env-keys.txt, положен в Secret». Новую несекретную настройку допишите туда как `config`.
+Временные файлы с секретами скрипт создаёт вне репозитория и удаляет сразу после применения,
+в контекст `docker build` они не попадают.
 
 ## Шаг 3. Запуск — одна команда
 
@@ -108,6 +118,7 @@ sh scripts/k8s-up.sh
 
 ```bash
 K8S_HOST=lms.example.ru sh scripts/k8s-up.sh            # свой домен вместо lms.local
+K8S_PUBLIC_URL=http://localhost:8000 sh scripts/k8s-up.sh  # открываете через port-forward (см. шаг 4)
 K8S_CLUSTER=minikube sh scripts/k8s-up.sh               # если автоопределение ошиблось
 K8S_OVERLAY=external-db sh scripts/k8s-up.sh            # база вне кластера (DATABASE_URL из .env)
 K8S_ENV_FILE=deploy/k8s/secrets.env sh scripts/k8s-up.sh  # отдельный файл вместо .env
@@ -130,7 +141,17 @@ curl http://localhost:8000/healthz                       # {"ok":true}
 kubectl -n mgimo-lms exec deploy/web -c web -- python -m app.seed   # тестовые учётки, один раз
 ```
 
-Через браузер: http://localhost:8000 (port-forward) или по домену Ingress. Чтобы открылся
+Через браузер: http://localhost:8000 (port-forward) или по домену Ingress.
+
+> **Адрес для ссылок.** Ссылка-подписка на календарь (`/feed/<токен>.ics`) и другие абсолютные
+> ссылки собираются из `PUBLIC_BASE_URL`. Скрипт ставит его в `http://<K8S_HOST>` (по умолчанию
+> `http://lms.local`) — при входе через port-forward такие ссылки не откроются. Если кабинет
+> смотрят через `kubectl port-forward svc/web 8000:8000`, перезапустите скрипт с адресом, по которому
+> его открывают: `K8S_PUBLIC_URL=http://localhost:8000 sh scripts/k8s-up.sh` (порт — левая часть
+> `8000:8000`). В `.env` `PUBLIC_BASE_URL` менять бесполезно: для кластера его задаёт скрипт.
+> `COOKIE_SECURE` скрипт выставляет по схеме этого адреса (`https` → true).
+
+Чтобы открылся Чтобы открылся
 `http://lms.local`, добавьте в `/etc/hosts` строку `<IP> lms.local`, где IP — из
 `kubectl -n mgimo-lms get ingress web` (колонка ADDRESS). minikube на macOS с драйвером docker:
 в отдельном окне `minikube tunnel`, IP — `127.0.0.1`.
@@ -202,7 +223,9 @@ K8S_HOST=lms.example.ru K8S_TLS_SECRET=lms-tls sh scripts/k8s-up.sh
 | web в `Init:Error` / `Init:CrashLoopBackOff` | Не прошли миграции: `kubectl -n mgimo-lms logs deploy/web -c migrate`. Чаще всего база ещё не поднялась или неверный пароль |
 | `password authentication failed` после смены `POSTGRES_PASSWORD` | Пароль применяется только при первой инициализации тома. Верните старый пароль или (данные пропадут) `k8s-down.sh --purge` |
 | web в `CreateContainerConfigError` | Нет Secret `lms-secrets` — запускайте через `scripts/k8s-up.sh`, а не голым `kubectl apply -k` |
-| Вход в кабинет «не держится» | Открываете по http при `COOKIE_SECURE=true`. Скрипт ставит false без TLS; не меняйте его в overlay |
+| Вход в кабинет «не держится» | Открываете по http при `COOKIE_SECURE=true`. Скрипт ставит false для http-адреса; не меняйте его в overlay |
+| Ссылка-подписка на календарь не открывается | `PUBLIC_BASE_URL` указывает на `lms.local`, а вы ходите через port-forward: `K8S_PUBLIC_URL=http://localhost:8000 sh scripts/k8s-up.sh` |
+| `ВНИМАНИЕ: ключ X не описан в env-keys.txt` | Ключ положен в Secret (безопасно). Если он несекретный — допишите `config X` в `deploy/k8s/env-keys.txt` |
 | bot в `Init:0/1` долго | Ждёт миграции от web — смотрите логи `migrate`. Без токена бот выключен (0 подов) — это нормально |
 | `Read-only file system` в логах web/bot | Библиотека пишет вне `/tmp` и `/data/regulations`. Сообщите в задачу; временно — `readOnlyRootFilesystem: false` в `base/web.yaml` |
 | Загрузка PDF в minikube — `413` | Аннотация лимита тела ingress-nginx (`overlays/minikube/ingress-nginx.yaml`, 60m) не применилась |
@@ -218,6 +241,10 @@ K8S_HOST=lms.example.ru K8S_TLS_SECRET=lms-tls sh scripts/k8s-up.sh
 3. `kubectl kustomize deploy/k8s/overlays/k3s | head -40` → печатается YAML без ошибок
    (настоящий kustomize; валидатор использует упрощённый).
 4. `sh scripts/k8s-up.sh` → в конце `==> кабинет: http://lms.local`, код выхода 0.
+   Предупреждений «ключ … не описан в env-keys.txt» быть не должно (иначе — дописать ключ в список).
+4а. `kubectl kustomize deploy/k8s/.build | grep -E '^kind:|namespace:' | sort | uniq -c` → у всех
+   объектов `namespace: mgimo-lms`, ровно один `kind: ConfigMap` с именем `lms-config-…`, в нём
+   `PUBLIC_BASE_URL` и `COOKIE_SECURE` из скрипта (проверка временной kustomization с merge).
 5. `kubectl -n mgimo-lms get pods` → `postgres-0`, `web-…`, `redis-…` — `Running`, READY `1/1`;
    `bot-…` — `Running`, если задан токен.
 6. `kubectl -n mgimo-lms logs deploy/web -c migrate` → alembic дошёл до последней ревизии

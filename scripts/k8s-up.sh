@@ -6,8 +6,9 @@
 #
 # Что делает (повторный запуск безопасен — ничего не дублирует):
 #   1. проверяет kubectl, доступ к кластеру и файл .env;
-#   2. раскладывает .env: секреты -> Secret lms-secrets, прочее -> ConfigMap lms-env
-#      (какие ключи секретные — deploy/k8s/env-keys.txt);
+#   2. раскладывает .env по deploy/k8s/env-keys.txt: в ConfigMap lms-env — только ключи,
+#      явно помеченные config/envonly; всё остальное, в том числе неописанные ключи, —
+#      в Secret lms-secrets (закрыто по умолчанию);
 #   3. собирает образ из Dockerfile и загружает его в кластер
 #      (k3s: k3s ctr images import, minikube: minikube image load);
 #   4. kubectl apply -k для выбранного overlay с тегом образа и хостом;
@@ -18,8 +19,11 @@
 #   K8S_OVERLAY     k3s | minikube | external-db (по умолчанию = K8S_CLUSTER)
 #   K8S_ENV_FILE    файл с настройками и секретами (по умолчанию .env)
 #   K8S_HOST        хост в Ingress (по умолчанию lms.local)
+#   K8S_PUBLIC_URL  внешний адрес кабинета для ссылок (PUBLIC_BASE_URL), если вы открываете его
+#                   не по K8S_HOST — например http://localhost:8000 при kubectl port-forward
 #   K8S_TLS_SECRET  имя Secret типа kubernetes.io/tls в namespace mgimo-lms -> включает HTTPS
-#   K8S_IMAGE_TAG   тег образа (по умолчанию — коммит git; с незакоммиченными правками — с меткой времени)
+#   K8S_IMAGE_TAG   тег образа (по умолчанию — коммит git; с любыми незакоммиченными
+#                   или неотслеживаемыми файлами — с меткой времени, образ пересобирается)
 #   K8S_SKIP_BUILD  1 — не собирать и не загружать образ (он уже есть в кластере с этим тегом)
 #   K8S_TIMEOUT     сколько ждать выкатку, по умолчанию 600s
 set -eu
@@ -35,6 +39,7 @@ IMAGE=mgimo-lms
 ENV_FILE=${K8S_ENV_FILE:-.env}
 HOST=${K8S_HOST:-lms.local}
 TLS_SECRET=${K8S_TLS_SECRET:-}
+PUBLIC_URL_OVERRIDE=${K8S_PUBLIC_URL:-}
 TIMEOUT=${K8S_TIMEOUT:-600s}
 SKIP_BUILD=${K8S_SKIP_BUILD:-0}
 
@@ -72,20 +77,30 @@ esac
 case "$TLS_SECRET" in
   *[!a-z0-9.-]*) die "K8S_TLS_SECRET='$TLS_SECRET': имя Secret — строчные буквы, цифры, точка, дефис" ;;
 esac
+case "$PUBLIC_URL_OVERRIDE" in
+  ''|http://*|https://*) ;;
+  *) die "K8S_PUBLIC_URL='$PUBLIC_URL_OVERRIDE' должен начинаться с http:// или https://" ;;
+esac
+case "$PUBLIC_URL_OVERRIDE" in
+  *[!A-Za-z0-9.:/_-]*) die "K8S_PUBLIC_URL: допустимы латиница, цифры и . : / _ -" ;;
+esac
 say "кластер: $CLUSTER (контекст '$CONTEXT'), overlay: $OVERLAY, хост: $HOST"
 
 # --- 2. Раскладываем .env на секреты и настройки ---------------------------------------------
 mkdir -p "$BUILD_DIR"
 umask 077
-SECRET_ENV=$BUILD_DIR/secrets.env
-PLAIN_ENV=$BUILD_DIR/lms-env.env
-cleanup() { rm -f "$SECRET_ENV" "$PLAIN_ENV"; }
+# Файлы с секретами — во временном каталоге ВНЕ репозитория: они не попадут ни в контекст
+# docker build, ни в VM при minikube image build, ни в git.
+SECRET_DIR=$(mktemp -d "${TMPDIR:-/tmp}/mgimo-lms-k8s.XXXXXX")
+SECRET_ENV=$SECRET_DIR/secrets.env
+PLAIN_ENV=$SECRET_DIR/lms-env.env
+cleanup() { rm -rf "$SECRET_DIR"; }
 trap cleanup EXIT
 trap 'exit 1' INT TERM
 : > "$SECRET_ENV"
 : > "$PLAIN_ENV"
 
-in_list() { # in_list <secret|managed|envonly> <KEY>
+in_list() { # in_list <secret|managed|config|envonly> <KEY>
   awk -v kind="$1" -v key="$2" '$1 == kind && $2 == key { found = 1 } END { exit !found }' "$KEYS_FILE"
 }
 
@@ -113,12 +128,16 @@ while IFS= read -r line || [ -n "$line" ]; do
     DATABASE_URL) DATABASE_URL_VALUE=$value; continue ;;
     TELEGRAM_BOT_TOKEN) TELEGRAM_TOKEN_SET=1 ;;
   esac
+  # Закрыто по умолчанию: в ConfigMap (открытый текст) — только явно несекретные ключи.
   if in_list managed "$key"; then
     continue
-  elif in_list secret "$key"; then
-    printf '%s=%s\n' "$key" "$value" >> "$SECRET_ENV"
-  else
+  elif in_list config "$key" || in_list envonly "$key"; then
     printf '%s=%s\n' "$key" "$value" >> "$PLAIN_ENV"
+  else
+    if ! in_list secret "$key"; then
+      warn "ключ $key не описан в $KEYS_FILE — положен в Secret"
+    fi
+    printf '%s=%s\n' "$key" "$value" >> "$SECRET_ENV"
   fi
 done < "$ENV_FILE"
 
@@ -148,14 +167,18 @@ if [ "$TELEGRAM_TOKEN_SET" = 0 ]; then
 fi
 
 if [ -n "$TLS_SECRET" ]; then SCHEME=https; COOKIE_SECURE=true; else SCHEME=http; COOKIE_SECURE=false; fi
-PUBLIC_URL=$SCHEME://$HOST
+PUBLIC_URL=${PUBLIC_URL_OVERRIDE:-$SCHEME://$HOST}
+# Cookie Secure — по фактической схеме адреса: по http браузер такую cookie не сохранит.
+case "$PUBLIC_URL" in https://*) COOKIE_SECURE=true ;; *) COOKIE_SECURE=false ;; esac
 
 # --- 3. Образ ---------------------------------------------------------------------------------
 if [ -n "${K8S_IMAGE_TAG:-}" ]; then
   TAG=$K8S_IMAGE_TAG
 elif have git && git rev-parse --git-dir >/dev/null 2>&1; then
   TAG=$(git rev-parse --short=12 HEAD)
-  if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+  # Неотслеживаемые файлы тоже считаются: новый модуль в app/ попадает в docker build,
+  # и образ с тегом «чистого» коммита был бы уже другим.
+  if [ -n "$(git status --porcelain)" ]; then
     TAG=$TAG-dirty-$(date +%Y%m%d%H%M%S)
   fi
 else
@@ -167,9 +190,9 @@ REF=$IMAGE:$TAG
 SUDO=
 if [ "$(id -u)" != 0 ] && have sudo; then SUDO=sudo; fi
 
-build_with() { # build_with <docker|nerdctl>
-  say "сборка образа $REF ($1 build)"
-  "$1" build -t "$REF" "$ROOT"
+build_docker() {
+  say "сборка образа $REF (docker build)"
+  docker build -t "$REF" "$ROOT"
 }
 
 if [ "$SKIP_BUILD" = 1 ]; then
@@ -177,7 +200,7 @@ if [ "$SKIP_BUILD" = 1 ]; then
 elif [ "$CLUSTER" = minikube ]; then
   have minikube || die "не найден minikube"
   if have docker; then
-    build_with docker
+    build_docker
     say "загрузка образа в minikube"
     minikube image load "$REF"
   else
@@ -189,12 +212,11 @@ else
   if [ "${TAG#*-dirty-}" = "$TAG" ] && $SUDO k3s ctr images ls -q 2>/dev/null | grep -qx "docker.io/library/$REF"; then
     say "образ $REF уже есть в k3s — сборка пропущена"
   else
-    if have docker; then BUILDER=docker
-    elif have nerdctl; then BUILDER=nerdctl
-    else die "нужен docker или nerdctl, чтобы собрать образ (docs/kubernetes.md, шаг 1)"; fi
-    build_with "$BUILDER"
+    # Только docker: nerdctl на голом k3s не видит его containerd и без buildkitd не собирает.
+    have docker || die "нужен docker, чтобы собрать образ (docs/kubernetes.md, шаг 1). Или соберите образ в другом месте, импортируйте и запустите с K8S_SKIP_BUILD=1"
+    build_docker
     say "импорт образа в k3s (k3s ctr images import)"
-    "$BUILDER" save "$REF" | $SUDO k3s ctr images import -
+    docker save "$REF" | $SUDO k3s ctr images import -
     $SUDO k3s ctr images ls -q | grep -qx "docker.io/library/$REF" \
       || die "образ $REF не появился в k3s после импорта (см. вывод выше)"
   fi
@@ -216,6 +238,7 @@ CHECKSUM=$(cat "$SECRET_ENV" "$PLAIN_ENV" | cksum | awk '{print $1}')
   echo "# Создано scripts/k8s-up.sh — не редактировать и не коммитить (.gitignore)."
   echo "apiVersion: kustomize.config.k8s.io/v1beta1"
   echo "kind: Kustomization"
+  echo "namespace: $NS"
   echo "resources:"
   echo "  - ../overlays/$OVERLAY"
   echo "images:"

@@ -62,14 +62,19 @@ Job неизменяема, её пришлось бы удалять и пер�
 
 **Ingress.** Только web, хост — параметр (`K8S_HOST`, по умолчанию `lms.local`). TLS
 необязателен: при `K8S_TLS_SECRET` добавляется блок `tls`, `PUBLIC_BASE_URL` становится
-https, `COOKIE_SECURE=true`. Без TLS `COOKIE_SECURE=false` — иначе браузер не сохранит cookie
+https, `COOKIE_SECURE=true`. При доступе через port-forward внешний адрес задаётся
+`K8S_PUBLIC_URL` (например `http://localhost:8000`), иначе ссылки-подписки на календарь ведут на
+`lms.local`; `COOKIE_SECURE` выводится из схемы итогового адреса. Без TLS `COOKIE_SECURE=false` — иначе браузер не сохранит cookie
 сессии на http и вход не сработает.
 
 **Секреты.** В репозитории их нет — ни значений, ни объектов `Secret` (это проверяет
 валидатор). `scripts/k8s-up.sh` читает `.env` и раскладывает его по списку
-`deploy/k8s/env-keys.txt`: секретные ключи (пароли, токены, ключи API, соль имён, прокси)
-— в Secret `lms-secrets` командой `kubectl create secret generic --from-env-file`, остальные
-непустые — в ConfigMap `lms-env`. Порядок в контейнере: `lms-config` → `lms-env` → `lms-secrets`,
+`deploy/k8s/env-keys.txt`. Список **закрыт по умолчанию**: в ConfigMap `lms-env` попадают только
+ключи, явно помеченные несекретными (`config`, `envonly`); секретные (пароли, токены, ключи API,
+соль имён, прокси) и любые неописанные — в Secret `lms-secrets` командой
+`kubectl create secret generic --from-env-file`, для неописанных печатается предупреждение.
+Временные env-файлы создаются через `mktemp -d` вне репозитория, поэтому не попадают в контекст
+`docker build` (дополнительно `deploy/k8s/.build` и `deploy/k8s/secrets.env` в `.dockerignore`). Порядок в контейнере: `lms-config` → `lms-env` → `lms-secrets`,
 поздний побеждает, поэтому `.env` перекрывает значения по умолчанию. Ключи `managed`
 (адрес базы в кластере, путь корпуса, `CACHE_URL`, `PUBLIC_BASE_URL`, `COOKIE_SECURE`) задаёт
 кластер, значение из `.env` для них игнорируется. Пустые значения не передаются (pydantic
@@ -91,11 +96,14 @@ Requests/limits заданы всем контейнерам.
 
 **Образ.** Собирается из того же Dockerfile, в реестр не публикуется: импорт в containerd k3s
 (`k3s ctr images import`) или `minikube image load`, `imagePullPolicy: Never`. Тег — коммит git
-(с незакоммиченными правками — с меткой времени), поэтому одинаковый код не пересобирается.
+(с любыми незакоммиченными или неотслеживаемыми файлами — с меткой времени), поэтому одинаковый
+код не пересобирается, а новый файл в `app/` не останется вне образа. Сборка — только docker
+(или `minikube image build`): nerdctl на голом k3s не видит его containerd и без buildkitd не собирает.
 
 **Одна команда.** `sh scripts/k8s-up.sh` (POSIX sh) проверяет kubectl, кластер и `.env`,
 собирает и загружает образ, создаёт Secret и ConfigMap, делает `kubectl apply -k` временной
-kustomization (`deploy/k8s/.build/`, в .gitignore) с тегом, хостом и числом реплик бота,
+kustomization (`deploy/k8s/.build/`, в .gitignore, с `namespace: mgimo-lms`, чтобы merge над
+`lms-config` из base находил объект) с тегом, хостом и числом реплик бота,
 ждёт rollout и печатает адрес. `sh scripts/k8s-down.sh` удаляет нагрузки, сохраняя данные;
 `--purge` — namespace целиком после подтверждения.
 

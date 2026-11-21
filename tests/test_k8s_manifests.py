@@ -29,7 +29,8 @@ def test_manifests_pass_validator(capsys):
 @pytest.fixture
 def broken_copy(tmp_path, monkeypatch):
     """Копия всего, что читает валидатор, — чтобы портить её, не трогая репозиторий."""
-    for name in ("deploy/k8s", "scripts/k8s-up.sh", "scripts/k8s-down.sh", ".env.example", "app/core/config.py"):
+    for name in ("deploy/k8s", "scripts/k8s-up.sh", "scripts/k8s-down.sh", ".env.example", ".dockerignore",
+                 "app/core/config.py"):
         source, target = ROOT / name, tmp_path / name
         target.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
@@ -117,7 +118,8 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
         'DEMO_PASSWORD="demo pass"\n'
         "PYRUS_FORM_ID=\n"
         "PUBLIC_BASE_URL=https://lms-university.example\r\n"
-        "LLM_PROVIDER=gigachat\n",
+        "LLM_PROVIDER=gigachat\n"
+        "MY_CUSTOM_TOKEN=s3cr3t\n",
         encoding="utf-8")
     log = tmp_path / "log"
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}", "STUB_LOG": str(log),
@@ -133,6 +135,9 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     assert "DATABASE_URL=postgresql+asyncpg://lms:pw_Test-1@postgres:5432/lms" in secret_part
     assert "DEMO_PASSWORD=demo pass" in secret_part
     assert "LLM_PROVIDER=gigachat" in plain_part
+    # Закрыто по умолчанию: неописанный ключ уходит в Secret с предупреждением, не в ConfigMap.
+    assert "MY_CUSTOM_TOKEN=s3cr3t" in secret_part and "MY_CUSTOM_TOKEN" not in plain_part
+    assert "ключ MY_CUSTOM_TOKEN не описан" in result.stderr
     for leaked in ("PASSWORD", "DATABASE_URL", "PUBLIC_BASE_URL", "PYRUS_FORM_ID"):
         assert leaked not in plain_part
     # Временные файлы с секретами удалены.
@@ -152,3 +157,21 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     assert "mgimo-lms/env-checksum" in web["metadata"]["annotations"]
     config = by_name[("ConfigMap", "lms-config")]["data"]
     assert config["PUBLIC_BASE_URL"] == "http://lms.example.test" and config["COOKIE_SECURE"] == "false"
+    build = yaml.safe_load((ROOT / "deploy/k8s/.build/kustomization.yaml").read_text(encoding="utf-8"))
+    assert build["namespace"] == "mgimo-lms"
+
+    # Доступ через port-forward: ссылки календаря должны вести на localhost.
+    env["K8S_PUBLIC_URL"] = "http://localhost:8000"
+    result = subprocess.run(["sh", str(ROOT / "scripts" / "k8s-up.sh")], env=env, capture_output=True,
+                            text=True, timeout=60)
+    assert result.returncode == 0, result.stdout + result.stderr
+    errors = validator.Errors()
+    objects = validator.build(ROOT / "deploy" / "k8s" / ".build", errors, set())
+    config = next(o for o in objects if o["kind"] == "ConfigMap")["data"]
+    assert config["PUBLIC_BASE_URL"] == "http://localhost:8000" and config["COOKIE_SECURE"] == "false"
+
+
+def test_validator_requires_every_plain_key_listed(broken_copy, capsys):
+    validator, root = broken_copy
+    edit(root / "deploy/k8s/env-keys.txt", "config SESSION_DAYS\n", "")
+    assert "SESSION_DAYS нет в env-keys.txt как config" in errors_of(validator, capsys)

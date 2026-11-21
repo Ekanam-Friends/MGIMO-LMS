@@ -9,3 +9,6 @@
 docs
 tests
 ruz_raw
+# Временные файлы и секреты Kubernetes (scripts/k8s-up.sh) в образ не попадают.
+deploy/k8s/.build
+deploy/k8s/secrets.env

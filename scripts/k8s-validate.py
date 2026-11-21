@@ -88,14 +88,14 @@ def read_env_keys(path: Path) -> dict[str, str]:
 
 
 def read_key_lists(path: Path) -> dict[str, set[str]]:
-    lists: dict[str, set[str]] = {"secret": set(), "managed": set(), "envonly": set()}
+    lists: dict[str, set[str]] = {"secret": set(), "config": set(), "managed": set(), "envonly": set()}
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         line = line.strip()
         if not line or line.startswith("#"):
             continue
         parts = line.split()
         if len(parts) != 2 or parts[0] not in lists:
-            raise ValueError(f"{rel(path)}:{number}: ожидается '<secret|managed|envonly> KEY', а не {line!r}")
+            raise ValueError(f"{rel(path)}:{number}: ожидается '<secret|config|managed|envonly> KEY', а не {line!r}")
         lists[parts[0]].add(parts[1])
     return lists
 
@@ -546,6 +546,7 @@ def check_env(errors: Errors) -> None:
         errors.add("env-keys.txt", str(exc))
         return
     secret, managed, envonly = lists["secret"], lists["managed"], lists["envonly"]
+    plain = lists["config"]
     fields = settings_fields(ROOT / "app" / "core" / "config.py")
     if not fields:
         errors.add("app/core/config.py", "не удалось найти поля Settings")
@@ -554,6 +555,18 @@ def check_env(errors: Errors) -> None:
     for key in example:
         if key not in config and key not in secret and key not in envonly:
             errors.add(".env.example", f"{key} не попадает ни в base/config.env, ни в Secret (env-keys.txt)")
+    # Закрыто по умолчанию: k8s-up.sh кладёт в ConfigMap только config/envonly, остальное — в Secret.
+    for key in example:
+        if key not in secret | plain | envonly | managed:
+            errors.add("env-keys.txt", f"{key} из .env.example не описан — k8s-up.sh положит его в Secret")
+    for kind_a, kind_b in (("secret", "config"), ("secret", "envonly"), ("config", "envonly"),
+                           ("config", "managed"), ("envonly", "managed")):
+        for key in sorted(lists[kind_a] & lists[kind_b]):
+            errors.add("env-keys.txt", f"{key} одновременно {kind_a} и {kind_b}")
+    for key in sorted(secret & managed - {"DATABASE_URL"}):
+        errors.add("env-keys.txt", f"{key} одновременно secret и managed")
+    for key in sorted(set(config) - plain - managed):
+        errors.add("base/config.env", f"{key} нет в env-keys.txt как config — из .env он ушёл бы в Secret")
     for key in sorted(set(config) & secret):
         errors.add("base/config.env", f"{key} — секрет, ему не место в ConfigMap")
     for key in sorted(set(config) & envonly):
@@ -570,7 +583,7 @@ def check_env(errors: Errors) -> None:
     for key, value in template.items():
         if value.strip():
             errors.add("secrets.env.example", f"{key}: в шаблоне не должно быть значения")
-    for key in sorted(set(config) | secret | envonly | managed):
+    for key in sorted(set(config) | secret | plain | envonly | managed):
         if key not in fields and key not in NON_SETTINGS_KEYS:
             errors.add("deploy/k8s", f"{key} нет среди полей Settings (app/core/config.py) — опечатка?")
     for key, value in config.items():
@@ -618,9 +631,22 @@ def check_repository(errors: Errors, seen: set[Path]) -> None:
         if pattern not in ignore:
             errors.add("deploy/k8s/.gitignore", f"нет строки {pattern}")
     up = (ROOT / "scripts" / "k8s-up.sh").read_text(encoding="utf-8")
-    for needle in ("env-keys.txt", "set -eu", "--from-env-file", "kubectl apply -k", "rollout status"):
+    for needle in ("env-keys.txt", "set -eu", "--from-env-file", "kubectl apply -k", "rollout status",
+                   # закрыто по умолчанию: в ConfigMap — только config/envonly
+                   'in_list config "$key" || in_list envonly "$key"',
+                   # временная kustomization с namespace (merge над lms-config из base)
+                   'echo "namespace: $NS"',
+                   # секреты — во временном каталоге вне контекста docker build
+                   "mktemp -d"):
         if needle not in up:
             errors.add("scripts/k8s-up.sh", f"ожидается {needle!r}")
+    if "--untracked-files=no" in up:
+        errors.add("scripts/k8s-up.sh", "неотслеживаемые файлы должны помечать образ как изменённый")
+    dockerignore = (ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines() \
+        if (ROOT / ".dockerignore").is_file() else []
+    for pattern in ("deploy/k8s/.build", "deploy/k8s/secrets.env"):
+        if pattern not in dockerignore:
+            errors.add(".dockerignore", f"нет строки {pattern} — секреты попали бы в контекст сборки")
     for overlay in OVERLAYS:
         if not (K8S / "overlays" / overlay / "kustomization.yaml").is_file():
             errors.add("deploy/k8s/overlays", f"нет overlay {overlay}")
