@@ -225,6 +225,41 @@ PUBLIC_BASE_URL=https://lms-university.ekanamfriends.ru
 упадёт, наш бот потеряет связь с Telegram вместе с ним.
 Демонстрация пуша: `docker compose exec bot python -m app.bot.demo_change --login student1`.
 
+## Кэш Redis — задача #24
+
+Решение [0027](decisions/0027-read-cache.md): общий кэш web и бота — расписание, лента
+колокольчика, повторные ответы ассистента. Импорт РУЗ в боте сбрасывает кэш web через Redis.
+**На стенде ещё не включён** (на 21 ноября 2026); включается обычной выкладкой:
+
+1. В `docker-compose.yml` уже есть сервис `redis` (redis:7-alpine, `maxmemory 64mb`,
+   `allkeys-lru`, без записи на диск, `mem_limit 96m`, порт наружу не публикуется) и
+   `CACHE_URL=redis://lms-redis:6379/0` у `web` и `bot`. В серверный `.env` ничего добавлять
+   не нужно: `environment` в compose перекрывает `.env`. Если в серверном
+   `docker-compose.override.yml` у `web`/`bot` переопределён `environment`, проверить,
+   что `CACHE_URL` там не затёрт пустым значением.
+2. Проверить запас памяти до выкладки: `free -m` (Redis займёт до ~70 МБ).
+3. `sh scripts/deploy.sh` — `docker compose up -d --build web` сам поднимет `redis`
+   (зависимость `depends_on`), затем пересоздаётся `bot`.
+4. Проверка:
+   ```bash
+   docker compose ps redis                                   # Up (healthy)
+   docker compose exec redis redis-cli ping                  # PONG
+   docker compose exec web python -c "from app.core.config import get_settings; print(get_settings().cache_url)"
+   # открыть главную студентом, затем:
+   docker compose exec redis redis-cli --scan --pattern 'lms:v1:*' | head
+   docker compose logs --since 10m web bot | grep 'кэш недоступен'   # пусто
+   ```
+5. Имя `lms-redis`, а не `redis`, — потому что бот на сервере подключён ещё и к сети
+   `ikanam_default` (прокси Telegram): короткое имя могло бы указать на чужой сервис,
+   как уже было с `db`.
+
+Откат: `CACHE_URL=` в `environment` серверного override для `web` и `bot` и
+`docker compose up -d web bot` — кабинет вернётся к кэшу в памяти процесса. Падение или
+остановка `redis` сайт не роняет: ошибки кэша логируются, запросы идут в БД
+(«кэш недоступен …» в логах web). Сбросить весь кэш: `docker compose restart redis`
+(данные на диск не пишутся). При аварийном переключении на реплику с `--no-deps`
+`redis` нужно поднять отдельно: `docker compose up -d redis`.
+
 ## Корпус для ИИ-ассистента (RAG)
 
 Решение [0007](decisions/0007-rag-assistant-infra.md). Это делает **root** один раз; Келли
