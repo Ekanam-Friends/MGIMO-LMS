@@ -139,11 +139,10 @@ async def _calendar_ctx(db: AsyncSession, viewer: Viewer, anchor: date, size: st
     start = sv.week_start(anchor)
     days = [start + timedelta(days=i) for i in range(7)]
     student = viewer.student
-    events = await cv.events_for(db, student, days[0], days[-1]) if student else {}
-    my_subgroups, my_disciplines = await cv.get_choices(db, student.id) if student else (set(), set())
-    return {"days": days, "events": events, "today": today(), "size": "full" if size == "full" else "compact",
+    week = await cv.week_for(db, student, days[0], days[-1]) if student else cv.CalendarWeek({}, False)
+    return {"days": days, "events": week.events, "today": today(), "size": "full" if size == "full" else "compact",
             "prev_week": start - timedelta(days=7), "next_week": start + timedelta(days=7),
-            "hours": list(range(cv.GRID_FROM, cv.GRID_TO)), "has_choices": bool(my_subgroups or my_disciplines),
+            "hours": list(range(cv.GRID_FROM, cv.GRID_TO)), "has_choices": week.has_choices,
             "has_group": bool(student and student.study_group_id)}
 
 

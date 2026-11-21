@@ -14,12 +14,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import date, datetime, time, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.cache import cached, get_cache
+from app.cache.invalidation import SCHEDULE, calendar_of
 from app.models import Activity, ActivitySignup, ElectiveChoice, Lesson, LessonGroup, Student, Teacher, lesson_teachers
 from app.models.calendar import ChoiceKind
 from app.models.schedule import LessonStatus
@@ -105,13 +107,61 @@ def _assign_lanes(events: list[CalEvent]) -> None:
         close()
 
 
+@dataclass
+class CalendarWeek:
+    events: dict[date, list[CalEvent]]
+    has_choices: bool
+    """Студент отметил хотя бы одну подгруппу или электив (подсказка на календаре)."""
+
+    def dump(self) -> dict:
+        return {"has_choices": self.has_choices,
+                "events": {d.isoformat(): [_dump_event(e) for e in evs] for d, evs in self.events.items()}}
+
+    @classmethod
+    def restore(cls, raw: dict) -> "CalendarWeek":
+        return cls(events={date.fromisoformat(d): [_restore_event(e) for e in evs] for d, evs in raw["events"].items()},
+                   has_choices=bool(raw["has_choices"]))
+
+
+def _dump_event(e: CalEvent) -> dict:
+    raw = asdict(e)
+    raw["begins_at"], raw["ends_at"] = e.begins_at.isoformat(), e.ends_at.isoformat()
+    return raw
+
+
+def _restore_event(raw: dict) -> CalEvent:
+    return CalEvent(**{**raw, "begins_at": time.fromisoformat(raw["begins_at"]),
+                       "ends_at": time.fromisoformat(raw["ends_at"])})
+
+
+async def week_for(db: AsyncSession, student: Student, start: date, end: date) -> CalendarWeek:
+    """Календарь студента за [start, end] через кэш (решение 0027).
+
+    Ключ: id студента из сессии + его группа + период + два поколения — общее поколение
+    расписания (импорт РУЗ, активности) и личное (элективы, запись на активности). Сами
+    данные студента в кэше — его же пары и отметки, другой студент этот ключ не получит.
+    """
+    cache = get_cache()
+    gens = await cache.generations(SCHEDULE, calendar_of(student.id))
+    if gens is None:  # кэш недоступен — напрямую из БД
+        return await _load_week(db, student, start, end)
+    key = (f"cal:s{student.id}:g{student.study_group_id or 0}:{start.isoformat()}:{end.isoformat()}"
+           f":{gens[0]}:{gens[1]}")
+    return await cached(key, cache.schedule_ttl, lambda: _load_week(db, student, start, end),
+                        dump=CalendarWeek.dump, restore=CalendarWeek.restore)
+
+
 async def events_for(db: AsyncSession, student: Student, start: date, end: date) -> dict[date, list[CalEvent]]:
     """События студента за [start, end] по дням: свои пары, выбранные элективы, активности."""
+    return (await week_for(db, student, start, end)).events
+
+
+async def _load_week(db: AsyncSession, student: Student, start: date, end: date) -> CalendarWeek:
     days: dict[date, list[CalEvent]] = defaultdict(list)
     group_id = student.study_group_id
+    my_subgroups, my_disciplines = await get_choices(db, student.id)
     if group_id is not None:
         catalog = await elective_catalog(db, group_id)
-        my_subgroups, my_disciplines = await get_choices(db, student.id)
         rows = (await db.execute(
             select(Lesson)
             .join(LessonGroup, LessonGroup.lesson_id == Lesson.id)
@@ -154,7 +204,7 @@ async def events_for(db: AsyncSession, student: Student, start: date, end: date)
 
     for evs in days.values():
         _assign_lanes(evs)
-    return dict(days)
+    return CalendarWeek(events=dict(days), has_choices=bool(my_subgroups or my_disciplines))
 
 
 def activity_event(a: Activity, signed: bool) -> CalEvent:
