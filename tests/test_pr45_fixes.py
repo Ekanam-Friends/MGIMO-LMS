@@ -31,6 +31,8 @@ from tests.test_web import client
     ("Мои домашние задания и как оформить академический отпуск?", ["homework", "public"], {"homework", "public"}),
     ("Что будет если я прогуляю пару и когда у меня английский?", ["public", "schedule"], {"public", "schedule"}),
     ("Условия стипендии и какие оценки у студентов?", ["public", "grades"], {"public", "grades"}),
+    ("Как оформить академический отпуск?", ["public", "schedule", "grades", "requests"], {"public"}),
+    ("Как получить справку об обучении?", ["public", "schedule"], {"public"}),
 ])
 def test_mixed_question_preserves_independent_scopes(question, scopes, expected):
     assert set(normalize_scopes(question, scopes)) == expected

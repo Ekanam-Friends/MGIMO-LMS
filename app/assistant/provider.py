@@ -104,9 +104,19 @@ class GigaChat:
                 raise
 
     async def complete(self, system: str, data: dict, *, max_tokens: int = 2200, response_schema: dict | None = None, model: str | None = None) -> str:
+        messages = [{"role": "system", "content": system}]
+        dialogue = data.get("dialogue") or []
+        for message in dialogue:
+            if message.get("role") not in {"user", "assistant"} or not isinstance(message.get("content"), str):
+                raise ValueError("Некорректная роль или содержимое серверной истории")
+            messages.append({"role": message["role"], "content": message["content"]})
+        # История передаётся стандартными ролями API, без второго противоречивого
+        # списка вопросов внутри последнего пользовательского сообщения.
+        current = {key: value for key, value in data.items()
+                   if key != "dialogue" and not (dialogue and key == "history")}
+        messages.append({"role": "user", "content": json.dumps(current, ensure_ascii=False)})
         payload = {
-            "model": model or self.model, "messages": [{"role": "system", "content": system},
-                {"role": "user", "content": json.dumps(data, ensure_ascii=False)}],
+            "model": model or self.model, "messages": messages,
             "temperature": 0.1, "max_tokens": max_tokens, "stream": False,
         }
         if response_schema is not None:

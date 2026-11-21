@@ -11,9 +11,12 @@ def normalize_scopes(question, scopes):
     requests = bool(re.search(r"статус.{0,30}(?:заяв|справ)|(?:заяв|справ).{0,30}статус|мои заяв|моя заяв", q))
     scholarship = bool(re.search(r"стипенд|стипух", q))
     absence = bool(re.search(r"прогул|пропущ|пропуск.{0,15}(?:пар|занят)|не (?:приду|пойду)", q))
+    procedure = (bool(re.search(r"академ.{0,15}отпуск|отчислен|справк", q))
+                 and bool(re.search(r"как.{0,20}(?:оформ|получ|подать)|правил|порядок|условия|основан", q))
+                 and not re.search(r"заказ|статус|мо[юя] справк", q))
     public_rule = ((scholarship and not personal) or
                    (absence and not re.search(r"сколько|мои|у меня", q)) or
-                   (homework and rules and not personal))
+                   (homework and rules and not personal) or procedure)
     if public_rule:
         # Общая норма не открывает кабинет; независимые части вопроса сохраняем.
         homework_request = homework and (personal or not rules or
