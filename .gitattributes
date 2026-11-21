@@ -1,5 +1,6 @@
 scripts/** text eol=lf
 *.sh text eol=lf
+deploy/k8s/** text eol=lf
 
 # Материалы интервью хранятся только для разработки, без включения в выкладку.
 interview/ export-ignore

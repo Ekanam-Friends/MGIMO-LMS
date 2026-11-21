@@ -101,7 +101,7 @@ trap 'exit 1' INT TERM
 : > "$PLAIN_ENV"
 
 in_list() { # in_list <secret|managed|config|envonly> <KEY>
-  awk -v kind="$1" -v key="$2" '$1 == kind && $2 == key { found = 1 } END { exit !found }' "$KEYS_FILE"
+  awk -v kind="$1" -v key="$2" '{ sub(/\r$/, "") } $1 == kind && $2 == key { found = 1 } END { exit !found }' "$KEYS_FILE"
 }
 
 POSTGRES_PASSWORD_VALUE=

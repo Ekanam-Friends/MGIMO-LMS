@@ -115,6 +115,13 @@ exit 0
 @pytest.mark.skipif(shutil.which("sh") is None, reason="нужен POSIX sh")
 def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     """k8s-up.sh с заглушкой kubectl: секреты не попадают в ConfigMap, итог проходит валидатор."""
+    runtime = tmp_path / "runtime"
+    shutil.copytree(ROOT / "deploy/k8s", runtime / "deploy/k8s", ignore=shutil.ignore_patterns(".build"))
+    (runtime / "scripts").mkdir()
+    shutil.copyfile(ROOT / "scripts/k8s-up.sh", runtime / "scripts/k8s-up.sh")
+    # Linux awk сохраняет CR в последнем поле; правила managed должны работать и после Windows checkout.
+    keys = runtime / "deploy/k8s/env-keys.txt"
+    keys.write_bytes(keys.read_text(encoding="utf-8").replace("\n", "\r\n").encode("utf-8"))
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     (bin_dir / "kubectl").write_text(STUB_KUBECTL, encoding="utf-8")
@@ -134,7 +141,7 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}", "STUB_LOG": str(log),
            "K8S_CLUSTER": "k3s", "K8S_SKIP_BUILD": "1", "K8S_IMAGE_TAG": "test-tag",
            "K8S_HOST": "lms.example.test", "K8S_ENV_FILE": str(env_file)}
-    result = subprocess.run(["sh", str(ROOT / "scripts" / "k8s-up.sh")], env=env, capture_output=True,
+    result = subprocess.run(["sh", str(runtime / "scripts" / "k8s-up.sh")], env=env, capture_output=True,
                             text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     # Заглушка сохраняет копии файлов, переданных в kubectl create --from-env-file.
@@ -150,12 +157,13 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     for leaked in ("PASSWORD", "DATABASE_URL", "PUBLIC_BASE_URL", "PYRUS_FORM_ID"):
         assert leaked not in plain_part
     # Временные файлы с секретами удалены.
-    assert not (ROOT / "deploy/k8s/.build/secrets.env").exists()
-    assert not (ROOT / "deploy/k8s/.build/lms-env.env").exists()
+    assert not (runtime / "deploy/k8s/.build/secrets.env").exists()
+    assert not (runtime / "deploy/k8s/.build/lms-env.env").exists()
 
     validator = load_validator()
+    validator.ROOT, validator.K8S = runtime, runtime / "deploy/k8s"
     errors = validator.Errors()
-    objects = validator.build(ROOT / "deploy" / "k8s" / ".build", errors, set())
+    objects = validator.build(runtime / "deploy" / "k8s" / ".build", errors, set())
     validator.check_overlay("k3s", objects, errors)
     assert not errors, errors
     by_name = {(o["kind"], o["metadata"]["name"]): o for o in objects}
@@ -166,16 +174,16 @@ def test_up_script_splits_env_and_renders_valid_build(tmp_path, capsys):
     assert "mgimo-lms/env-checksum" in web["metadata"]["annotations"]
     config = by_name[("ConfigMap", "lms-config")]["data"]
     assert config["PUBLIC_BASE_URL"] == "http://lms.example.test" and config["COOKIE_SECURE"] == "false"
-    build = yaml.safe_load((ROOT / "deploy/k8s/.build/kustomization.yaml").read_text(encoding="utf-8"))
+    build = yaml.safe_load((runtime / "deploy/k8s/.build/kustomization.yaml").read_text(encoding="utf-8"))
     assert build["namespace"] == "mgimo-lms"
 
     # Доступ через port-forward: ссылки календаря должны вести на localhost.
     env["K8S_PUBLIC_URL"] = "http://localhost:8000"
-    result = subprocess.run(["sh", str(ROOT / "scripts" / "k8s-up.sh")], env=env, capture_output=True,
+    result = subprocess.run(["sh", str(runtime / "scripts" / "k8s-up.sh")], env=env, capture_output=True,
                             text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     errors = validator.Errors()
-    objects = validator.build(ROOT / "deploy" / "k8s" / ".build", errors, set())
+    objects = validator.build(runtime / "deploy" / "k8s" / ".build", errors, set())
     config = next(o for o in objects if o["kind"] == "ConfigMap")["data"]
     assert config["PUBLIC_BASE_URL"] == "http://localhost:8000" and config["COOKIE_SECURE"] == "false"
 
