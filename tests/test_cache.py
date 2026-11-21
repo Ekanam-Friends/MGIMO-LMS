@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import re
 import time
@@ -192,6 +193,43 @@ async def test_pending_bumps_block_reads_even_inside_cooldown():
     assert await cache.generations("schedule") is None
     await cache.bump("notifications")  # следующий сброс досылает и прежний
     assert not cache.pending
+
+
+async def test_parallel_commit_does_not_lose_failed_invalidation():
+    """Ответ первого сброса не подтверждает более поздний коммит того же поколения."""
+    class DelayedBackend(MemoryBackend):
+        def __init__(self):
+            super().__init__()
+            self.entered, self.release = asyncio.Event(), asyncio.Event()
+            self.calls = 0
+
+        async def set_many(self, items, ttl):
+            self.calls += 1
+            if self.calls == 1:
+                await super().set_many(items, ttl)
+                self.entered.set()
+                await self.release.wait()
+            elif self.calls == 2:
+                raise ConnectionError("сбой после второго коммита")
+            else:
+                await super().set_many(items, ttl)
+
+    clock, backend = Clock(), DelayedBackend()
+    cache = Cache(backend, clock=clock)
+    first = asyncio.create_task(cache.bump("schedule"))
+    await asyncio.wait_for(backend.entered.wait(), 2)
+    old = (await backend.mget(["lms:v1:gen:schedule"]))[0]
+    await cache.set_json(f"cal:{old}", {"lesson": "старое"}, 600)
+    second = asyncio.create_task(cache.bump("schedule"))
+    await asyncio.sleep(0)
+    backend.release.set()
+    await asyncio.wait_for(asyncio.gather(first, second), 2)
+    assert cache.pending == {"schedule"}
+    assert await cache.generations("schedule") is None
+    clock.now += 6
+    (fresh,) = await cache.generations("schedule")
+    assert fresh != old and not cache.pending
+    assert await cache.get_json(f"cal:{fresh}") is None
 
 
 async def test_memory_backend_limits_total_size():

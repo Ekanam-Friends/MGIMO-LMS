@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import time
@@ -152,6 +153,8 @@ class Cache:
         self.pending: set[str] = set()
         """Поколения, которые не удалось сбросить (Redis был недоступен). Пока набор не пуст,
         процесс не читает кэш поколений вовсе: под старым токеном могут лежать устаревшие данные."""
+        self._pending_tokens: dict[str, str] = {}
+        self._flush_lock = asyncio.Lock()
 
     @property
     def kind(self) -> str:
@@ -175,17 +178,23 @@ class Cache:
     async def _flush_pending(self) -> bool:
         """Дослать несброшенные поколения. Без паузы cooldown: потерянная инвалидация хуже
         лишней попытки (таймаут клиента — 0,5 с)."""
-        if not self.pending:
-            return True
-        names = sorted(self.pending)
-        try:
-            await self.backend.set_many({f"{PREFIX}gen:{n}": new_token() for n in names}, GENERATION_TTL)
-        except Exception as exc:  # noqa: BLE001
-            self._failed(exc)
-            return False
-        self.pending.difference_update(names)
-        log.info("кэш: досланы поколения %s", names)
-        return True
+        async with self._flush_lock:
+            if not self.pending:
+                return True
+            tokens = {n: self._pending_tokens[n] for n in sorted(self.pending)}
+            try:
+                await self.backend.set_many({f"{PREFIX}gen:{n}": t for n, t in tokens.items()}, GENERATION_TTL)
+            except Exception as exc:  # noqa: BLE001
+                self._failed(exc)
+                return False
+            # Пока Redis отвечал, другой коммит мог запросить новый сброс того же имени.
+            # Подтверждаем только отправленный токен; новый остаётся в очереди.
+            for name, token in tokens.items():
+                if self._pending_tokens.get(name) == token:
+                    self.pending.discard(name)
+                    del self._pending_tokens[name]
+            log.info("кэш: досланы поколения %s", sorted(tokens))
+            return not self.pending
 
     async def get_json(self, key: str) -> Any | None:
         values = await self._call(lambda: self.backend.mget([PREFIX + key]), None)
@@ -232,6 +241,7 @@ class Cache:
         и досылаются следующим `bump` или `generations` этого процесса.
         """
         self.pending.update(names)
+        self._pending_tokens.update({name: new_token() for name in names})
         await self._flush_pending()
 
     async def aclose(self) -> None:
