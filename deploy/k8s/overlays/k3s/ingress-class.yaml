@@ -1,0 +1,4 @@
+# Встроенный в k3s контроллер Ingress — Traefik.
+- op: add
+  path: /spec/ingressClassName
+  value: traefik

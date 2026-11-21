@@ -1,0 +1,8 @@
+# PostgreSQL в кластере. Подключается overlay-ями k3s и minikube; external-db его не берёт.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mgimo-lms
+
+resources:
+  - postgres.yaml

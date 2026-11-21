@@ -1,0 +1,220 @@
+# web — FastAPI-кабинет (решение 0028).
+#
+# replicas: 1 и strategy: Recreate — не случайность:
+#  * фоновая сверка заявок с Pyrus и обработчик загруженных документов запускаются внутри
+#    процесса web (app/main.py, lifespan) и рассчитаны на ОДИН процесс; две реплики делали бы
+#    одну и ту же работу дважды;
+#  * миграции идут в initContainer — при одной реплике гонки alembic нет;
+#  * том корпуса lms-corpus — ReadWriteOnce, его смонтирует только один под.
+# Recreate даёт несколько секунд простоя при обновлении (как docker compose up -d), зато
+# старый и новый процесс никогда не работают одновременно.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: web
+      app.kubernetes.io/part-of: mgimo-lms
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: web
+        app.kubernetes.io/component: web
+        app.kubernetes.io/part-of: mgimo-lms
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        # Миграции — отдельным шагом до старта web (а не CMD образа): web стартует только
+        # на актуальной схеме, ошибка миграции видна как Init:Error, а не как падение web.
+        # Повторы — пока поднимается PostgreSQL (первый запуск) или внешняя БД недоступна.
+        - name: migrate
+          image: mgimo-lms
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - |
+              i=0
+              until alembic upgrade head; do
+                i=$((i + 1))
+                if [ "$i" -ge 30 ]; then echo "миграции не прошли за 30 попыток" >&2; exit 1; fi
+                echo "база недоступна, повтор через 5 с ($i/30)" >&2
+                sleep 5
+              done
+          envFrom:
+            - configMapRef:
+                name: lms-config
+            - configMapRef:
+                name: lms-env
+                optional: true
+            - secretRef:
+                name: lms-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: web
+          image: mgimo-lms
+          # Образ собирается локально и импортируется в кластер (scripts/k8s-up.sh),
+          # из реестра его не скачать. Never — понятная ошибка ErrImageNeverPull вместо
+          # попытки docker.io/library/mgimo-lms.
+          imagePullPolicy: Never
+          # Тот же uvicorn, что в CMD Dockerfile, но без alembic: миграции уже прошли в initContainer.
+          command:
+            - uvicorn
+            - app.main:app
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+            - --proxy-headers
+            - --forwarded-allow-ips
+            - "*"
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: lms-config
+            - configMapRef:
+                name: lms-env
+                optional: true
+            - secretRef:
+                name: lms-secrets
+          env:
+            # Пути и адреса внутри кластера не должны перекрываться значениями из .env.
+            - name: RAG_CORPUS_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: lms-config
+                  key: RAG_CORPUS_DIR
+            - name: CACHE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lms-config
+                  key: CACHE_URL
+            - name: TMPDIR
+              value: /tmp
+          # /healthz не ходит в базу: проверяет, что процесс жив и отвечает.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            # Корень только для чтения. Приложение пишет в два места, оба — тома:
+            #  /tmp             — multipart-загрузки (PDF до 50 МБ) Starlette сбрасывает во временные файлы;
+            #  /data/regulations — снимок корпуса chunks.jsonl (атомарная замена через временный файл рядом).
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: corpus
+              mountPath: /data/regulations
+            - name: gigachat-ca
+              mountPath: /data/ca
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
+        - name: corpus
+          persistentVolumeClaim:
+            claimName: lms-corpus
+        # Корневой сертификат для api.gigachat — необязательный Secret (docs/kubernetes.md).
+        # Нет Secret — каталог пустой, GIGACHAT_CA_BUNDLE оставьте пустым.
+        - name: gigachat-ca
+          secret:
+            secretName: lms-gigachat-ca
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: mgimo-lms
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
+---
+# Корпус положений ассистента (chunks.jsonl и исходные PDF). На VPS это /opt/mgimo-lms/data.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lms-corpus
+  labels:
+    app.kubernetes.io/name: lms-corpus
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: mgimo-lms
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi

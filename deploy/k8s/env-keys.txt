@@ -1,0 +1,66 @@
+# Как переменные из .env попадают в кластер (решение 0028). Читают scripts/k8s-up.sh
+# и scripts/k8s-validate.py — список один, чтобы скрипт и проверка не разошлись.
+#
+# ЗАКРЫТО ПО УМОЛЧАНИЮ: ключ, которого здесь нет, k8s-up.sh кладёт в Secret и предупреждает.
+# В ConfigMap (открытым текстом) попадают только ключи config и envonly.
+#
+#   secret  KEY — секрет: только в Secret lms-secrets, никогда в ConfigMap и в репозитории.
+#   config  KEY — несекретная настройка: из .env -> ConfigMap lms-env (перекрывает base/config.env).
+#   envonly KEY — несекретная настройка без безопасного значения по умолчанию в base/config.env;
+#                 берётся только из .env (ConfigMap lms-env).
+#   managed KEY — задаёт кластер/скрипт; значение из .env игнорируется.
+# Новую несекретную переменную добавляйте сюда как config, иначе она уйдёт в Secret.
+
+secret POSTGRES_PASSWORD
+secret DATABASE_URL
+secret FAKE_NAME_SALT
+secret PYRUS_LOGIN
+secret PYRUS_SECURITY_KEY
+secret DEMO_PASSWORD
+secret TELEGRAM_BOT_TOKEN
+# Прокси может содержать логин и пароль в адресе.
+secret TELEGRAM_PROXY
+secret GIGACHAT_AUTH_KEY
+
+config RUZ_BASE_URL
+config RUZ_VERIFY_TLS
+config RUZ_CONCURRENCY
+config RUZ_REQUEST_DELAY
+config RUZ_TIMEOUT
+config PYRUS_AUTH_URL
+config PYRUS_SYNC_INTERVAL
+config CERT_DOWNLOAD_DAYS
+config PDF_FONT_PATH
+config SESSION_DAYS
+config CACHE_SCHEDULE_TTL
+config CACHE_FEED_TTL
+config CACHE_ASSISTANT_TTL
+config TELEGRAM_BOT_USERNAME
+config TELEGRAM_LINK_CODE_MINUTES
+config BOT_IMPORT_HOURS
+config BOT_IMPORT_SCOPE
+config BOT_BOOTSTRAP_GROUPS
+config LLM_PROVIDER
+config GIGACHAT_SCOPE
+config GIGACHAT_MODEL
+config GIGACHAT_TRANSLATION_MODEL
+config GIGACHAT_CA_BUNDLE
+config LLM_EMBEDDING_MODEL
+config RAG_USE_EMBEDDINGS
+config ASSISTANT_DEMO_STUDENT_ACCESS
+config RAG_TOP_K
+config RAG_LEXICAL_WEIGHT
+config RAG_SEMANTIC_WEIGHT
+config RAG_MAX_SOURCE_AGE_DAYS
+config RAG_REQUESTS_PER_MINUTE
+config RAG_CONCURRENT_REQUESTS
+
+envonly PYRUS_FORM_ID
+
+# DATABASE_URL собирается из POSTGRES_PASSWORD для базы в кластере; при K8S_OVERLAY=external-db
+# берётся из .env (поэтому он и в secret, и здесь — скрипт учитывает режим).
+managed DATABASE_URL
+managed RAG_CORPUS_DIR
+managed CACHE_URL
+managed PUBLIC_BASE_URL
+managed COOKIE_SECURE

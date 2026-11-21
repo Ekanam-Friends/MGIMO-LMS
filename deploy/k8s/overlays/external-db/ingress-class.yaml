@@ -1,0 +1,4 @@
+# Как в overlays/k3s: Ingress через Traefik.
+- op: add
+  path: /spec/ingressClassName
+  value: traefik
