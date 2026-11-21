@@ -25,5 +25,6 @@ class Conversations:
         return None
 
     def clear(self, token: str, owner: str):
-        if self.get(token, owner):
+        if conversation := self.get(token, owner):
+            conversation.clear()
             del self.items[token]

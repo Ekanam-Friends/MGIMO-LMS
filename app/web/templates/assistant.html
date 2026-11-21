@@ -9,7 +9,7 @@
     <button class="assistant__new" id="assistant-clear" type="button" title="{{ _('Очистить диалог и отозвать доступ к оценкам') }}"><span aria-hidden="true">＋</span> {{ _('Новый чат') }}</button>
   </div>
   <p class="assistant__demo-notice">{{ _('Демонстрация: учебные данные вымышленные и обрабатываются GigaChat. В рабочей системе реальные данные студентов должны обрабатываться локальной моделью на сервере. Локальная модель в прототипе не развёрнута.') }}</p>
-  {% if viewer.user.role != 'student' and demo_access %}
+  {% if viewer.user.role == 'staff' and demo_access %}
   <section class="assistant__student-picker" aria-label="{{ _('Выбор демо-студента') }}">
     <label for="assistant-student-search">{{ _('Демо-студент') }}</label>
     <input id="assistant-student-search" type="search" maxlength="100" placeholder="{{ _('Поиск по вымышленному имени') }}">
@@ -55,5 +55,5 @@
   </div>
 </div>
 <link rel="stylesheet" href="/static/assistant.css?v=20261116-chat">
-<script src="/static/assistant.js?v=20261117-help" defer></script>
+<script src="/static/assistant.js?v=20261121-dialogue" defer></script>
 {% endblock %}

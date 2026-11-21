@@ -22,7 +22,7 @@ def document_excerpts(pages: list[str], *, maximum: int = 6000) -> list[Excerpt]
         starts.append(len(text))
         text += page + "\n\n"
     boundaries = sorted({0, len(text), *[m.start() for m in
-        re.finditer(r"(?m)^\s*\d+(?:\.\d+)*[.)]\s+", text)]})
+        re.finditer(r"(?m)^\s*\d+(?:\.\d+)*\.\s+", text)]})
     result = []
     start = 0
     for end in boundaries[1:]:

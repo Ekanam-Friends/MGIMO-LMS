@@ -9,6 +9,7 @@ from app.db.base import Base
 from app.db.session import make_engine, make_session_factory
 from app.models import ImportRun, Lesson, LessonChange, LessonGroup, Teacher
 from app.models.schedule import ChangeKind, ImportStatus, LessonStatus
+from app.models.schedule import GroupScheduleCoverage
 from app.schedule.importer import ScheduleImporter, semester_bounds
 from app.schedule.ruz_client import RuzClient
 from tests.fake_ruz import REAL_NAME_MARKERS, FakeRuz, group, lesson
@@ -271,6 +272,24 @@ async def test_import_run_is_recorded(sf, ruz):
         run = await s.get(ImportRun, stats.run_id)
     assert (run.status, run.period_start, run.period_end, run.lessons_seen) == (ImportStatus.OK, START, FINISH, 6)
     assert isinstance(run.finished_at, datetime)
+
+
+async def test_semester_coverage_survives_window_refresh_and_empty_groups_are_not_confirmed(sf, ruz):
+    base_schedule(ruz)
+    full_start, full_end = semester_bounds(START)
+    async with RuzClient("https://ruz.test/api/", delay=0, backoff=0, retries=1, transport=ruz.transport()) as client:
+        importer = ScheduleImporter(sf, client, fake_name_salt="test")
+        full = await importer.run(full_start, full_end)
+    await run_import(sf, ruz)
+    async with sf() as db:
+        receipt = await db.get(GroupScheduleCoverage, (A, full_start))
+        assert receipt is not None and receipt.run_id == full.run_id
+        assert await db.get(GroupScheduleCoverage, (A, START)) is None
+    # Новая пустая группа не становится доказательством загруженного семестра.
+    ruz.groups.append(group(9001, "1МО-03", "26МО-03"))
+    await run_import(sf, ruz)
+    async with sf() as db:
+        assert await db.scalar(select(GroupScheduleCoverage.group_id).where(GroupScheduleCoverage.group_id == 9001)) is None
 
 
 @pytest.mark.parametrize(

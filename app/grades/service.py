@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.service import utcnow
 from app.grades import scale
+from app.grades.queries import latest_final_clause
 from app.models import Lesson, LessonGroup, Student, StudyGroup, Teacher
 from app.models.grades import (
     Assessment,
@@ -111,7 +112,7 @@ async def _latest_finals(db: AsyncSession, course_ids: list[int], student_id: in
     """Последняя попытка по каждой паре (курс, студент)."""
     if not course_ids:
         return {}
-    q = select(FinalGrade).where(FinalGrade.course_id.in_(course_ids))
+    q = select(FinalGrade).where(FinalGrade.course_id.in_(course_ids), latest_final_clause())
     if student_id is not None:
         q = q.where(FinalGrade.student_id == student_id)
     out: dict[tuple[int, int], FinalGrade] = {}

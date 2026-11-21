@@ -7,6 +7,7 @@ import math
 import ssl
 import time
 import uuid
+from email.utils import parsedate_to_datetime
 
 import httpx
 from .errors import ProviderError
@@ -45,9 +46,24 @@ class GigaChat:
                 return data
         except httpx.HTTPStatusError as exc:
             # Не включать тело ответа, заголовки или текст вопроса в исключение/лог.
-            raise ProviderError(f"GigaChat HTTP {exc.response.status_code}") from None
-        except (httpx.HTTPError, ValueError) as exc:
-            raise ProviderError("Не удалось получить корректный ответ GigaChat") from None
+            status = exc.response.status_code
+            try:
+                retry_after = max(0, float(exc.response.headers.get("Retry-After", "0")))
+                if not math.isfinite(retry_after):
+                    retry_after = 0
+            except ValueError:
+                try:
+                    retry_after = max(0, parsedate_to_datetime(exc.response.headers["Retry-After"]).timestamp() - time.time())
+                except (ValueError, TypeError, KeyError, OverflowError):
+                    retry_after = 0
+            raise ProviderError(f"GigaChat HTTP {status}", code=f"http_{status}",
+                retryable=status in {429, 500, 502, 503, 504}, retry_after=retry_after) from None
+        except httpx.TimeoutException:
+            raise ProviderError("Истекло время ожидания GigaChat", code="timeout", retryable=True) from None
+        except httpx.HTTPError:
+            raise ProviderError("Не удалось соединиться с GigaChat", code="network", retryable=True) from None
+        except ValueError:
+            raise ProviderError("Не удалось получить корректный ответ GigaChat", code="invalid_json") from None
 
     async def _bearer(self) -> str:
         async with self._lock:
@@ -66,17 +82,26 @@ class GigaChat:
             return token
 
     async def _call(self, endpoint: str, payload: dict) -> dict:
-        for attempt in range(2):
-            token = await self._bearer()
+        refreshed = False
+        retried = False
+        while True:
+            token = ""
             try:
+                token = await self._bearer()
                 return await self._json(API_URL + endpoint, headers={"Authorization": "Bearer " + token}, json=payload)
             except ProviderError as exc:
-                if str(exc) != "GigaChat HTTP 401" or attempt:
-                    raise
-                async with self._lock:
-                    if self._token == token:
-                        self._token, self._expires = "", 0
-        raise ProviderError("Авторизация GigaChat не восстановлена")
+                if exc.code == "http_401" and token and not refreshed:
+                    async with self._lock:
+                        if self._token == token:
+                            self._token, self._expires = "", 0
+                    refreshed = True
+                    continue
+                # Длительные Retry-After не сокращаем: возвращаем ошибку в общий дедлайн.
+                if exc.retryable and not retried and exc.retry_after <= 3:
+                    retried = True
+                    await asyncio.sleep(max(0.5, exc.retry_after))
+                    continue
+                raise
 
     async def complete(self, system: str, data: dict, *, max_tokens: int = 2200, response_schema: dict | None = None, model: str | None = None) -> str:
         payload = {
@@ -90,11 +115,15 @@ class GigaChat:
         try:
             choice = result["choices"][0]
             text = choice["message"]["content"]
-            if choice.get("finish_reason") != "stop" or not isinstance(text, str) or not text.strip():
+            reason = choice.get("finish_reason")
+            if reason != "stop":
+                code = "generation_length" if reason == "length" else "generation_refused"
+                raise ProviderError("Генерация не завершена или отклонена GigaChat", code=code)
+            if not isinstance(text, str) or not text.strip():
                 raise ValueError()
             return text
         except (KeyError, TypeError, IndexError, ValueError):
-            raise ProviderError("Генерация не завершена или отклонена GigaChat") from None
+            raise ProviderError("Пустой или некорректный ответ GigaChat", code="empty_response") from None
 
     async def embed(self, texts: list[str], model: str) -> list[list[float]]:
         result = await self._call("/embeddings", {"model": model, "input": texts})

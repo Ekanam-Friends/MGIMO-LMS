@@ -25,7 +25,7 @@ def fragments(pages):
         starts.append(len(text))
         text += page['text'] + '\n\n'
     # Не разрезаем пункт на границе страницы: сначала соединяем текст документа.
-    boundaries = [0] + [m.start() for m in re.finditer(r'(?m)^\s*\d+(?:\.\d+)*[.)]\s+', text)] + [len(text)]
+    boundaries = [0] + [m.start() for m in re.finditer(r'(?m)^\s*\d+(?:\.\d+)*\.\s+', text)] + [len(text)]
     boundaries = sorted(set(boundaries))
     units, start = [], 0
     for end in boundaries[1:]:

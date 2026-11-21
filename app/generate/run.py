@@ -84,7 +84,7 @@ def make_password_hashes(n: int) -> list[str]:
         return []
     if n < 50:
         return [_hash_random(i) for i in range(n)]
-    with ProcessPoolExecutor() as pool:
+    with ProcessPoolExecutor(max_workers=2) as pool:
         return list(pool.map(_hash_random, range(n), chunksize=25))
 
 
@@ -159,11 +159,12 @@ async def pick_groups(db: AsyncSession, students: int, per_group: int, only: lis
 # --- студенты ---
 
 
-async def create_students(ctx: Ctx, g: StudyGroup, n: int, hashes: list[str], faculty: Faculty | None) -> list[int]:
+async def create_students(ctx: Ctx, g: StudyGroup, n: int, hashes: list[str], faculty: Faculty | None,
+                          start: int = 1) -> list[int]:
     rng = random.Random(f"{ctx.seed}:students:{g.id}")
     intake = intake_year(g, ctx.today)
     rows = []
-    for i in range(1, n + 1):
+    for i in range(start, start + n):
         name, gender = people.student_name(rng)
         rows.append(dict(
             full_name=name, gender=gender,
@@ -181,7 +182,7 @@ async def create_students(ctx: Ctx, g: StudyGroup, n: int, hashes: list[str], fa
     ids = list((await ctx.db.scalars(insert(Student).returning(Student.id, sort_by_parameter_order=True), rows)).all())
     await ctx.db.execute(insert(User), [
         dict(login=f"st{g.id}-{i:02d}", password_hash=hashes.pop(), role=Role.STUDENT, student_id=sid, created_at=ctx.now)
-        for i, sid in enumerate(ids, start=1)
+        for i, sid in enumerate(ids, start=start)
     ])
     ctx.stats["students"] += len(ids)
     return ids
@@ -497,9 +498,36 @@ async def reset(db: AsyncSession) -> None:
 # --- точка входа ---
 
 
+async def extend_group(ctx: Ctx, g: StudyGroup, n: int, hashes: list[str], faculty: Faculty | None) -> None:
+    """Дополнить синтетическую группу, сохранив существующие ведомости и правки.
+
+    Новые студенты получают копию вымышленного учебного профиля одного из уже
+    сгенерированных одногруппников, включая его языковые подгруппы и историю.
+    """
+    peers = list((await ctx.db.scalars(select(Student).where(Student.study_group_id == g.id,
+        Student.record_book.like(f"{GEN_PREFIX}%")).order_by(Student.id))).all())
+    start = max(int(s.record_book.rsplit("-", 1)[1]) for s in peers) + 1
+    ids = await create_students(ctx, g, n, hashes, faculty, start=start)
+    for i, sid in enumerate(ids):
+        peer = peers[i % len(peers)]
+        for model, fields in (
+            (CourseEnrollment, ("course_id",)),
+            (Score, ("assessment_id", "points", "comment", "graded_by", "graded_at")),
+            (FinalGrade, ("course_id", "attempt", "current_points", "exam_points", "total_points",
+                          "result", "teacher_id", "graded_on")),
+        ):
+            source = (await ctx.db.execute(select(*(getattr(model, f) for f in fields))
+                .where(model.student_id == peer.id))).all()
+            if source:
+                await ctx.db.execute(insert(model), [dict(zip(fields, row), student_id=sid) for row in source])
+                ctx.stats[{CourseEnrollment: "enrollments", Score: "scores", FinalGrade: "final_grades"}[model]] += len(source)
+    ctx.stats["groups_extended"] += 1
+
+
 async def generate(*, students: int, per_group: int, seed: str, do_reset: bool, only: list[str],
                    today: date | None = None, database_url: str | None = None,
-                   demo_password: str | None = None) -> Counter:
+                   demo_password: str | None = None, fill_existing: bool = False,
+                   access_password: str | None = None) -> Counter:
     if database_url is None:
         cfg = get_settings()
         url, demo_password = cfg.database_url, cfg.demo_password if demo_password is None else demo_password
@@ -521,8 +549,11 @@ async def generate(*, students: int, per_group: int, seed: str, do_reset: bool, 
                 .group_by(Student.study_group_id)
             )).all())
             todo = [g for g in groups if not gen_counts.get(g.id)]
-            print(f"групп: {len(groups)}, из них новых {len(todo)}; считаю {len(todo) * per_group} хэшей паролей…")
-            hashes = make_password_hashes(len(todo) * per_group)
+            count = sum(max(0, per_group - gen_counts.get(g.id, 0)) if fill_existing else
+                        (0 if gen_counts.get(g.id) else per_group) for g in groups)
+            print(f"групп: {len(groups)}, из них новых {len(todo)}; новых студентов {count}")
+            # Один общий хэш допустим только для явно включённого синтетического стенда.
+            hashes = [hash_password(access_password)] * count if access_password and count else make_password_hashes(count)
             ctx = Ctx(db=db, today=today or date.today(), seed=seed,
                       disciplines=dict((await db.execute(select(Discipline.name, Discipline.id))).all()),
                       teacher_pool=sorted((await db.scalars(select(Teacher.id))).all()), stats=stats, now=utcnow())
@@ -530,6 +561,8 @@ async def generate(*, students: int, per_group: int, seed: str, do_reset: bool, 
             for n, g in enumerate(groups, start=1):
                 fresh = not gen_counts.get(g.id)
                 faculty = await db.get(Faculty, g.faculty_id) if g.faculty_id else None
+                if not fresh and fill_existing and gen_counts[g.id] < per_group:
+                    await extend_group(ctx, g, per_group - gen_counts[g.id], hashes, faculty)
                 if fresh:
                     await create_students(ctx, g, per_group, hashes, faculty)
                 members = list((await db.scalars(
