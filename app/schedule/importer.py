@@ -34,6 +34,8 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import and_, delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.cache import get_cache
+from app.cache.invalidation import SCHEDULE
 from app.models import (
     Faculty,
     GroupScheduleCoverage,
@@ -602,3 +604,6 @@ class ScheduleImporter:
                 )
             )
             await session.commit()
+        # Явно, хотя слушатель сессии (app/cache/invalidation.py) уже сбросил поколение после
+        # коммита каждой группы: итог импорта — точка, после которой кэш расписания точно свежий.
+        await get_cache().bump(SCHEDULE)

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
+# Слушатели сессии, которые сбрасывают поколения кэша после COMMIT (решение 0027). Импорт здесь —
+# чтобы они были в каждом процессе, который пишет в БД: web, бот, CLI импорта, seed.
+import app.cache.invalidation  # noqa: F401,E402
+
 
 def make_engine(database_url: str, *, echo: bool = False) -> AsyncEngine:
     return create_async_engine(database_url, echo=echo, pool_pre_ping=True)

@@ -20,3 +20,11 @@ class JsonlCorpusRepository:
 
     async def load(self) -> Corpus:
         return await asyncio.to_thread(load_corpus, self.path)
+
+    async def version(self) -> str | None:
+        """Версия снимка для ключа кэша ответов: публикация документа переписывает файл."""
+        try:
+            st = self.path.stat()
+        except OSError:
+            return None
+        return f"{st.st_mtime_ns:x}-{st.st_size:x}"

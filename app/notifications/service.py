@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 
 from sqlalchemy import and_, or_, select
@@ -15,6 +15,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.service import utcnow
+from app.cache import cached, get_cache
+from app.cache.invalidation import NOTIFICATIONS, reads_of
 from app.models import (
     Announcement,
     CertificateRequest,
@@ -133,9 +135,35 @@ async def _documents(db: AsyncSession, student_id: int, since: datetime, limit: 
         for did, title, url, at in rows]
 
 
+def _dump_items(items: list[Item]) -> list[dict]:
+    return [{**asdict(i), "created_at": i.created_at.isoformat()} for i in items]
+
+
+def _restore_items(raw: list[dict]) -> list[Item]:
+    return [Item(**{**r, "created_at": datetime.fromisoformat(r["created_at"])}) for r in raw]
+
+
 async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None,
                limit: int = LIMIT) -> list[Item]:
-    """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного."""
+    """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного.
+
+    Обычная лента (колокольчик на каждой странице) — через кэш (решение 0027). Ключ — id
+    пользователя из сессии и его студента; поколения сбрасываются при новом объявлении, событии
+    справки, балле, уведомлении о документе (общее) и при отметке «прочитано» (личное).
+    """
+    if now is not None or limit != LIMIT:
+        return await _load_feed(db, user, student, now=now, limit=limit)
+    cache = get_cache()
+    gens = await cache.generations(NOTIFICATIONS, reads_of(user.id))
+    if gens is None:
+        return await _load_feed(db, user, student, now=now, limit=limit)
+    key = f"feed:u{user.id}:s{student.id if student else 0}:{gens[0]}:{gens[1]}"
+    return await cached(key, cache.feed_ttl, lambda: _load_feed(db, user, student, now=now, limit=limit),
+                        dump=_dump_items, restore=_restore_items)
+
+
+async def _load_feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None,
+                     limit: int) -> list[Item]:
     since = (now or utcnow()) - HORIZON
     items = await _announcements(db, student, since, limit)
     if student is not None:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import uuid
@@ -20,6 +21,7 @@ from .ports import CorpusRepository, PersonalEvidenceReader, LanguageModel, Conv
 from .retrieval import evidence_context, source_payload
 from .routing import normalize_scopes
 from .memory import answer_context
+from app.cache import get_cache
 from app.schedule.query import ScheduleQuery
 
 log = logging.getLogger(__name__)
@@ -276,10 +278,47 @@ class Assistant:
             self._active.discard(user_id)
             self._slots -= 1
 
+    async def _answer_key(self, user_id, student_id, question, as_of, conversation) -> str | None:
+        """Ключ кэша ответа (решение 0027) или None, если этот вопрос кэшировать нельзя.
+
+        Только первый вопрос беседы: дальше ответ зависит от истории. Ключ всегда содержит
+        id пользователя из сессии — ассистент читает личные данные, и даже публичный ответ
+        одного пользователя другому не отдаётся. Плюс роль, язык, выбранный студент, дата
+        редакции, сегодняшняя дата (применимость норм) и версия корпуса: загрузка документа
+        сотрудником меняет файл корпуса, и старые ответы перестают совпадать по ключу.
+        """
+        ttl = get_cache().assistant_ttl
+        version = getattr(self.corpus_repository, "version", None)
+        if ttl <= 0 or conversation.history or version is None:
+            return None
+        corpus = await version()
+        if corpus is None:
+            return None
+        text = re.sub(r"\s+", " ", redact_question(question).casefold().replace("ё", "е"))
+        text = text.strip(" .,!?…;:")
+        digest = hashlib.sha256(text.encode()).hexdigest()[:32]
+        return (f"asst:u{user_id}:{conversation.actor_role}:{conversation.language}:s{student_id or 0}"
+                f":{as_of.isoformat() if as_of else '-'}:{moscow_today().isoformat()}:{corpus}:{digest}")
+
+    @staticmethod
+    def _cacheable(result: dict, contains_grades: bool) -> bool:
+        """Только подтверждённый ответ по публичным положениям: без ошибок, отказов, лимитов,
+        запросов согласия и без записей кабинета (они меняются чаще часа)."""
+        return (result.get("status") in {"answer", "partial"} and not contains_grades
+                and not result.get("facts") and "personal_checked_at" not in result
+                and "request_id" not in result)
+
     async def chat(self, user_id, student_id, question, history, as_of, conversation,
                    evidence_reader: PersonalEvidenceReader | None):
         if not self.enabled:
             return self._result("unavailable", "Ассистент пока не подключён. Обратитесь в деканат.")
+        cache = get_cache()
+        key = await self._answer_key(user_id, student_id, question, as_of, conversation)
+        if key is not None:
+            hit = await cache.get_json(key)
+            if isinstance(hit, dict) and self._cacheable(hit, False):
+                conversation.remember(redact_question(question), redact_question(answer_context(hit)))
+                return hit
         self._reserve(user_id)
         try:
             result = await asyncio.wait_for(self._chat(student_id, question, history, as_of, conversation, evidence_reader), 70)
@@ -287,6 +326,8 @@ class Assistant:
             if result["status"] in {"answer", "partial", "clarify", "not_found"}:
                 conversation.remember(redact_question(question), redact_question(answer_context(result)),
                                       contains_grades=contains_grades)
+            if key is not None and self._cacheable(result, contains_grades):
+                await cache.set_json(key, result, cache.assistant_ttl)
             return result
         except CorpusError:
             return self._result("unavailable", "Не удалось подтвердить корпус или редакции. Обратитесь в деканат.")
