@@ -48,6 +48,8 @@ CALENDAR_TABLES = {"elective_choices": "student_id", "activity_signups": "studen
 NOTIFICATION_TABLES = {
     "announcements", "certificate_request_events", "grade_events", "document_notices",
     "document_recipients", "courses", "disciplines", "students",
+    "certificate_requests",  # dean_message в тексте «нужны сведения»; сверка Pyrus очищает его без события
+    "knowledge_documents",  # заголовок и ссылка уведомления о документе
 }
 """Источники ленты колокольчика (app/notifications/service.py) и данные адресации объявлений."""
 READ_TABLES = {"notification_reads": "user_id"}

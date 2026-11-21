@@ -111,6 +111,10 @@ class BrokenBackend:
         self.calls += 1
         raise ConnectionError("redis недоступен")
 
+    async def set_many(self, items, ttl):
+        self.calls += 1
+        raise ConnectionError("redis недоступен")
+
     async def aclose(self):
         pass
 
@@ -121,12 +125,159 @@ async def test_broken_backend_fails_open_with_cooldown(caplog):
     cache = Cache(backend, cooldown=5, clock=clock)
     assert await cache.get_json("x") is None
     assert await cache.generations("schedule") is None
-    await cache.bump("schedule")  # не бросает
-    assert cache.errors == 1 and backend.calls == 1  # дальше — пауза, бэкенд не дёргаем
+    assert await cache.get_json("x") is None
+    assert cache.errors == 1 and backend.calls == 1  # чтения в паузе бэкенд не дёргают
+    await cache.bump("schedule")  # не бросает, но и не ждёт конца паузы
+    assert backend.calls == 2 and cache.pending == {"schedule"}
     assert "secret" not in caplog.text
     clock.now += 6
     await cache.set_json("x", {"a": 1}, 60)
-    assert backend.calls == 2
+    assert backend.calls == 3
+
+
+class FlakyBackend(MemoryBackend):
+    """Память, которая «падает» по флагу — как Redis, ушедший на рестарт."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.down = False
+
+    def _check(self) -> None:
+        if self.down:
+            raise ConnectionError("redis недоступен")
+
+    async def mget(self, keys):
+        self._check()
+        return await super().mget(keys)
+
+    async def set(self, key, value, ttl, *, nx=False):
+        self._check()
+        return await super().set(key, value, ttl, nx=nx)
+
+    async def set_many(self, items, ttl):
+        self._check()
+        await super().set_many(items, ttl)
+
+
+async def test_bump_lost_during_outage_is_resent_and_old_value_never_served():
+    clock = Clock()
+    backend = FlakyBackend()
+    cache = Cache(backend, cooldown=5, clock=clock)
+    (old,) = await cache.generations("calendar:s1")
+    await cache.set_json(f"cal:s1:{old}", {"v": "старый"}, 600)
+
+    backend.down = True
+    await cache.get_json("probe")  # ошибка чтения — включилась пауза
+    await cache.bump("calendar:s1")  # студент сохранил элективы, сброс не дошёл
+    assert cache.pending == {"calendar:s1"}
+    clock.now += 6
+    assert await cache.generations("calendar:s1") is None  # Redis ещё лежит — только БД
+
+    backend.down = False  # Redis вернулся со старыми данными
+    clock.now += 6
+    (new,) = await cache.generations("calendar:s1")
+    assert new != old and not cache.pending
+    assert await cache.get_json(f"cal:s1:{new}") is None  # старое значение не отдаётся
+
+
+async def test_pending_bumps_block_reads_even_inside_cooldown():
+    clock = Clock()
+    backend = FlakyBackend()
+    cache = Cache(backend, cooldown=5, clock=clock)
+    await cache.generations("schedule")
+    backend.down = True
+    await cache.bump("schedule")
+    backend.down = False
+    # Пауза ещё идёт: даже живой бэкенд не читаем, пока сброс не дослан.
+    assert await cache.generations("schedule") is None
+    await cache.bump("notifications")  # следующий сброс досылает и прежний
+    assert not cache.pending
+
+
+async def test_memory_backend_limits_total_size():
+    backend = MemoryBackend(max_bytes=10)
+    await backend.set("a", "1234", ttl=60)
+    await backend.set("b", "абв", ttl=60)  # 6 байт в UTF-8
+    assert backend.size == 10
+    await backend.set("c", "xy", ttl=60)  # вытесняет «a»
+    assert await backend.mget(["a", "b", "c"]) == [None, "абв", "xy"] and backend.size == 8
+    await backend.set("b", "z", ttl=60)  # перезапись учитывает старый размер
+    assert backend.size == 3
+    assert not await backend.set("huge", "x" * 11, ttl=60) and backend.size == 3
+
+
+async def test_session_listener_bumps_generations_without_importer(tmp_path):
+    """Обычная запись через сессию — без импортёра и его явного bump — меняет поколения."""
+    from app.cache.invalidation import NOTIFICATIONS, SCHEDULE, calendar_of, reads_of
+    from app.models import CertificateRequest, ElectiveChoice, Lesson, NotificationRead
+    from app.models.calendar import ChoiceKind
+
+    engine = make_engine(f"sqlite+aiosqlite:///{tmp_path / 'listener.db'}")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    sf = make_session_factory(engine)
+    cache = get_cache()
+    names = (SCHEDULE, calendar_of(1), NOTIFICATIONS, reads_of(1))
+
+    async def changed(before):
+        after = await cache.generations(*names)
+        return {n for n, b, a in zip(names, before, after) if b != a}
+
+    async with sf() as s:
+        s.add_all([StudyGroup(id=10, name="Г", number="1Г-01"),
+                   Student(id=1, full_name="Тестова Анна", record_book="Т-1", study_group_id=10)])
+        await s.flush()
+        s.add(User(login="anna", password_hash="x", role=Role.STUDENT, student_id=1, created_at=utcnow()))
+        await s.commit()
+
+    before = await cache.generations(*names)
+    now = datetime(2026, 11, 1)
+    async with sf() as s:
+        s.add(Lesson(id=1, date=now.date(), begins_at=now.time(), ends_at=now.time(), discipline="Д",
+                     first_seen_at=now, last_seen_at=now))
+        await s.commit()
+    assert await changed(before) == {SCHEDULE}
+
+    before = await cache.generations(*names)
+    async with sf() as s:
+        s.add(ElectiveChoice(student_id=1, kind=ChoiceKind.DISCIPLINE, value="Д"))
+        async with s.begin_nested():
+            s.add(NotificationRead(user_id=1, key="ann:1", read_at=utcnow()))
+        assert await changed(before) == set()  # точка сохранения — ещё не COMMIT
+        await s.commit()
+    assert await changed(before) == {calendar_of(1), reads_of(1)}
+
+    async with sf() as s:
+        req = CertificateRequest(student_id=1, kind="study", purpose="", copies=1, status="need_info",
+                                 dean_message="Принесите фото", created_at=utcnow(), updated_at=utcnow())
+        s.add(req)
+        await s.commit()
+    before = await cache.generations(*names)
+    async with sf() as s:  # сверка Pyrus очищает dean_message без нового события
+        (await s.get(CertificateRequest, req.id)).dean_message = None
+        await s.commit()
+    assert await changed(before) == {NOTIFICATIONS}
+    await engine.dispose()
+
+
+async def test_bump_in_one_process_is_seen_by_another_via_shared_redis():
+    """Два независимых клиента одного Redis (fakeredis): бот сбросил — web увидел."""
+    fakeredis = pytest.importorskip("fakeredis")
+    server = fakeredis.FakeServer()
+    bot = Cache(RedisBackend(client=fakeredis.FakeAsyncRedis(server=server, decode_responses=True)))
+    web = Cache(RedisBackend(client=fakeredis.FakeAsyncRedis(server=server, decode_responses=True)))
+
+    (token,) = await web.generations("schedule")
+    assert await bot.generations("schedule") == [token]
+    await web.set_json(f"cal:s1:{token}", {"v": "старый"}, 600)
+
+    await bot.bump("schedule")  # импорт РУЗ в процессе бота
+    (fresh,) = await web.generations("schedule")
+    assert fresh != token
+    assert await web.get_json(f"cal:s1:{fresh}") is None
+    assert await web.get_json(f"cal:s1:{token}") == {"v": "старый"}  # лежит, но по ключу уже не читается
+    await bot.aclose()
+    await web.aclose()
 
 
 async def test_site_works_when_cache_is_down(client):
@@ -357,6 +508,6 @@ async def test_unreachable_redis_is_fail_open():
     assert await cache.generations("schedule") is None
     assert await cache.get_json("x") is None  # в паузе после ошибки — без нового подключения
     await cache.set_json("x", {"a": 1}, 60)
-    await cache.bump("schedule")
-    assert cache.errors == 1 and time.monotonic() - started < 2
+    await cache.bump("schedule")  # сброс пробует даже в паузе — и запоминается как недосланный
+    assert cache.errors == 2 and cache.pending == {"schedule"} and time.monotonic() - started < 2
     await cache.aclose()

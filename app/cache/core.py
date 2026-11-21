@@ -6,8 +6,10 @@
 * инвалидация — через «поколения»: ключ данных содержит текущий токен поколения, а запись
   меняет токен (`bump`). Старые записи никто больше не читает, они уходят по TTL или LRU;
 * кэш не обязателен для работы: любая ошибка бэкенда логируется, а вызывающий код идёт в БД
-  (fail-open). После ошибки Redis не опрашивается `cooldown` секунд, чтобы недоступный
-  сервер не добавлял таймаут к каждому запросу.
+  (fail-open). После ошибки чтения Redis не опрашивается `cooldown` секунд, чтобы недоступный
+  сервер не добавлял таймаут к каждому запросу;
+* сброс поколения не теряется: при сбое имя остаётся в `Cache.pending`, досылается при
+  следующем обращении, а до этого процесс не читает кэш поколений (идёт в БД).
 """
 
 from __future__ import annotations
@@ -35,28 +37,39 @@ class Backend(Protocol):
 
     async def set(self, key: str, value: str, ttl: int, *, nx: bool = False) -> bool: ...
 
+    async def set_many(self, items: dict[str, str], ttl: int) -> None: ...
+
     async def aclose(self) -> None: ...
 
 
 class MemoryBackend:
-    """TTL-словарь с вытеснением давно не читанных записей (LRU) сверх `max_items`.
+    """TTL-словарь с вытеснением давно не читанных записей (LRU) сверх `max_items` записей
+    или `max_bytes` суммарного размера значений (UTF-8).
 
     Живёт внутри одного процесса: импорт расписания в процессе бота этот кэш не видит, поэтому
     без CACHE_URL свежесть данных web после импорта ограничена только TTL (см. решение 0027).
     """
 
-    def __init__(self, max_items: int = 5000, clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(self, max_items: int = 5000, max_bytes: int = 32 * 1024 * 1024,
+                 clock: Callable[[], float] = time.monotonic) -> None:
         self.max_items = max(1, max_items)
+        self.max_bytes = max(1, max_bytes)
         self._clock = clock
-        self._data: OrderedDict[str, tuple[float, str]] = OrderedDict()
+        self._data: OrderedDict[str, tuple[float, str, int]] = OrderedDict()
+        self.size = 0
+        """Суммарный размер хранимых значений в байтах."""
+
+    def _drop(self, key: str) -> None:
+        _, _, size = self._data.pop(key)
+        self.size -= size
 
     def _alive(self, key: str) -> str | None:
         entry = self._data.get(key)
         if entry is None:
             return None
-        expires, value = entry
+        expires, value, _ = entry
         if expires <= self._clock():
-            del self._data[key]
+            self._drop(key)
             return None
         self._data.move_to_end(key)
         return value
@@ -67,11 +80,20 @@ class MemoryBackend:
     async def set(self, key: str, value: str, ttl: int, *, nx: bool = False) -> bool:
         if nx and self._alive(key) is not None:
             return False
-        self._data[key] = (self._clock() + ttl, value)
-        self._data.move_to_end(key)
-        while len(self._data) > self.max_items:
-            self._data.popitem(last=False)
+        size = len(value.encode())
+        if key in self._data:
+            self._drop(key)
+        if size > self.max_bytes:  # одно значение больше всего кэша — не храним
+            return False
+        self._data[key] = (self._clock() + ttl, value, size)
+        self.size += size
+        while len(self._data) > self.max_items or self.size > self.max_bytes:
+            self._drop(next(iter(self._data)))
         return True
+
+    async def set_many(self, items: dict[str, str], ttl: int) -> None:
+        for key, value in items.items():
+            await self.set(key, value, ttl)
 
     async def aclose(self) -> None:
         self._data.clear()
@@ -83,19 +105,29 @@ class MemoryBackend:
 class RedisBackend:
     """redis.asyncio с короткими таймаутами: кэш не должен тормозить страницу дольше, чем БД."""
 
-    def __init__(self, url: str, *, timeout: float = 0.5) -> None:
-        import redis.asyncio as redis
+    def __init__(self, url: str = "", *, timeout: float = 0.5, client=None) -> None:
+        """client — готовый redis.asyncio.Redis (тесты на fakeredis); иначе подключение по url."""
+        if client is None:
+            import redis.asyncio as redis
 
-        self._redis = redis.Redis.from_url(
-            url, decode_responses=True, socket_timeout=timeout, socket_connect_timeout=timeout,
-            health_check_interval=30,
-        )
+            client = redis.Redis.from_url(
+                url, decode_responses=True, socket_timeout=timeout, socket_connect_timeout=timeout,
+                health_check_interval=30,
+            )
+        self._redis = client
 
     async def mget(self, keys: list[str]) -> list[str | None]:
         return list(await self._redis.mget(keys))
 
     async def set(self, key: str, value: str, ttl: int, *, nx: bool = False) -> bool:
         return bool(await self._redis.set(key, value, ex=ttl, nx=nx))
+
+    async def set_many(self, items: dict[str, str], ttl: int) -> None:
+        # Один round-trip на все поколения коммита, а не таймаут на каждое при сбое.
+        async with self._redis.pipeline(transaction=False) as pipe:
+            for key, value in items.items():
+                pipe.set(key, value, ex=ttl)
+            await pipe.execute()
 
     async def aclose(self) -> None:
         await self._redis.aclose()
@@ -117,10 +149,19 @@ class Cache:
         self._clock = clock
         self._down_until = 0.0
         self.hits = self.misses = self.errors = 0
+        self.pending: set[str] = set()
+        """Поколения, которые не удалось сбросить (Redis был недоступен). Пока набор не пуст,
+        процесс не читает кэш поколений вовсе: под старым токеном могут лежать устаревшие данные."""
 
     @property
     def kind(self) -> str:
         return "redis" if isinstance(self.backend, RedisBackend) else "memory"
+
+    def _failed(self, exc: Exception) -> None:
+        self.errors += 1
+        self._down_until = self._clock() + self.cooldown
+        # Только класс ошибки: в тексте исключения redis бывает адрес с паролем.
+        log.warning("кэш недоступен (%s), %.0f с работаем напрямую с БД", type(exc).__name__, self.cooldown)
 
     async def _call(self, op: Callable[[], Awaitable[T]], default: T) -> T:
         if self._clock() < self._down_until:
@@ -128,11 +169,23 @@ class Cache:
         try:
             return await op()
         except Exception as exc:  # noqa: BLE001 — кэш не должен ронять страницу ни при какой ошибке
-            self.errors += 1
-            self._down_until = self._clock() + self.cooldown
-            # Только класс ошибки: в тексте исключения redis бывает адрес с паролем.
-            log.warning("кэш недоступен (%s), %.0f с работаем напрямую с БД", type(exc).__name__, self.cooldown)
+            self._failed(exc)
             return default
+
+    async def _flush_pending(self) -> bool:
+        """Дослать несброшенные поколения. Без паузы cooldown: потерянная инвалидация хуже
+        лишней попытки (таймаут клиента — 0,5 с)."""
+        if not self.pending:
+            return True
+        names = sorted(self.pending)
+        try:
+            await self.backend.set_many({f"{PREFIX}gen:{n}": new_token() for n in names}, GENERATION_TTL)
+        except Exception as exc:  # noqa: BLE001
+            self._failed(exc)
+            return False
+        self.pending.difference_update(names)
+        log.info("кэш: досланы поколения %s", names)
+        return True
 
     async def get_json(self, key: str) -> Any | None:
         values = await self._call(lambda: self.backend.mget([PREFIX + key]), None)
@@ -156,6 +209,8 @@ class Cache:
 
     async def generations(self, *names: str) -> list[str] | None:
         """Текущие токены поколений. None — кэш недоступен, вызывающий идёт в БД без кэша."""
+        if self.pending and (self._clock() < self._down_until or not await self._flush_pending()):
+            return None
         keys = [f"{PREFIX}gen:{n}" for n in names]
         values = await self._call(lambda: self.backend.mget(keys), None)
         if values is None:
@@ -171,9 +226,13 @@ class Cache:
         return list(values)
 
     async def bump(self, *names: str) -> None:
-        """Новое поколение: всё, что закэшировано со старым токеном, больше не читается."""
-        for n in names:
-            await self._call(lambda n=n: self.backend.set(f"{PREFIX}gen:{n}", new_token(), GENERATION_TTL), False)
+        """Новое поколение: всё, что закэшировано со старым токеном, больше не читается.
+
+        Не подчиняется паузе после ошибки и не теряется: при сбое имена остаются в `pending`
+        и досылаются следующим `bump` или `generations` этого процесса.
+        """
+        self.pending.update(names)
+        await self._flush_pending()
 
     async def aclose(self) -> None:
         try:

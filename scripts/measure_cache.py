@@ -54,6 +54,9 @@ class NullBackend:
     async def set(self, key, value, ttl, *, nx=False):
         return True
 
+    async def set_many(self, items, ttl):
+        pass
+
     async def aclose(self):
         pass
 
