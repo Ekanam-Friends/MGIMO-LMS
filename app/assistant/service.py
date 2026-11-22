@@ -104,7 +104,7 @@ class Audit(Wire):
 
 
 class Plan(Wire):
-    scopes: list[Literal["public", "grades", "schedule", "requests", "homework"]] = Field(min_length=1, max_length=5)
+    scopes: list[Literal["public", "grades", "schedule", "requests", "homework", "notifications"]] = Field(min_length=1, max_length=6)
     start: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     end: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     intent: Literal["question", "capabilities", "greeting"] = "question"
@@ -135,7 +135,7 @@ standalone_question, clarification, discipline, nearest. Не пропускай
 intent допускает ТОЛЬКО question, capabilities, greeting. Просьбы «покажи баллы»
 и «найди мои оценки» тоже question. Значения request, action и general запрещены.
 public — нормативные положения и общие процедуры; grades — личные оценки, баллы,
-зачётка, долги и успеваемость; homework — описания и сроки домашних заданий БЕЗ оценок;
+зачётка, долги и успеваемость; homework — описания, сроки и состояние сдачи домашних заданий БЕЗ оценок; notifications — уведомления и сообщения в ЛК;
 schedule — личное расписание и вымышленные имена преподавателей; requests — статусы своих
 заявок. Общие условия академического отпуска, основания отчисления, справка о болезни
 и правила контрольных мероприятий — public. Упоминание оценки или заявления в общем
@@ -416,7 +416,7 @@ class Assistant:
         plan.scopes = normalize_scopes(question, plan.scopes)
         if any(s != "public" for s in plan.scopes) and student_id is None and conversation.actor_role != "teacher":
             return self._result("clarify", "Выберите демо-студента и начните новую беседу для ответа по учебным данным.")
-        if "grades" in plan.scopes and not conversation.grades_allowed:
+        if any(s in plan.scopes for s in ("grades", "notifications")) and not conversation.grades_allowed:
             conversation.request_grades()
             subject = ("вашим оценкам и баллам" if conversation.actor_role == "student" else
                        "оценкам и баллам ваших студентов по своим дисциплинам" if conversation.actor_role == "teacher" else
@@ -470,7 +470,7 @@ class Assistant:
                 fact["url"] = ""
         if personal:
             result["personal_checked_at"] = datetime.now(ZoneInfo("Europe/Moscow")).isoformat(timespec="seconds")
-        result["_contains_grades"] = "grades" in personal
+        result["_contains_grades"] = "grades" in personal or "notifications" in personal
         if conversation.language != "ru":
             result = await for_display(self.provider, result, conversation.language)
         return result

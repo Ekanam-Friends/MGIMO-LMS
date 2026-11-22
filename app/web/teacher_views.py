@@ -8,8 +8,9 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -17,13 +18,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.grades import scale
 from app.grades import service as grades
-from app.models.grades import AssessmentKind, ControlForm, FinalResult
+from app.models.grades import AssessmentKind, ControlForm, CourseStatus, FinalResult
 from app.web import schedule_view as sv
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
 from app.web.nav import SERVICES, TEACHER_RESOURCES, TEACHER_WORK
 from app.web.views import _parse_day, render, templates, today
 
 router = APIRouter(prefix="/t")
+MOSCOW = ZoneInfo("Europe/Moscow")
 
 templates.env.globals.update(scale=scale, ControlForm=ControlForm, FinalResult=FinalResult,
                              AssessmentKind=AssessmentKind)
@@ -84,15 +86,30 @@ async def teacher_root() -> Response:
 @router.get("/home", response_class=HTMLResponse)
 async def teacher_home(request: Request, viewer: Viewer = Depends(teacher_viewer),
                        db: AsyncSession = Depends(get_db)) -> HTMLResponse:
-    now = today()
-    cards = [c for c in await grades.teacher_courses(db, viewer.teacher_id, today=now)
-             if c.course.academic_year == scale.academic_year(now)]
-    due_soon = sorted((c for c in cards if c.next_due and c.next_due <= now + timedelta(days=7)),
-                      key=lambda c: c.next_due)
-    lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, now, now)).get(now, [])
+    moscow_now = datetime.now(MOSCOW)
+    today_date = moscow_now.date()
+    cards = await grades.teacher_courses(db, viewer.teacher_id, scale.academic_year(today_date), today_date)
+    week = timedelta(days=7)
+    homework = await grades.homework_for_courses(db, cards, due_between=(today_date - week, today_date + week))
+    due_soon = sum(item.assessment.due_date >= today_date for item in homework)
+    attention = sorted(
+        (item for item in homework
+         if item.card.course.status != CourseStatus.CLOSED and item.submitted < item.students),
+        key=lambda item: item.assessment.due_date,
+    )[:3]
+
+    lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, today_date, today_date)).get(today_date, [])
+    pairs = sum(not lesson.cancelled for slot in lessons for lesson in slot.lessons)
+    next_day = None
+    next_lessons = []
+    if not pairs:
+        next_day = await sv.teacher_next_day(db, viewer.teacher_id, today_date)
+        if next_day:
+            next_lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, next_day, next_day)).get(next_day, [])
     return render(request, "teacher/home.html", viewer, cards=cards, due_soon=due_soon, lessons=lessons,
-                  resources=TEACHER_RESOURCES, work=TEACHER_WORK, today_date=now,
-                  students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
+                  pairs=pairs, next_day=next_day, next_lessons=next_lessons, attention=attention,
+                  clock=moscow_now.time(), resources=TEACHER_RESOURCES, work=TEACHER_WORK,
+                  today_date=today_date, students_total=sum({c.group: c.students for c in cards}.values()))
 
 
 @router.get("/services", response_class=HTMLResponse)
@@ -212,7 +229,7 @@ async def assessment_delete(course_id: int, assessment_id: int, viewer: Viewer =
 @router.get("/homework", response_class=HTMLResponse)
 async def homework(request: Request, viewer: Viewer = Depends(teacher_viewer),
                    db: AsyncSession = Depends(get_db)) -> HTMLResponse:
-    t = today()
+    t = datetime.now(MOSCOW).date()
     items = await grades.teacher_homework(db, viewer.teacher_id, scale.academic_year(t), t)
     upcoming = sorted([i for i in items if i.assessment.due_date and i.assessment.due_date >= t],
                       key=lambda i: i.assessment.due_date)
@@ -279,9 +296,10 @@ async def course_close(request: Request, course_id: int, viewer: Viewer = Depend
 @router.get("/schedule", response_class=HTMLResponse)
 async def schedule(request: Request, week: str | None = None, viewer: Viewer = Depends(teacher_viewer),
                    db: AsyncSession = Depends(get_db)) -> HTMLResponse:
-    start = sv.week_start(_parse_day(week, today()))
+    today_date = datetime.now(MOSCOW).date()
+    start = sv.week_start(_parse_day(week, today_date))
     days = [start + timedelta(days=i) for i in range(7)]
     lessons = await sv.teacher_lessons_for(db, viewer.teacher_id, days[0], days[-1])
-    return render(request, "teacher/schedule.html", viewer, days=days, lessons=lessons, today=today(),
+    return render(request, "teacher/schedule.html", viewer, days=days, lessons=lessons, today=today_date,
                   prev_week=start - timedelta(days=7), next_week=start + timedelta(days=7))
 

@@ -103,6 +103,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await app.state.cache.aclose()
 
     app = FastAPI(title="MGIMO-LMS (концепт для конкурса)", lifespan=lifespan)
+    from app import learning
+    from app.web.learning_views import router as learning_router, LearningBodyLimit
+    app.include_router(learning_router)
+    app.add_middleware(LearningBodyLimit)
+
+    @app.exception_handler(learning.Missing)
+    async def missing_learning(request, exc):
+        return Response(status_code=404)
+
+    @app.exception_handler(learning.Invalid)
+    async def invalid_learning(request, exc):
+        from html import escape
+        return Response("<html lang=ru><meta name=viewport content=\"width=device-width, initial-scale=1\"><p>Концепт для конкурса</p><h1>" + escape(str(exc)) + "</h1><a href=/learning/tasks>Задания</a> · <a href=/attendance>Посещаемость</a></html>", status_code=400, media_type="text/html")
+
     app.add_middleware(DocumentBodyLimit)
 
     @app.get("/healthz")

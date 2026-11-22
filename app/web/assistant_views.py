@@ -115,7 +115,7 @@ async def assistant_page(request: Request, viewer: Viewer = Depends(current_view
     require_role(viewer)
     if viewer.user.role == "student":
         viewer.student_id
-    response = render(request, "assistant.html", viewer, enabled=request.app.state.assistant.enabled,
+    response = render(request, "assistant.html", viewer, enabled=True, llm_enabled=request.app.state.assistant.enabled,
                       demo_access=demo_access(request) or viewer.user.role == "teacher")
     response.headers["Cache-Control"] = "no-store"
     return response
@@ -160,6 +160,10 @@ async def assistant_ask(request: Request, viewer: Viewer = Depends(check_csrf), 
             raise HTTPException(404)
         if student_id is not None:
             await selected_student(request, viewer, db, student_id)
+    from app.assistant.navigation import requested_service
+    navigation = requested_service(data.question, viewer.user.role)
+    if navigation:
+        return JSONResponse({"status": "answer", "message": "Открываю: " + navigation["title"], "navigation": navigation}, headers={"Cache-Control": "no-store"})
     try:
         question = data.question.strip()
         previous = conversation.dialogue()

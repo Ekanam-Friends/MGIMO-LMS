@@ -48,7 +48,7 @@
     <h2 class="profile__name">{{ _('Сервисы вуза') }}</h2>
     <ul class="svc-list">
       {% for name, color, text in services %}
-        <li class="svc-list__item">
+        <li class="svc-list__item" id="service-{{ loop.index }}">
           <span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span>
           <span><b>{{ name }}</b><br><span class="muted">{{ text }}</span></span>
         </li>

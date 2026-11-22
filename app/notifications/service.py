@@ -35,7 +35,7 @@ from app.models.notifications import Audience, Source
 LIMIT = 30
 ALL_LIMIT = 1000
 HORIZON = timedelta(days=45)
-KINDS = {"ann", "cert", "grade", "doc"}
+KINDS = {"ann", "cert", "grade", "doc", "learning"}
 TITLE_MAX = 200
 BODY_MAX = 2000
 
@@ -179,6 +179,16 @@ async def _load_feed(db: AsyncSession, user: User, student: Student | None, *, n
             items += await _documents(db, student.id, since, limit)
         if source in (None, Source.TEACHER):
             items += await _grades(db, student.id, since, limit, grade_details=grade_details)
+    if source in (None, Source.TEACHER):
+        from app.models.learning import LearningNotice
+        body = LearningNotice.body if grade_details else literal("")
+        notices = (await db.execute(
+            select(LearningNotice.id, LearningNotice.title, body, LearningNotice.created_at, LearningNotice.href)
+            .where(LearningNotice.user_id == user.id, LearningNotice.created_at >= since)
+            .order_by(LearningNotice.created_at.desc()).limit(limit)
+        )).all()
+        items += [Item("learning", notice_id, Source.TEACHER, title, message, created_at, href)
+                  for notice_id, title, message, created_at, href in notices]
     items.sort(key=lambda i: i.created_at, reverse=True)
     items = items[:limit]
     if items:

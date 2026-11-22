@@ -27,6 +27,7 @@ async def test_assistant_requires_login_and_csrf(client):
 async def test_assistant_notifications_use_current_feed_and_remember_sender_followups(client, monkeypatch):
     from app.auth.service import utcnow
     from app.models import Course, Discipline, GradeEvent
+    from app.models.learning import LearningNotice
     from app.models.notifications import Announcement, Audience, Source
 
     csrf = await login(client)
@@ -46,6 +47,8 @@ async def test_assistant_notifications_use_current_feed_and_remember_sender_foll
         await db.flush()
         db.add(GradeEvent(student_id=1, course_id=1, kind="score",
                           text="Контрольная: 8 из 10", created_at=utcnow()))
+        db.add(LearningNotice(user_id=1, title="Сообщение по заданию",
+                              body="Контрольная: 8 из 10", href="/learning/tasks/1", created_at=utcnow()))
         for source, title, student_id in (
             (Source.TEACHER, "Объявление преподавателя", 1),
             (Source.DEAN, "Объявление деканата", 1),
@@ -64,8 +67,9 @@ async def test_assistant_notifications_use_current_feed_and_remember_sender_foll
 
     for question, expected in [
         ("А что у меня в уведах?", {"Объявление преподавателя", "Объявление деканата",
-                                   "Новое событие по успеваемости"}),
-        ("А от преподов там что-то", {"Объявление преподавателя", "Новое событие по успеваемости"}),
+                                   "Новое событие по успеваемости", "Сообщение по заданию"}),
+        ("А от преподов там что-то", {"Объявление преподавателя", "Новое событие по успеваемости",
+                                     "Сообщение по заданию"}),
         ("Нет, это от деканата, а не от преподов", {"Объявление деканата"}),
     ]:
         answer = await ask(question)
@@ -75,6 +79,13 @@ async def test_assistant_notifications_use_current_feed_and_remember_sender_foll
     conversation = state.assistant.conversations.items[token]
     assert not conversation.grades_pending
     assert "Объявление" not in str(conversation.dialogue())
+
+
+def test_notification_summary_does_not_intercept_normative_questions():
+    from app.web.assistant_notifications import notification_filter
+
+    assert notification_filter("Какие правила публикации уведомлений?", "") is None
+    assert notification_filter("Каков порядок публикации уведомлений и какие у меня уведомления?", "") is None
 
 
 async def test_assistant_page_and_payload_limits(client):

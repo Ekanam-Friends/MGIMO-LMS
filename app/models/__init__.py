@@ -1,3 +1,4 @@
+from app.models.learning import Submission, TaskMessage, LearningNotice, Attendance, AttendanceWindow, AttendanceAttempt, AttendanceChange
 from app.models.auth import AuthSession, User
 from app.models.calendar import Activity, ActivitySignup, ElectiveChoice
 from app.models.certificates import (

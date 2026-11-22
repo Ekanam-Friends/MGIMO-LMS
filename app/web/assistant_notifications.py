@@ -3,6 +3,7 @@ import re
 from datetime import timezone
 from zoneinfo import ZoneInfo
 
+from app.assistant.routing import normalize_scopes
 from app.models.notifications import Source
 from app.notifications import service as notifications
 
@@ -30,7 +31,7 @@ def notification_filter(question: str, previous: str) -> str | None:
     if not _NOTIFICATIONS.search(q):
         if previous != NOTIFICATION_CONTEXT or not _FOLLOWUP.fullmatch(q):
             return None
-    elif _OTHER_REQUEST.search(q):
+    elif _OTHER_REQUEST.search(q) or normalize_scopes(q, ["notifications"]) != ["notifications"]:
         return None
     positive = re.split(r"(?:,?\s+а\s+)?\bне\s+от\s+", q, maxsplit=1)[0]
     sender = _SENDER.search(positive)
