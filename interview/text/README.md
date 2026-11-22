@@ -25,4 +25,4 @@
 | [03-mgimo-starosta-sozvon.md](03-mgimo-starosta-sozvon.md) | Screen_Recording_…Samsung Browser | староста группы МГИМО, созвон | 26:22 |
 | [00-korotkie-zapisi.md](00-korotkie-zapisi.md) | IMG_5257–5261, IMG_5264 | подготовка, отказы, итог дня | ~1,5 мин |
 
-Суть выявленных проблем — отдельным файлом, команда составляет его вместе.
+Свод выявленных проблем — в [../README.md](../README.md).
