@@ -336,6 +336,9 @@ async def delete_assessment(db: AsyncSession, teacher_id: int, course_id: int, a
     card = await get_course(db, teacher_id, course_id)
     if card and card.course.status == CourseStatus.CLOSED:
         raise Locked("Ведомость закрыта")
+    from app.models.learning import Submission, TaskMessage
+    await db.execute(delete(Submission).where(Submission.assessment_id == a.id))
+    await db.execute(delete(TaskMessage).where(TaskMessage.assessment_id == a.id))
     await db.execute(delete(Score).where(Score.assessment_id == a.id))
     await db.delete(a)
     # «Новое задание» и баллы по нему уже в ленте студентов, а GradeEvent не ссылается на задание,

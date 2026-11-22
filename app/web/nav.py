@@ -11,6 +11,8 @@ MENU = [
     {"title": "Расписание", "icon": "calendar", "href": "/schedule"},
     {"title": "Учёба", "icon": "cap", "children": [
         {"title": "Успеваемость", "href": "/grades"},
+        {"title": "Задания и сообщения", "href": "/learning/tasks"},
+        {"title": "Отметка на паре", "href": "/attendance"},
         {"title": "Учебный план", "href": "/s/plan"},
     ]},
     {"title": "Элективные дисциплины", "icon": "book", "href": "/electives"},
@@ -45,6 +47,8 @@ TEACHER_MENU = [
     {"title": "Преподавателю", "icon": "cap", "children": [
         {"title": "Мои курсы", "href": "/t/courses"},
         {"title": "Домашние задания", "href": "/t/homework"},
+        {"title": "Решения и сообщения", "href": "/learning/tasks"},
+        {"title": "Посещаемость", "href": "/attendance"},
         {"title": "Расписание", "href": "/t/schedule"},
         {"title": "Объявления", "href": "/t/announcements"},
         {"title": "Учебная нагрузка", "href": "/s/workload"},

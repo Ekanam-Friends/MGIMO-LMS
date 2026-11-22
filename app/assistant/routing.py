@@ -26,6 +26,8 @@ def normalize_scopes(question, scopes):
                 + (["grades"] if re.search(r"(?:покажи|мои|наши).{0,30}(?:балл|оценк)|(?:и|а также)\s+(?:мои\s+)?(?:балл|оценк)", q)
                    or (grades and "grades" in scopes and re.search(r"\s(?:и|а также)\s", q)) else []))
     result = list(dict.fromkeys(scopes))
+    if re.search(r"уведомлен|объявлен|сообщени|написал", q) and "notifications" not in result:
+        result.append("notifications")
     if homework:
         result = [scope for scope in result if scope not in {"grades", "public"}]
         result = ["homework"] + [scope for scope in result if scope != "homework"]

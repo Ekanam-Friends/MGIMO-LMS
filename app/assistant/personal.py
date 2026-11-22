@@ -68,7 +68,12 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
         for task, discipline in rows[:60]:
             due = task.due_date.isoformat() if task.due_date else "не указан"
             add(f"{discipline}: {task.title}. Срок: {due}. {task.description[:400]} "
-                "Сведения о сдаче и проверке в этой выборке не запрашивались.", "/grades", "Домашние задания")
+                "Статус сдачи указан отдельно, если решение отправлено в ЛК.", f"/learning/tasks/{task.id}", "Домашние задания")
+            from app.models.learning import Submission
+            submission = await db.get(Submission, (task.id, student_id))
+            if submission:
+                from app.learning import STATUSES
+                add(f"{task.title}: {STATUSES[submission.status]}, версия {submission.revision}, отправлено {submission.updated_at.isoformat()} UTC.", f"/learning/tasks/{task.id}", "Домашние задания")
         if not rows:
             add("В загруженных курсах текущего студента нет записей домашних заданий; "
                 "это не подтверждает отсутствие заданий вне кабинета.", "/grades", "Домашние задания")
@@ -153,6 +158,14 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
             add("В кабинете нет заявок текущего студента.", "/mfc/certificates", "Заявки")
         if len(rows) > 20:
             add("Выбраны последние 20 заявок. Полная история доступна в разделе справок.", "/mfc/certificates", "Ограничение выборки")
+    if "notifications" in scopes:
+        from app.models import User
+        from app.notifications.service import feed
+        user = await db.scalar(select(User).where(User.student_id == student_id, User.role == "student"))
+        student = await db.get(Student, student_id)
+        if user and student:
+            for notice in await feed(db, user, student, limit=30):
+                add(f"{notice.created_at.isoformat()} UTC: {notice.title}. {notice.body[:1000]}", notice.href or "/notifications", "Уведомления")
     # Не отправляем провайдеру неограниченный журнал оценок.
     return bounded_facts(facts)
 
