@@ -8,6 +8,16 @@ SESSION_ADMISSION = re.compile(
     re.I,
 )
 
+_ARRIVAL = r"(?:приду|появлюсь|явлюсь|прийти|появиться|явиться)"
+_WITHOUT_CLOTHES = r"(?:гол(?:ым|ой|ая|ый)|без\s+одежды)"
+_CLASSROOM = r"на\s+(?:пару|занятие|лекцию|семинар|урок)"
+CLASSROOM_ATTIRE = re.compile(
+    rf"\s*(?:а\s+)?что\s+(?:будет\s*)?,?\s*если\s+(?:я\s+)?"
+    rf"(?:(?:{_ARRIVAL}\s+{_WITHOUT_CLOTHES}|{_WITHOUT_CLOTHES}\s+{_ARRIVAL})\s+{_CLASSROOM}"
+    rf"|(?:{_ARRIVAL}\s+{_CLASSROOM}|{_CLASSROOM}\s+{_ARRIVAL})\s+{_WITHOUT_CLOTHES})[.!?\s]*",
+    re.I,
+)
+
 def normalize_scopes(question, scopes):
     q = question.lower().replace("ё", "е")
     personal = bool(re.search(r"\b(?:я|мне|меня|мои|моих|моим|моя|мой|мое|наши|наших)\b|положен|полагает|имею ли право", q))

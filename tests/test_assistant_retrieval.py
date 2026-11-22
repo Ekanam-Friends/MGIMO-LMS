@@ -90,8 +90,8 @@ async def test_search_rewrite_does_not_replace_question_seen_by_auditor(tmp_path
 
 
 @pytest.mark.parametrize("question", [
-    "Что будет если я голым приду на пару?",
-    "А что если я приду голым на пару?",
+    "Если я буду выглядеть неподобающе на семинаре?",
+    "А если я появлюсь на семинаре в неподходящем виде?",
 ])
 async def test_model_searches_dress_requirement_for_colloquial_scenario(tmp_path, question):
     rule = chunk(id="dress", document_id="conduct", title="Правила внутреннего распорядка",
@@ -116,8 +116,8 @@ async def test_model_searches_dress_requirement_for_colloquial_scenario(tmp_path
 
 
 @pytest.mark.parametrize("question", [
-    "Что будет если я голым приду на пару?",
-    "А что если я приду голым на пару?",
+    "Что будет, если на семинаре мой внешний вид нарушает правила?",
+    "Какие могут быть взыскания за несоблюдение требований к одежде на паре?",
 ])
 async def test_draft_refusal_shows_original_search_results(tmp_path, question):
     rule = chunk(id="dress", document_id="conduct", clause="п. 2.4",
@@ -139,6 +139,22 @@ async def test_draft_refusal_shows_original_search_results(tmp_path, question):
     assert [step["url"] for step in answer["steps"]] == [rule.original_url, sanction.original_url]
     assert not assistant._cacheable(answer, False) and not conversation.dialogue()
     assert len(provider.calls) == 2
+
+
+@pytest.mark.parametrize("question", [
+    "А что если я приду голым на пару?",
+    "Что будет если я голым приду на пару?",
+    "Что будет, если я приду на лекцию без одежды?",
+])
+async def test_explicit_attire_question_uses_corpus_even_without_model(tmp_path, question):
+    rule = chunk(id="rule", text="2.4. Обучающиеся обязаны соблюдать эстетические нормы в одежде.")
+    measures = chunk(id="measures", text="5.2. Возможно применение одного из следующих дисциплинарных взысканий: а) замечание;")
+    continuation = chunk(id="continuation", text="б) выговор; в) отчисление из Университета в соответствии с Уставом.")
+    write_corpus(tmp_path, [rule, measures, continuation])
+    assistant = create_assistant(config(tmp_path))
+    answer = await assistant.chat(1, 1, question, [], None, Conversation("owner", float("inf")), None)
+    assert answer["status"] == "sources_only"
+    assert [step["id"] for step in answer["steps"]] == ["rule", "measures", "continuation"]
 
 
 async def test_consequences_keep_context_space_before_rule_neighbors(tmp_path, monkeypatch):
