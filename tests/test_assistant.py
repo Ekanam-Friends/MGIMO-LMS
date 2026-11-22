@@ -273,6 +273,24 @@ async def test_incomplete_or_filtered_generation_is_provider_error(payload):
     await provider.aclose()
 
 
+@pytest.mark.parametrize("content", ['{"scopes":["public"]}', '{"scopes":["public"]'])
+async def test_gigachat_length_requires_a_closed_json_object_for_structured_output(content):
+    async def transport(request):
+        if request.url.path.endswith("oauth"):
+            return httpx.Response(200, json={"access_token": "token", "expires_at": (time.time() + 1800) * 1000})
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}, "finish_reason": "length"}]})
+
+    provider = GigaChat("key", "GIGACHAT_API_PERS", "model", transport=httpx.MockTransport(transport))
+    try:
+        if content.endswith("}"):
+            assert await provider.complete("system", {}, response_schema={"type": "object"}) == content
+        else:
+            with pytest.raises(ProviderError, match="Генерация не завершена"):
+                await provider.complete("system", {}, response_schema={"type": "object"})
+    finally:
+        await provider.aclose()
+
+
 def test_ingest_keeps_all_clauses_after_short_heading(tmp_path):
     import pymupdf
     doc = pymupdf.open()

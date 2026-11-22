@@ -1,6 +1,13 @@
 """Уточнения маршрута до чтения личных данных; нормы остаются в корпусе."""
 import re
 
+SESSION_ADMISSION = re.compile(
+    r"\s*(?:а\s+)?(?:есть ли у меня допуск|у меня есть допуск|я допущен[а]?(?: ли)?"
+    r"|допущен[а]? ли я|меня допустили|допустили ли меня)"
+    r"\s+(?:к|до)\s+[са]ессии[.!?\s]*",
+    re.I,
+)
+
 def normalize_scopes(question, scopes):
     q = question.lower().replace("ё", "е")
     personal = bool(re.search(r"\b(?:я|мне|меня|мои|моих|моим|моя|мой|мое|наши|наших)\b|положен|полагает|имею ли право", q))
@@ -10,6 +17,7 @@ def normalize_scopes(question, scopes):
     schedule = bool(re.search(r"расписан|когда у (?:меня|нас)|как зовут|кто (?:у меня )?(?:ведет|преподает)|имя преподавател", q))
     requests = bool(re.search(r"статус.{0,30}(?:заяв|справ)|(?:заяв|справ).{0,30}статус|мои заяв|моя заяв", q))
     scholarship = bool(re.search(r"стипенд|стипух", q))
+    hypothetical_grade = bool(re.search(r"\bесли\b.{0,60}\b(?:будет|получу)\s+(?:[2-5]|тройк\w*)\b", q))
     absence = bool(re.search(r"прогул|пропущ|пропуск.{0,15}(?:пар|занят)|не (?:приду|пойду)", q))
     procedure = (bool(re.search(r"академ.{0,15}отпуск|отчислен|справк", q))
                  and bool(re.search(r"как.{0,20}(?:оформ|получ|подать)|правил|порядок|условия|основан", q))
@@ -24,7 +32,7 @@ def normalize_scopes(question, scopes):
             r"мои\b|мне\b|у меня|покажи|прочитай|проверь|новые|непрочитан|кто.{0,20}написал|какие|есть ли",
             clause)
         for clause in notice_clauses)
-    public_rule = (bool(notice_rules) or (scholarship and not personal) or
+    public_rule = (bool(notice_rules) or (scholarship and (not personal or hypothetical_grade)) or
                    (absence and not re.search(r"сколько|мои|у меня", q)) or
                    (homework and rules and not personal) or procedure)
     if public_rule:
