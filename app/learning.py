@@ -8,7 +8,7 @@ from sqlalchemy import and_, or_, select
 
 from app.auth.service import utcnow
 from app.grades import service as grades
-from app.models import Assessment, Course, CourseEnrollment, Discipline, Lesson, LessonGroup, Student, User, lesson_teachers
+from app.models import Assessment, Course, CourseEnrollment, Discipline, Lesson, LessonGroup, Score, Student, User, lesson_teachers
 from app.models.learning import Attendance, AttendanceAttempt, AttendanceChange, AttendanceWindow, LearningNotice, Submission, TaskMessage
 from app.schedule.choices import elective_catalog, get_choices, selected_lesson
 
@@ -85,6 +85,12 @@ async def submit(db, user, task_id, text, filename="", data=None):
     filename = filename.replace("\\", "/").split("/")[-1]
     filename = "".join(c for c in filename if c.isprintable())[:200]
     row = await db.get(Submission, (task_id, user.student_id))
+    score_id = await db.scalar(select(Score.id).where(
+        Score.assessment_id == task_id, Score.student_id == user.student_id))
+    if row is not None and (row.status == "reviewed" or score_id is not None):
+        raise Invalid("Решение уже оценено. Повторная отправка доступна после возврата на доработку")
+    if row is None and score_id is not None:
+        raise Invalid("В ведомости уже есть оценка. Для отправки преподаватель должен снять её")
     if row is None:
         row = Submission(assessment_id=task_id, student_id=user.student_id, revision=0)
         db.add(row)

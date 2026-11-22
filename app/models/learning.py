@@ -41,6 +41,7 @@ class LearningNotice(Base):
     telegram_state: Mapped[str] = mapped_column(String(20), default="pending")
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     attempted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    telegram_retry_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
