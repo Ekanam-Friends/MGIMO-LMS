@@ -115,6 +115,32 @@ async def test_model_searches_dress_requirement_for_colloquial_scenario(tmp_path
     assert [source["id"] for source in provider.calls[1][1]["sources"]] == [rule.id, measures.id]
 
 
+@pytest.mark.parametrize("question", [
+    "Что будет если я голым приду на пару?",
+    "А что если я приду голым на пару?",
+])
+async def test_draft_refusal_shows_original_search_results(tmp_path, question):
+    rule = chunk(id="dress", document_id="conduct", clause="п. 2.4",
+                 text="Обучающиеся должны соблюдать правила внешнего вида и опрятности в одежде.")
+    sanction = chunk(id="measures", document_id="measures", clause="п. 5.2",
+                     text="Дисциплинарные взыскания применяются с учётом обстоятельств проступка.")
+    hidden = chunk(id="hidden", document_id="hidden", reviewed_public=False, text=rule.text)
+    write_corpus(tmp_path, [rule, sanction, hidden])
+    provider = FakeProvider(
+        {"scopes": ["public"], "search_query": "внешний вид", "consequences_query": "дисциплинарные взыскания"},
+        ProviderError("Отказ", code="generation_refused"),
+    )
+    assistant = create_assistant(config(tmp_path, rag_use_embeddings=False), provider)
+    conversation = Conversation("owner", float("inf"))
+    answer = await assistant.chat(1, 1, question, [], None, conversation, None)
+
+    assert answer["status"] == "sources_only" and answer["summary"] is None
+    assert [step["text"] for step in answer["steps"]] == [rule.text, sanction.text]
+    assert [step["url"] for step in answer["steps"]] == [rule.original_url, sanction.original_url]
+    assert not assistant._cacheable(answer, False) and not conversation.dialogue()
+    assert len(provider.calls) == 2
+
+
 async def test_consequences_keep_context_space_before_rule_neighbors(tmp_path, monkeypatch):
     rules = [chunk(id=f"rule-{i}", text="а" * 6000) for i in range(6)]
     sanction = chunk(id="sanction", document_id="sanction", text="б" * 4000)
