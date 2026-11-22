@@ -178,3 +178,18 @@ TEACHER_WORK = [
     ("Учебная нагрузка", "часы по дисциплинам", "#7A5BC4", "/s/workload"),
     ("Конкурс ППС", "заявки и сроки", "#3F6FA8", "/s/pps"),
 ]
+
+
+# Единый список плиток главной и разрешённых переходов ассистента.
+POPULAR_SERVICES = [
+    ("Отметка на паре", "#12808F", "/attendance"),
+    ("СДО", "#447ABC", "/learning/tasks"),
+    ("Библиотека", "#7A5BC4", "/services#service-2"),
+    ("Почта", "#E3832B", "/services#service-3"),
+    ("Диск", "#2B7FE3", "/services#service-4"),
+    ("Антиплагиат", "#3F6FA8", "/services#service-5"),
+    ("ИИ-ассистент", "#DF2935", "/s/assistant"),
+    ("Расписание в Telegram", "#2AABEE", "/services#telegram"),
+    ("Расписание в MAX", "#6A5AE0", "/services#max"),
+    ("Календарь .ics", "#3BA55C", "/services#calendar"),
+]

@@ -3,7 +3,6 @@
 {% from "partials/_cert.html" import status_badge, request_row with context %}
 {% block content %}
 <div class="dashboard">
-<section class="panel"><a class="btn" href="/attendance">Отметка на паре</a> <a href="/learning/tasks">Задания и сообщения</a></section>
   <div class="dashboard__col">
     {# Календарь — центральный объект (решение 0006): сетка на десктопе, список дня на телефоне. #}
     <section class="dash-block dash-calendar">
@@ -69,8 +68,8 @@
     <section class="dash-block dash-services">
     <div class="dash-block__header"><h2 class="dash-title">{{ _('Популярные сервисы') }}</h2><a class="dash-link" href="/services" aria-label="{{ _('Сервисы') }}">{{ icon("arrow") }}</a></div>
     <div class="services services--column">
-      {% for name, color in [("СДО", "#447ABC"), ("Библиотека", "#7A5BC4"), ("Почта", "#E3832B"), ("Диск", "#2B7FE3"), ("Антиплагиат", "#3F6FA8"), ("ИИ-ассистент", "#DF2935"), ("Расписание в Telegram", "#2AABEE"), ("Расписание в MAX", "#6A5AE0"), ("Календарь .ics", "#3BA55C")] %}
-        <a class="service" href="{{ {"ИИ-ассистент": "/s/assistant", "Расписание в Telegram": "/services#telegram", "Расписание в MAX": "/services#max", "Календарь .ics": "/services#calendar"}.get(name, "/services") }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
+      {% for name, color, href in POPULAR_SERVICES %}
+        <a class="service" href="{{ href }}"><span class="service__logo" style="background:{{ color }}">{{ name[:1] }}</span><span>{{ name }}</span></a>
       {% endfor %}
       {# Официальное приложение вуза: ссылка в магазин приложений по платформе (см. app_links ниже). #}
       <a class="service js-app-link" href="{{ MGIMO_APP.android }}" data-ios="{{ MGIMO_APP.ios }}" data-android="{{ MGIMO_APP.android }}" target="_blank" rel="noopener"><span class="service__logo" style="background:#1F3A6B">П</span><span>{{ _('Приложение МГИМО') }}</span></a>

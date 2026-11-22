@@ -60,6 +60,8 @@ def today() -> date:
 
 
 def render(request: Request, name: str, viewer: Viewer | None, **ctx) -> HTMLResponse:
+    from app.web.nav import POPULAR_SERVICES
+    ctx.setdefault("POPULAR_SERVICES", POPULAR_SERVICES)
     return templates.TemplateResponse(request, name, {"viewer": viewer, "path": request.url.path, **ctx})
 
 
