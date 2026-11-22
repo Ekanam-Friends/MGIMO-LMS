@@ -13,7 +13,8 @@ def source_payload(row: Chunk) -> dict:
 
 
 def evidence_context(hits: list[Chunk], rows: list[Chunk], *,
-                     budget: int = 32000, neighbor_radius: int = 2) -> list[Chunk]:
+                     budget: int = 32000, neighbor_radius: int = 2,
+                     priority_hits: tuple[Chunk, ...] = ()) -> list[Chunk]:
     groups: dict[tuple[str, str], list[Chunk]] = {}
     positions = {}
     for row in rows:
@@ -26,9 +27,11 @@ def evidence_context(hits: list[Chunk], rows: list[Chunk], *,
     # хранить основания в предыдущей выдержке того же акта; второстепенные
     # совпадения не должны вытеснить эти условия из бюджета.
     offsets = (0, -1, 1, -2, 2)[:1 + 2 * neighbor_radius]
-    for hit in hits:
+    # При нескольких запросах резервируем место для прямых совпадений обеих тем.
+    candidates = [(hit, (0,)) for hit in priority_hits] + [(hit, offsets) for hit in hits]
+    for hit, hit_offsets in candidates:
         group = groups[(hit.document_id, hit.revision)]
-        for offset in offsets:
+        for offset in hit_offsets:
             index = positions[hit.id] + offset
             if not 0 <= index < len(group):
                 continue

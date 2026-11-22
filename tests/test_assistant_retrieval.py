@@ -115,6 +115,30 @@ async def test_model_searches_dress_requirement_for_colloquial_scenario(tmp_path
     assert [source["id"] for source in provider.calls[1][1]["sources"]] == [rule.id, measures.id]
 
 
+async def test_consequences_keep_context_space_before_rule_neighbors(tmp_path, monkeypatch):
+    rules = [chunk(id=f"rule-{i}", text="а" * 6000) for i in range(6)]
+    sanction = chunk(id="sanction", document_id="sanction", text="б" * 4000)
+    write_corpus(tmp_path, [*rules, sanction])
+
+    def search(self, query, rows, limit, *args, **kwargs):
+        by_id = {row.id: row for row in rows}
+        ids = ("rule-1", "rule-4") if query == "требование к одежде" else ("sanction",)
+        return [by_id[id_] for id_ in ids]
+
+    monkeypatch.setattr(Corpus, "search", search)
+    provider = FakeProvider(
+        {"scopes": ["public"], "search_query": "требование к одежде", "consequences_query": "меры взыскания"},
+        {"status": "partial", "summary_id": "rule-1"},
+        {"accepted_ids": ["rule-1"], "complete": False},
+    )
+    answer = await create_assistant(config(tmp_path, rag_use_embeddings=False), provider).chat(
+        1, 1, "Какое правило и какие последствия?", [], None, Conversation("owner", float("inf")), None)
+    assert answer["status"] == "partial"
+    sources = provider.calls[1][1]["sources"]
+    assert [source["id"] for source in sources[:2]] == ["rule-1", "sanction"]
+    assert sources[1]["text"] == sanction.text
+
+
 async def test_route_recovers_from_empty_structured_generation(tmp_path):
     write_corpus(tmp_path, [chunk()])
     provider = FakeProvider(ProviderError("Пустой ответ", code="empty_response"),

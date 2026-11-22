@@ -273,6 +273,13 @@ class Assistant:
         return {"status": status, "message": message, "summary": None, "steps": [],
                 "snapshot": None, "as_of": None, "dropped_steps": 0, **kwargs}
 
+    def _admission_clarification(self, question: str, actor_role: str) -> dict | None:
+        if actor_role != "student" or not SESSION_ADMISSION.fullmatch(question):
+            return None
+        return self._result("clarify", "В кабинете нет единого статуса допуска к сессии. "
+                            "Укажите дисциплину, чтобы проверить накопленные баллы и форму контроля.",
+                            section="grades")
+
     async def _complete(self, stage, system, data, **kwargs):
         started = time.monotonic()
         try:
@@ -344,6 +351,12 @@ class Assistant:
 
     async def chat(self, user_id, student_id, question, history, as_of, conversation,
                    evidence_reader: PersonalEvidenceReader | None):
+        if conversation.language == "ru":
+            question_for_admission = redact_question(question)
+            result = self._admission_clarification(question_for_admission, conversation.actor_role)
+            if result is not None:
+                conversation.remember(question_for_admission, answer_context(result))
+                return result
         if not self.enabled:
             return self._result("unavailable", "Ассистент пока не подключён. Обратитесь в деканат.")
         cache = get_cache()
@@ -382,11 +395,9 @@ class Assistant:
         dialogue = conversation.dialogue()
         if conversation.language != "ru":
             question, history = await for_search(self.provider, question, history, conversation.language)
-        if conversation.actor_role == "student" and SESSION_ADMISSION.fullmatch(question):
-            result = self._result("clarify", "В кабинете нет единого статуса допуска к сессии. "
-                "Укажите дисциплину, чтобы проверить накопленные баллы и форму контроля.",
-                section="grades")
-            return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
+            result = self._admission_clarification(question, conversation.actor_role)
+            if result is not None:
+                return await for_display(self.provider, result, conversation.language)
         if re.fullmatch(r"\s*(?:спасибо|благодарю)[.!?,\s]*", question, re.I):
             result = self._result("help", "Пожалуйста! Если появятся вопросы об учёбе, обращайтесь.")
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
@@ -540,7 +551,9 @@ class Assistant:
         hits = [row for ranked_rows in ranked for row in ranked_rows]
         if not hits:
             return self._result("not_found", "В проверенном снимке положений не найдено достаточных подтверждений. Обратитесь в деканат.", **common)
-        hits = evidence_context(hits, rows, neighbor_radius=1 if split_search else 2)
+        priority_hits = tuple(result[0] for result in ranked if result) if split_search else ()
+        hits = evidence_context(hits, rows, neighbor_radius=1 if split_search else 2,
+                                priority_hits=priority_hits)
         # Выдержки не обрезаются: усечение может потерять исключение или отрицание.
         sources = [source_payload(c) for c in hits]
         payload = {"question": question, "history": history, "dialogue": dialogue or [],

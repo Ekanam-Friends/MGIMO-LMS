@@ -71,6 +71,11 @@ async def test_assistant_notifications_use_current_feed_and_remember_sender_foll
         ("А от преподов там что-то", {"Объявление преподавателя", "Новое событие по успеваемости",
                                      "Сообщение по заданию"}),
         ("Нет, это от деканата, а не от преподов", {"Объявление деканата"}),
+        ("Покажи уведомления от деканата и от преподавателей",
+         {"Объявление деканата", "Объявление преподавателя", "Новое событие по успеваемости",
+          "Сообщение по заданию"}),
+        ("А от преподавателей и деканата?", {"Объявление деканата", "Объявление преподавателя",
+                                              "Новое событие по успеваемости", "Сообщение по заданию"}),
     ]:
         answer = await ask(question)
         assert answer["status"] == "answer" and answer["section"] == "notifications"
@@ -79,6 +84,36 @@ async def test_assistant_notifications_use_current_feed_and_remember_sender_foll
     conversation = state.assistant.conversations.items[token]
     assert not conversation.grades_pending
     assert "Объявление" not in str(conversation.dialogue())
+
+
+async def test_assistant_filters_unread_notifications_before_limit(client):
+    from datetime import timedelta
+
+    from app.auth.service import utcnow
+    from app.models.notifications import Announcement, Audience, Source
+
+    csrf = await login(client)
+    headers = {"X-CSRF-Token": csrf}
+    token = await start_chat(client, csrf)
+    now = utcnow()
+    async with client._transport.app.state.session_factory() as db:
+        announcements = [Announcement(source=Source.DEAN, title=f"Объявление {i}", body="", author_user_id=1,
+                                      audience=Audience.STUDENT, student_id=1, created_at=now - timedelta(minutes=i))
+                         for i in range(7)]
+        db.add_all(announcements)
+        await db.flush()
+        read_ids = [notice.id for notice in announcements[:6]]
+        await db.commit()
+    for ref in read_ids:
+        assert (await client.post(f"/notifications/read/ann/{ref}", headers=headers)).status_code == 204
+
+    payload = {"question": "Покажи непрочитанные уведомления", "conversation_token": token}
+    response = await client.post("/s/assistant/ask", headers=headers, json=payload)
+    assert response.status_code == 200
+    assert [fact["text"].rsplit(" · ", 1)[-1] for fact in response.json()["facts"]] == ["Объявление 6"]
+    assert (await client.post("/notifications/read-all", headers=headers)).status_code == 200
+    empty = (await client.post("/s/assistant/ask", headers=headers, json=payload)).json()
+    assert empty["facts"] == [] and "непрочитанных" in empty["message"]
 
 
 def test_notification_summary_does_not_intercept_normative_questions():

@@ -167,9 +167,10 @@ async def assistant_ask(request: Request, viewer: Viewer = Depends(check_csrf), 
     try:
         question = data.question.strip()
         previous = conversation.dialogue()
-        source = notification_filter(question, previous[-1]["content"] if previous else "") if viewer.user.role == "student" else None
-        if source is not None:
-            answer = await notification_answer(db, viewer, source, data.as_of, moscow_today())
+        filters = (notification_filter(question, previous[-1]["content"] if previous else "")
+                   if viewer.user.role == "student" else None)
+        if filters is not None:
+            answer = await notification_answer(db, viewer, filters, data.as_of, moscow_today())
             # В дальнейший контекст модели не попадают заголовки или содержимое ленты.
             conversation.remember("Вопрос об уведомлениях", NOTIFICATION_CONTEXT)
         else:
