@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import String, and_, cast, literal, or_, select, true
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,8 +60,20 @@ class Item:
         return Source.TITLES[self.source]
 
 
-async def _announcements(db: AsyncSession, student: Student | None, since: datetime, limit: int) -> list[Item]:
-    q = select(Announcement).where(Announcement.created_at >= since)
+def _unread(kind: str, ref, user_id: int | None):
+    if user_id is None:
+        return true()
+    return ~select(NotificationRead.key).where(
+        NotificationRead.user_id == user_id,
+        NotificationRead.key == literal(kind + ":") + cast(ref, String),
+    ).exists()
+
+
+async def _announcements(db: AsyncSession, student: Student | None, since: datetime, limit: int,
+                         sources: tuple[str, ...] | None, unread_by: int | None) -> list[Item]:
+    q = select(Announcement).where(Announcement.created_at >= since, _unread("ann", Announcement.id, unread_by))
+    if sources is not None:
+        q = q.where(Announcement.source.in_(sources))
     if student is not None:
         cond = [Announcement.audience == Audience.ALL]
         if student.faculty_name:
@@ -99,36 +111,49 @@ def _cert_item(ev: CertificateRequestEvent, req: CertificateRequest) -> Item | N
     return Item("cert", ev.id, Source.DEAN, title, body, ev.created_at, href)
 
 
-async def _certificates(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
-    rows = (await db.execute(
-        select(CertificateRequestEvent, CertificateRequest)
-        .join(CertificateRequest, CertificateRequest.id == CertificateRequestEvent.request_id)
-        .where(CertificateRequest.student_id == student_id, CertificateRequestEvent.created_at >= since)
-        .order_by(CertificateRequestEvent.created_at.desc()).limit(limit * 2)
-    )).all()
+async def _certificates(db: AsyncSession, student_id: int, since: datetime, limit: int,
+                        unread_by: int | None) -> list[Item]:
+    event = CertificateRequestEvent
+    query = (select(event, CertificateRequest)
+             .join(CertificateRequest, CertificateRequest.id == event.request_id)
+             .where(CertificateRequest.student_id == student_id, event.created_at >= since))
+    if unread_by is not None:
+        query = query.where(_unread("cert", event.id, unread_by), or_(
+            event.kind.in_((EventKind.DEAN_MESSAGE, EventKind.PDF_READY)),
+            and_(event.kind == EventKind.STATUS, event.status.not_in(("", RequestStatus.ACCEPTED))),
+            and_(event.kind == EventKind.PAPER, event.status != ""),
+        ))
+    rows = (await db.execute(query.order_by(event.created_at.desc()).limit(limit * 2))).all()
     return [i for ev, req in rows if (i := _cert_item(ev, req))]
 
 
-async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
+async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int, *,
+                  grade_details: bool, unread_by: int | None) -> list[Item]:
+    title = (Discipline.name + ": " + GradeEvent.text if grade_details else
+             literal("Новое событие по успеваемости"))
     rows = (await db.execute(
-        select(GradeEvent, Discipline.name)
+        select(GradeEvent.id, GradeEvent.created_at, title)
+        .select_from(GradeEvent)
         .join(Course, Course.id == GradeEvent.course_id)
         .join(Discipline, Discipline.id == Course.discipline_id)
-        .where(GradeEvent.student_id == student_id, GradeEvent.created_at >= since)
+        .where(GradeEvent.student_id == student_id, GradeEvent.created_at >= since,
+               _unread("grade", GradeEvent.id, unread_by))
         .order_by(GradeEvent.created_at.desc()).limit(limit)
     )).all()
-    return [Item("grade", ev.id, Source.TEACHER, f"{name}: {ev.text}", "", ev.created_at, "/grades")
-            for ev, name in rows]
+    return [Item("grade", event_id, Source.TEACHER, heading, "", created_at, "/grades")
+            for event_id, created_at, heading in rows]
 
 
-async def _documents(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
+async def _documents(db: AsyncSession, student_id: int, since: datetime, limit: int,
+                     unread_by: int | None) -> list[Item]:
     from app.models.document_notice import DocumentNotice, DocumentRecipient
     from app.models.knowledge import KnowledgeDocument
     rows = (await db.execute(select(KnowledgeDocument.id, KnowledgeDocument.title,
         KnowledgeDocument.source_url, DocumentNotice.confirmed_at)
         .join(DocumentNotice, DocumentNotice.document_id == KnowledgeDocument.id)
         .join(DocumentRecipient, DocumentRecipient.document_id == KnowledgeDocument.id)
-        .where(DocumentRecipient.student_id == student_id, DocumentNotice.confirmed_at >= since)
+        .where(DocumentRecipient.student_id == student_id, DocumentNotice.confirmed_at >= since,
+               _unread("doc", KnowledgeDocument.id, unread_by))
         .order_by(DocumentNotice.confirmed_at.desc()).limit(limit))).all()
     return [Item("doc", did, Source.DEAN, "Новый документ: " + title,
         "Деканат отметил, что документ касается вас. Откройте публичный источник.", at, url)
@@ -144,15 +169,17 @@ def _restore_items(raw: list[dict]) -> list[Item]:
 
 
 async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None,
-               limit: int = LIMIT) -> list[Item]:
+               limit: int = LIMIT, sources: tuple[str, ...] | None = None, grade_details: bool = True,
+               unread_only: bool = False) -> list[Item]:
     """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного.
 
     Обычная лента (колокольчик на каждой странице) — через кэш (решение 0027). Ключ — id
     пользователя из сессии и его студента; поколения сбрасываются при новом объявлении, событии
     справки, балле, уведомлении о документе (общее) и при отметке «прочитано» (личное).
     """
-    if now is not None or limit != LIMIT:
-        return await _load_feed(db, user, student, now=now, limit=limit)
+    if now is not None or limit != LIMIT or sources is not None or not grade_details or unread_only:
+        return await _load_feed(db, user, student, now=now, limit=limit, sources=sources,
+                                grade_details=grade_details, unread_only=unread_only)
     cache = get_cache()
     gens = await cache.generations(NOTIFICATIONS, reads_of(user.id))
     if gens is None:
@@ -163,19 +190,33 @@ async def feed(db: AsyncSession, user: User, student: Student | None, *, now: da
 
 
 async def _load_feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None,
-                     limit: int) -> list[Item]:
+                     limit: int, sources: tuple[str, ...] | None = None, grade_details: bool = True,
+                     unread_only: bool = False) -> list[Item]:
     since = (now or utcnow()) - HORIZON
-    items = await _announcements(db, student, since, limit)
+    unread_by = user.id if unread_only else None
+    items = await _announcements(db, student, since, limit, sources, unread_by)
+    from_dean = sources is None or Source.DEAN in sources
+    from_teacher = sources is None or Source.TEACHER in sources
     if student is not None:
-        items += await _certificates(db, student.id, since, limit)
-        items += await _grades(db, student.id, since, limit)
-        items += await _documents(db, student.id, since, limit)
-    from app.models.learning import LearningNotice
-    notices = (await db.scalars(select(LearningNotice).where(LearningNotice.user_id == user.id, LearningNotice.created_at >= since).order_by(LearningNotice.created_at.desc()).limit(limit))).all()
-    items += [Item("learning", n.id, Source.TEACHER, n.title, n.body, n.created_at, n.href) for n in notices]
+        if from_dean:
+            items += await _certificates(db, student.id, since, limit, unread_by)
+            items += await _documents(db, student.id, since, limit, unread_by)
+        if from_teacher:
+            items += await _grades(db, student.id, since, limit, grade_details=grade_details, unread_by=unread_by)
+    if from_teacher:
+        from app.models.learning import LearningNotice
+        body = LearningNotice.body if grade_details else literal("")
+        notices = (await db.execute(
+            select(LearningNotice.id, LearningNotice.title, body, LearningNotice.created_at, LearningNotice.href)
+            .where(LearningNotice.user_id == user.id, LearningNotice.created_at >= since,
+                   _unread("learning", LearningNotice.id, unread_by))
+            .order_by(LearningNotice.created_at.desc()).limit(limit)
+        )).all()
+        items += [Item("learning", notice_id, Source.TEACHER, title, message, created_at, href)
+                  for notice_id, title, message, created_at, href in notices]
     items.sort(key=lambda i: i.created_at, reverse=True)
     items = items[:limit]
-    if items:
+    if items and not unread_only:
         read = set((await db.scalars(
             select(NotificationRead.key).where(NotificationRead.user_id == user.id,
                                                NotificationRead.key.in_([i.key for i in items]))

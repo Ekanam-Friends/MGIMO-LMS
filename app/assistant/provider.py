@@ -126,6 +126,14 @@ class GigaChat:
             choice = result["choices"][0]
             text = choice["message"]["content"]
             reason = choice.get("finish_reason")
+            # GigaChat может пометить завершённый JSON как length. Незакрытый
+            # объект отклоняем здесь, поля проверяет модель данных вызывающего кода.
+            if reason == "length" and response_schema is not None and isinstance(text, str):
+                try:
+                    if isinstance(json.loads(text), dict):
+                        return text
+                except ValueError:
+                    pass
             if reason != "stop":
                 code = "generation_length" if reason == "length" else "generation_refused"
                 raise ProviderError("Генерация не завершена или отклонена GigaChat", code=code)

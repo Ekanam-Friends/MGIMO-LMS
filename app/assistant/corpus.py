@@ -7,6 +7,7 @@ import math
 import re
 from collections import Counter
 from datetime import date
+from threading import local
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -83,18 +84,25 @@ class Chunk(BaseModel):
         return f"{self.source_url}#page={self.page}"
 
 
-_STEMMER = snowballstemmer.stemmer("russian")
+_SEARCH_THREAD = local()
 _STOP = set("как какой какая какие сколько когда где куда кто что нужно мне меня мой моего моем моём могут это для при или чтобы можно ли оформить получить подать документы документ студент студента обучающийся пожалуйста расскажи".split())
 _ALIASES = {"академ": "академический отпуск", "общага": "общежитие", "общагу": "общежитие",
             "стипуха": "стипендия", "стипухе": "стипендия", "стипуху": "стипендия",
             "стипухи": "стипендия", "стипухой": "стипендия",
             "прогуляю": "пропуск занятий", "прогулять": "пропуск занятий", "прогул": "пропуск занятий", "матпомощь": "материальная помощь", "бюджет": "бесплатное обучение",
-            "отчислить": "отчисление", "отчислят": "отчисление"}
+            "отчислить": "отчисление", "отчислят": "отчисление",
+            "внешний вид": "внешний вид одежда опрятность эстетические нормы",
+            "внешнего вида": "внешний вид одежда опрятность эстетические нормы",
+            "одежда": "одежда опрятность эстетические нормы"}
 
 
 def terms(text: str) -> list[str]:
     words = re.findall(r"[а-яёa-z]{3,}", text.lower().replace("ё", "е"))
-    return _STEMMER.stemWords([w for w in words if w not in _STOP])
+    stemmer = getattr(_SEARCH_THREAD, "stemmer", None)
+    if stemmer is None:
+        # Snowball хранит состояние текущего слова и не разделяется между потоками поиска.
+        stemmer = _SEARCH_THREAD.stemmer = snowballstemmer.stemmer("russian")
+    return stemmer.stemWords([w for w in words if w not in _STOP])
 
 
 def expand(question: str) -> str:
