@@ -8,8 +8,9 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -93,8 +94,13 @@ async def teacher_home(request: Request, viewer: Viewer = Depends(teacher_viewer
     # Сегодня пар нет — показываем ближайший день с занятиями, а не пустую плашку.
     next_day = None if lessons else await sv.teacher_next_day(db, viewer.teacher_id, now)
     next_lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, next_day, next_day)).get(next_day, []) if next_day else []
+    # «Требует внимания»: домашние задания со сроком в пределах недели (назад и вперёд), ещё не проверенные целиком.
+    attention = sorted((i for i in await grades.teacher_homework(db, viewer.teacher_id, scale.academic_year(now), now)
+                        if i.assessment.due_date and abs((i.assessment.due_date - now).days) <= 7
+                        and i.submitted < i.students), key=lambda i: i.assessment.due_date)[:3]
+    clock = datetime.now(ZoneInfo("Europe/Moscow")).time()  # пары в расписании — по московскому времени
     return render(request, "teacher/home.html", viewer, cards=cards, due_soon=due_soon, lessons=lessons,
-                  next_day=next_day, next_lessons=next_lessons,
+                  next_day=next_day, next_lessons=next_lessons, attention=attention, clock=clock,
                   resources=TEACHER_RESOURCES, work=TEACHER_WORK, today_date=now,
                   students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
 

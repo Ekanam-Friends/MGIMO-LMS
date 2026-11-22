@@ -704,6 +704,75 @@ body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity {
 .student-results { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; }
 .student-results__item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 
-/* главная преподавателя: сегодня пар нет — подпись над ближайшим днём с занятиями */
-.next-day { margin: 0; font-size: 14px; color: var(--muted); }
-.next-day strong { color: var(--text); font-weight: 600; }
+
+/* ===== Главная преподавателя, верх (вариант A1 дизайн-ревью 2026-11-22) ===== */
+.th-head { display: flex; flex-direction: column; gap: 12px; }
+.th-hello { font-size: 40px; line-height: 1.05; font-weight: 600; margin: 0; }
+.th-date { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.th-date b { color: var(--text); font-weight: 600; }
+.th-chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.th-chip { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 14px; border-radius: 999px; background: var(--surface);
+  border: 1px solid var(--line); font-size: 13px; color: var(--muted); white-space: nowrap; }
+.th-chip b { font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.th-chip:hover { border-color: #d6d6dc; }
+.th-chip--warn { border-color: #f3c9a3; background: #fdf4ec; }
+.th-chip--warn b { color: #b5601a; }
+.th-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; align-items: start; }
+.th-grid--solo { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.th-sec { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.th-sec__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.th-sec__title { font-size: 20px; line-height: 28px; font-weight: 600; margin: 0; }
+.th-sec__title span { color: var(--muted); font-weight: 500; font-size: 16px; }
+.th-sec__link { color: var(--accent); display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; }
+.th-agenda { list-style: none; margin: 0; padding: 0; background: var(--surface); border-radius: var(--radius-l); overflow: hidden; }
+.th-agenda > li + li { border-top: 1px solid var(--line); }
+.th-day { padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; background: #fbfbfc; }
+.th-day b { color: var(--text); }
+.th-slot { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; padding: 14px 20px; position: relative; color: inherit; }
+.th-slot:hover { background: #fafafb; }
+.th-time { font-size: 18px; line-height: 24px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.th-time small { display: block; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+.th-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.th-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 16px; line-height: 24px; font-weight: 600; }
+.th-tag { font-size: 11px; line-height: 16px; font-weight: 600; padding: 1px 8px; border-radius: 10px; }
+.th-tag--lec { background: var(--violet-soft); color: var(--violet); }
+.th-tag--sem { background: var(--blue-soft); color: var(--blue); }
+.th-tag--exam { background: var(--accent-soft); color: var(--accent); }
+.th-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 13px; line-height: 20px; }
+.th-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.th-meta .th-room { color: var(--text); font-weight: 600; }
+.th-slot--now::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.th-slot--now .th-time small { color: var(--accent); }
+.th-slot--past { opacity: .55; }
+.th-slot--cancelled .th-title { text-decoration: line-through; color: var(--muted); }
+.th-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 5px; vertical-align: 1px; }
+.th-none { padding: 14px 20px; color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.th-att { background: var(--surface); border-radius: var(--radius-l); padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.th-att__top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.th-att__name { font-weight: 600; font-size: 15px; }
+.th-att__due { font-size: 12px; font-weight: 700; color: #b5601a; white-space: nowrap; }
+.th-att__due--late { color: var(--accent); }
+.th-att__sub { font-size: 13px; color: var(--muted); }
+.th-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.th-bar i { display: block; height: 100%; background: var(--orange); border-radius: 3px; }
+.th-att__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; }
+.th-att__foot b { font-variant-numeric: tabular-nums; }
+.th-btn { padding: 6px 16px; font-size: 13px; line-height: 18px; }
+.th-ok { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 16px; border-radius: var(--radius-l); background: var(--surface); font-size: 14px; color: var(--muted); }
+.th-ok .ico { color: var(--green); }
+.th-ok > span { flex: 1; min-width: 0; }
+.th-ok b { color: var(--text); font-weight: 600; }
+.th-ok a { margin-left: auto; color: var(--accent); font-size: 13px; font-weight: 600; white-space: nowrap; }
+@media (max-width: 640px) {
+  .th-hello { font-size: 28px; }
+  .th-chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; }
+  .th-chip { padding: 5px 12px; }
+  .th-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .th-slot { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px 16px; }
+  .th-time { font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+  .th-time small { display: inline; margin: 0; }
+  .th-day, .th-none { padding-left: 16px; padding-right: 16px; }
+  .th-att { padding: 14px 16px; }
+  .th-ok { align-items: flex-start; font-size: 13px; }
+  .th-ok .ico { margin-top: 1px; }
+}

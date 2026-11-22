@@ -319,6 +319,6 @@ async def test_teacher_home_shows_next_lesson_day(client):
         await s.commit()
     await login(client, "teacher")
     page = (await client.get("/t/home")).text
-    assert "Сегодня занятий нет. Ближайшие" in page and "Своя дисциплина" in page
+    assert "Сегодня пар нет" in page and "Ближайшие пары" in page and "Своя дисциплина" in page
     await login(client, "other")  # у второго преподавателя занятий нет вовсе
-    assert "Занятий в ближайший месяц нет" in (await client.get("/t/home")).text
+    assert "Пар в ближайший месяц нет" in (await client.get("/t/home")).text

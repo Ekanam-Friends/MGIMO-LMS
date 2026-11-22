@@ -5,46 +5,93 @@
 {% block title %}Главная{% endblock %}
 {% block header %}<p class="header__title">Кабинет преподавателя</p>{% endblock %}
 {% block content %}
+{#- Верх главной (вариант A1 дизайн-ревью 2026-11-22): приветствие с датой, цифры чипами,
+    «Сегодня» лентой дня (время в одну строку, своё ФИО не показываем), «Требует внимания» —
+    задания со сроком в пределах недели с прогрессом проверки; пусто — одна строка «Всё проверено». -#}
+{% macro plural(n, one, few, many) %}{{ one if n % 10 == 1 and n % 100 != 11 else (few if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else many) }}{% endmacro %}
+{% macro agenda(slots, mark_now) -%}
+  {% set ns = namespace(next_marked=false) %}
+  {% for slot in slots %}{% for l in slot.lessons %}
+    {% set past = mark_now and slot.ends_at <= clock %}
+    {% set now_on = mark_now and slot.begins_at <= clock < slot.ends_at %}
+    {% set is_next = mark_now and not past and not now_on and not ns.next_marked %}
+    {% if is_next %}{% set ns.next_marked = true %}{% endif %}
+    <li>
+      <a class="th-slot{% if now_on %} th-slot--now{% elif past %} th-slot--past{% endif %}{% if l.cancelled %} th-slot--cancelled{% endif %}" href="/t/schedule">
+        <div class="th-time">{{ slot.begins_at | hhmm }}–{{ slot.ends_at | hhmm }}
+          {%- if l.cancelled %}<small>отменено</small>{% elif now_on %}<small><span class="th-dot"></span>идёт сейчас</small>{% elif is_next %}<small>следующая</small>{% elif past %}<small>прошла</small>{% endif %}</div>
+        <div class="th-body">
+          <div class="th-title">{{ l.discipline }} <span class="th-tag th-tag--{{ 'lec' if l.kind_class == 'lecture' else ('exam' if l.kind_class == 'exam' else 'sem') }}">{{ l.kind | lower }}</span></div>
+          <div class="th-meta">
+            {% if l.auditorium or l.building %}<span class="th-room">{{ icon("door", 14) }}{% if l.auditorium %}ауд. {{ l.auditorium }}{% endif %}{% if l.auditorium and l.building %}, {% endif %}{{ l.building }}</span>{% endif %}
+            {% if l.groups %}<span>{{ icon("user", 14) }}{{ l.groups[:6] | join(", ") }}{% if l.groups | length > 6 %} и ещё {{ l.groups | length - 6 }}{% endif %}</span>{% endif %}
+          </div>
+        </div>
+      </a>
+    </li>
+  {% endfor %}{% endfor %}
+{%- endmacro %}
 <div class="page">
-  <div class="page__head">
+  {% set fio = viewer.teacher.full_name.split() %}
+  {% set hello = "Доброе утро" if clock.hour < 12 else ("Добрый день" if clock.hour < 18 else "Добрый вечер") %}
+  {% set pairs = lessons | map(attribute="lessons") | map("length") | sum %}
+  <div class="th-head">
     <div>
-      <h1 class="title-1">{% set fio = viewer.teacher.full_name.split() %}Добро пожаловать, {{ fio[1] if fio | length > 1 else fio[0] }}</h1>
-      <p class="muted">Рабочее место сотрудника и преподавателя</p>
+      <h1 class="th-hello">{{ hello }}, {{ fio[1] if fio | length > 1 else fio[0] }}</h1>
+      <p class="th-date">{{ sv.WEEKDAYS_FULL[today_date.weekday()] }}, <b>{{ today_date.day }} {{ sv.MONTHS_GEN[today_date.month - 1] }}</b> · {% if pairs %}{{ pairs }} {{ plural(pairs, "пара", "пары", "пар") }}{% else %}пар нет{% endif %}</p>
     </div>
+    <ul class="th-chips">
+      <li><a class="th-chip" href="/t/courses"><b>{{ cards | length }}</b> {{ plural(cards | length, "ведомость", "ведомости", "ведомостей") }}</a></li>
+      <li><a class="th-chip" href="/t/courses"><b>{{ students_total }}</b> {{ plural(students_total, "студент", "студента", "студентов") }}</a></li>
+      {% if due_soon %}<li><a class="th-chip th-chip--warn" href="/t/homework"><b>{{ due_soon | length }}</b> {{ plural(due_soon | length, "срок", "срока", "сроков") }} ДЗ на неделе</a></li>{% endif %}
+    </ul>
   </div>
 
-  <div class="stats">
-    <div class="stat"><span class="stat__num">{{ lessons | length }}</span><span class="stat__label">занятий сегодня</span></div>
-    <div class="stat"><span class="stat__num">{{ cards | length }}</span><span class="stat__label">ведомостей</span></div>
-    <div class="stat"><span class="stat__num">{{ students_total }}</span><span class="stat__label">студентов</span></div>
-    <div class="stat{% if due_soon %} stat--warn{% endif %}"><span class="stat__num">{{ due_soon | length }}</span><span class="stat__label">сроков ДЗ на неделе</span></div>
-  </div>
-
-  <div class="teacher-home">
-    <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Сегодня</h2><a class="dash-link" href="/t/schedule" aria-label="Расписание">{{ icon("arrow") }}</a></div>
-      {% if lessons %}
-        {% for slot in lessons %}{{ slot_card(slot) }}{% endfor %}
-      {% else %}
-        {% if next_day %}
-          <p class="next-day">Сегодня занятий нет. Ближайшие — <strong>{{ sv.WEEKDAYS_FULL[next_day.weekday()] | lower }}, {{ next_day.day }} {{ sv.MONTHS_GEN[next_day.month - 1] }}</strong>{% if (next_day - today_date).days == 1 %} (завтра){% endif %}</p>
-          {% for slot in next_lessons %}{{ slot_card(slot) }}{% endfor %}
+  <div class="th-grid{% if not attention %} th-grid--solo{% endif %}">
+    <section class="th-sec" aria-labelledby="th-today">
+      <div class="th-sec__head">
+        <h2 class="th-sec__title" id="th-today">{% if lessons or not next_day %}Сегодня{% else %}Ближайшие пары{% endif %}</h2>
+        <a class="th-sec__link" href="/t/schedule">Расписание {{ icon("arrow", 16) }}</a>
+      </div>
+      <ul class="th-agenda">
+        {% if lessons %}
+          {{ agenda(lessons, true) }}
+        {% elif next_day %}
+          {% set gap = (next_day - today_date).days %}
+          <li class="th-none">{{ icon("calendar", 16) }}Сегодня пар нет</li>
+          <li class="th-day"><b>{{ sv.WEEKDAYS_FULL[next_day.weekday()] }}, {{ next_day.day }} {{ sv.MONTHS_GEN[next_day.month - 1] }}</b> · {{ "завтра" if gap == 1 else ("послезавтра" if gap == 2 else "через " ~ gap ~ " " ~ plural(gap, "день", "дня", "дней")) }}</li>
+          {{ agenda(next_lessons, false) }}
         {% else %}
-          <p class="panel muted">Занятий в ближайший месяц нет.</p>
+          <li class="th-none">{{ icon("calendar", 16) }}Пар в ближайший месяц нет</li>
         {% endif %}
-      {% endif %}
+      </ul>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-block__header"><h2 class="dash-title">Требует внимания</h2><a class="dash-link" href="/t/homework" aria-label="Домашние задания">{{ icon("arrow") }}</a></div>
-      {% if due_soon %}
-        <ul class="panel timeline">
-          {% for c in due_soon %}<li><span class="timeline__date">до {{ c.next_due | ddmmyyyy }}</span><a href="/t/courses/{{ c.course.id }}">{{ c.discipline }}, {{ c.group }}</a></li>{% endfor %}
-        </ul>
-      {% else %}
-        <p class="panel muted">Ближайших сроков сдачи заданий нет.</p>
-      {% endif %}
+    {% if attention %}
+    <section class="th-sec" aria-labelledby="th-att">
+      <div class="th-sec__head">
+        <h2 class="th-sec__title" id="th-att">Требует внимания <span>{{ attention | length }}</span></h2>
+        <a class="th-sec__link" href="/t/homework">Все задания {{ icon("arrow", 16) }}</a>
+      </div>
+      {% for i in attention %}
+        {% set a = i.assessment %}{% set left = (a.due_date - today_date).days %}{% set todo = i.students - i.submitted %}
+        <div class="th-att">
+          <div class="th-att__top">
+            <span class="th-att__name">{{ a.title }}</span>
+            <span class="th-att__due{% if left < 0 %} th-att__due--late{% endif %}">{% if left < 0 %}срок прошёл {{ a.due_date.strftime("%d.%m") }}{% elif left == 0 %}срок сегодня{% elif left == 1 %}срок завтра{% else %}до {{ a.due_date.strftime("%d.%m") }}{% endif %}</span>
+          </div>
+          <div class="th-att__sub">{{ i.card.discipline }} · {{ i.card.group }}</div>
+          <div class="th-bar" role="img" aria-label="Проверено {{ i.submitted }} из {{ i.students }}"><i style="width: {{ (100 * i.submitted / i.students) | round | int if i.students else 0 }}%"></i></div>
+          <div class="th-att__foot">
+            <span>Проверено <b>{{ i.submitted }}/{{ i.students }}</b></span>
+            <a class="btn btn--primary th-btn" href="/t/courses/{{ i.card.course.id }}/assessments/{{ a.id }}">Проверить {{ todo }} {{ plural(todo, "работу", "работы", "работ") }}</a>
+          </div>
+        </div>
+      {% endfor %}
     </section>
+    {% else %}
+      <p class="th-ok">{{ icon("check", 16) }}<span><b>Всё проверено</b> — сроков сдачи на этой неделе нет</span><a href="/t/homework">Задания</a></p>
+    {% endif %}
   </div>
 
   <section class="dash-block">
