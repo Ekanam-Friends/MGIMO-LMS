@@ -480,6 +480,7 @@ async def enroll_missing(ctx: Ctx, g: StudyGroup, students: list[Student]) -> No
 
 async def reset(db: AsyncSession) -> None:
     from app.models.document_notice import DocumentRecipient
+    from app.models.learning import Attendance, AttendanceAttempt, AttendanceChange, LearningNotice, Submission, TaskMessage
 
     gen_students = select(Student.id).where(Student.record_book.like(f"{GEN_PREFIX}%"))
     gen_users = select(User.id).where(User.student_id.in_(gen_students))
@@ -488,6 +489,13 @@ async def reset(db: AsyncSession) -> None:
         delete(Announcement).where(Announcement.student_id.in_(gen_students)),
         delete(NotificationRead).where(NotificationRead.user_id.in_(gen_users)),
         delete(DocumentRecipient).where(DocumentRecipient.student_id.in_(gen_students)),
+        delete(LearningNotice).where(
+            LearningNotice.user_id.in_(gen_users) | LearningNotice.href.startswith("/learning/tasks/")),
+        delete(AttendanceChange).where(
+            AttendanceChange.student_id.in_(gen_students) | AttendanceChange.actor_id.in_(gen_users)),
+        delete(AttendanceAttempt).where(AttendanceAttempt.student_id.in_(gen_students)),
+        delete(Attendance).where(Attendance.student_id.in_(gen_students)),
+        delete(TaskMessage), delete(Submission),
         delete(GradeEvent), delete(FinalGrade), delete(Score), delete(Assessment), delete(CourseEnrollment),
         delete(Course), delete(AuthSession).where(AuthSession.user_id.in_(gen_users)),
         delete(User).where(User.student_id.in_(gen_students)), delete(Student).where(Student.id.in_(gen_students)),

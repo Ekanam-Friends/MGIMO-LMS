@@ -132,7 +132,9 @@ def counts_now(a: Assessment, has_score: bool, today: date) -> bool:
 
 
 def _event(db: AsyncSession, student_id: int, course_id: int, kind: str, text: str) -> None:
-    db.add(GradeEvent(student_id=student_id, course_id=course_id, kind=kind, text=text[:500], created_at=utcnow()))
+    now = utcnow()
+    db.add(GradeEvent(student_id=student_id, course_id=course_id, kind=kind, text=text[:500],
+                      created_at=now, telegram_retry_at=now))
 
 
 def _parse_number(raw: str | float | None, *, what: str, lo: float, hi: float, lo_inclusive: bool = True) -> float | None:
@@ -279,11 +281,14 @@ async def journal(db: AsyncSession, teacher_id: int, course_id: int, today: date
                    current_max=scale.current_max(form), planned_max=sum(a.max_points for a in assessments))
 
 
-async def get_assessment(db: AsyncSession, teacher_id: int, course_id: int, assessment_id: int) -> Assessment | None:
-    return await db.scalar(
-        select(Assessment).join(Course, Course.id == Assessment.course_id)
-        .where(Assessment.id == assessment_id, Assessment.course_id == course_id, Course.teacher_id == teacher_id)
-    )
+async def get_assessment(
+    db: AsyncSession, teacher_id: int, course_id: int, assessment_id: int, *, lock: bool = False,
+) -> Assessment | None:
+    query = (select(Assessment).join(Course, Course.id == Assessment.course_id)
+             .where(Assessment.id == assessment_id, Assessment.course_id == course_id, Course.teacher_id == teacher_id))
+    if lock:
+        query = query.with_for_update(of=Assessment)
+    return await db.scalar(query)
 
 
 async def create_assessment(
@@ -330,12 +335,15 @@ async def create_assessment(
 
 
 async def delete_assessment(db: AsyncSession, teacher_id: int, course_id: int, assessment_id: int) -> bool:
-    a = await get_assessment(db, teacher_id, course_id, assessment_id)
+    a = await get_assessment(db, teacher_id, course_id, assessment_id, lock=True)
     if a is None:
         return False
     card = await get_course(db, teacher_id, course_id)
     if card and card.course.status == CourseStatus.CLOSED:
         raise Locked("Ведомость закрыта")
+    from app.models.learning import Submission, TaskMessage
+    await db.execute(delete(Submission).where(Submission.assessment_id == a.id))
+    await db.execute(delete(TaskMessage).where(TaskMessage.assessment_id == a.id))
     await db.execute(delete(Score).where(Score.assessment_id == a.id))
     await db.delete(a)
     # «Новое задание» и баллы по нему уже в ленте студентов, а GradeEvent не ссылается на задание,
@@ -364,7 +372,7 @@ async def set_score(
 
     None — курс не свой, точки нет в курсе или студент не записан в ведомость (экран отвечает 404).
     """
-    a = await get_assessment(db, teacher_id, course_id, assessment_id)
+    a = await get_assessment(db, teacher_id, course_id, assessment_id, lock=True)
     if a is None or not await _enrolled(db, course_id, student_id):
         return None
     card = await get_course(db, teacher_id, course_id)

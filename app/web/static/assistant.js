@@ -207,6 +207,9 @@
       }
       if (!response.ok && response.status !== 429) throw new Error();
       const data = await response.json(); show(data);
+      if (data.navigation && /^\/(attendance|learning\/tasks|s\/assistant|services#[a-z0-9-]+)$/.test(data.navigation.href)) {
+        window.location.assign(data.navigation.href);
+      }
       if (!['error','unavailable','busy','consent_required'].includes(data.status)) input.value = '';
     } catch (_) {
       show({status:'error', message:'Не удалось получить ответ. Проверьте соединение и вход в кабинет. Вопрос сохранён в поле ввода.'});

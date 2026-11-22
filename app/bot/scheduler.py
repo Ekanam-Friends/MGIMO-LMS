@@ -70,6 +70,8 @@ async def tick(ctx: Context, *, now: datetime | None = None) -> None:
     now_msk = (now or datetime.now(MOSCOW)).astimezone(MOSCOW)
     today = now_msk.date()
     await deliver_document_notifications(ctx.bot, ctx.sf)
+    from app.bot.learning_notify import deliver_learning_notifications
+    await deliver_learning_notifications(ctx.bot, ctx.sf)
 
     async with ctx.sf() as session:
         changes = await notify.collect_schedule_changes(session, today=today)

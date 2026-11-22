@@ -11,6 +11,8 @@ MENU = [
     {"title": "Расписание", "icon": "calendar", "href": "/schedule"},
     {"title": "Учёба", "icon": "cap", "children": [
         {"title": "Успеваемость", "href": "/grades"},
+        {"title": "Задания и сообщения", "href": "/learning/tasks"},
+        {"title": "Отметка на паре", "href": "/attendance"},
         {"title": "Учебный план", "href": "/s/plan"},
     ]},
     {"title": "Элективные дисциплины", "icon": "book", "href": "/electives"},
@@ -45,6 +47,8 @@ TEACHER_MENU = [
     {"title": "Преподавателю", "icon": "cap", "children": [
         {"title": "Мои курсы", "href": "/t/courses"},
         {"title": "Домашние задания", "href": "/t/homework"},
+        {"title": "Решения и сообщения", "href": "/learning/tasks"},
+        {"title": "Посещаемость", "href": "/attendance"},
         {"title": "Расписание", "href": "/t/schedule"},
         {"title": "Объявления", "href": "/t/announcements"},
         {"title": "Учебная нагрузка", "href": "/s/workload"},
@@ -114,7 +118,7 @@ MGIMO_APP = {
 }
 
 SERVICES = [
-    ("СДО", "#447ABC", "Курсы, задания и тесты преподавателей."),
+    ("Moodle", "#447ABC", "Курсы, задания и тесты преподавателей."),
     ("Библиотека", "#7A5BC4", "Электронный каталог и ЭБС."),
     ("Почта", "#E3832B", "Корпоративная почта студента."),
     ("Диск", "#2B7FE3", "Облачное хранилище для учёбы."),
@@ -173,4 +177,20 @@ TEACHER_WORK = [
     ("Расписание", "занятия на неделю", "#447ABC", "/t/schedule"),
     ("Учебная нагрузка", "часы по дисциплинам", "#7A5BC4", "/s/workload"),
     ("Конкурс ППС", "заявки и сроки", "#3F6FA8", "/s/pps"),
+    ("Отметка на паре", "создание шестизначного кода", "#12808F", "/attendance"),
+]
+
+
+# Единый список плиток главной и разрешённых переходов ассистента.
+POPULAR_SERVICES = [
+    ("Отметка на паре", "#12808F", "/attendance"),
+    ("Moodle", "#447ABC", "/learning/tasks"),
+    ("Библиотека", "#7A5BC4", "/services#service-2"),
+    ("Почта", "#E3832B", "/services#service-3"),
+    ("Диск", "#2B7FE3", "/services#service-4"),
+    ("Антиплагиат", "#3F6FA8", "/services#service-5"),
+    ("ИИ-ассистент", "#DF2935", "/s/assistant"),
+    ("Расписание в Telegram", "#2AABEE", "/services#telegram"),
+    ("Расписание в MAX", "#6A5AE0", "/services#max"),
+    ("Календарь .ics", "#3BA55C", "/services#calendar"),
 ]

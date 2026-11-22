@@ -34,7 +34,7 @@ def test_upgrade_from_either_branch_and_reset_document_recipient(previous):
         sf = make_session_factory(engine)
         try:
             async with sf() as db:
-                assert await db.scalar(text("select version_num from alembic_version")) == "0013_merge"
+                assert await db.scalar(text("select version_num from alembic_version")) == "0015_learning_delivery"
                 db.add_all([Student(id=1, full_name="Вымышленный студент", record_book="ГЕН-1"),
                             Student(id=2, full_name="Демонстрационный студент", record_book="ДЕМО-2")])
                 await db.flush()

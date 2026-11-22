@@ -203,5 +203,6 @@ class GradeEvent(Base):
     text: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime)
     notified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
+    telegram_retry_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
 
     __table_args__ = (Index("ix_grade_events_student_created", "student_id", "created_at"),)

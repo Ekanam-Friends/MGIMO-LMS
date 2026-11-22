@@ -47,7 +47,7 @@ CALENDAR_TABLES = {"elective_choices": "student_id", "activity_signups": "studen
 """Личный слой календаря → поле со студентом. Без него (массовый DML) — общее поколение расписания."""
 NOTIFICATION_TABLES = {
     "announcements", "certificate_request_events", "grade_events", "document_notices",
-    "document_recipients", "courses", "disciplines", "students",
+    "learning_notices", "document_recipients", "courses", "disciplines", "students",
     "certificate_requests",  # dean_message в тексте «нужны сведения»; сверка Pyrus очищает его без события
     "knowledge_documents",  # заголовок и ссылка уведомления о документе
 }

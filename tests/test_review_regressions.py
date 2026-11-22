@@ -20,12 +20,12 @@ from tests.test_assistant import FakeProvider, config
 def test_migrations_have_one_head_and_upgrade_either_deployed_branch(tmp_path, previous):
     cfg = Config("alembic.ini")
     cfg.set_main_option("sqlalchemy.url", f"sqlite+aiosqlite:///{tmp_path / 'upgrade.db'}")
-    assert ScriptDirectory.from_config(cfg).get_heads() == ["0013_merge"]
+    assert ScriptDirectory.from_config(cfg).get_heads() == ["0015_learning_delivery"]
     command.upgrade(cfg, previous)
     command.upgrade(cfg, "head")
     import sqlite3
     with sqlite3.connect(tmp_path / 'upgrade.db') as db:
-        assert db.execute("select version_num from alembic_version").fetchall() == [("0013_merge",)]
+        assert db.execute("select version_num from alembic_version").fetchall() == [("0015_learning_delivery",)]
         assert db.execute("select count(*) from group_schedule_coverage").fetchone() == (0,)
         assert db.execute("select count(*) from knowledge_documents").fetchone() == (0,)
         with pytest.raises(sqlite3.IntegrityError):
@@ -84,3 +84,15 @@ def test_grade_consent_cannot_be_granted_without_request():
         conversation.grant_grades()
     with pytest.raises(AttributeError):
         conversation.grades_allowed = True
+
+
+@pytest.mark.parametrize(("question", "route", "expected"), [
+    ("Каков порядок публикации объявлений?", ["public"], ["public"]),
+    ("Какие правила публикации объявлений?", ["notifications"], ["public"]),
+    ("Что мне написал преподаватель?", ["public"], ["public", "notifications"]),
+    ("Каков порядок публикации объявлений и какие у меня уведомления?", ["public"], ["public", "notifications"]),
+])
+def test_notification_scopes_distinguish_public_rules_and_personal_feed(question, route, expected):
+    from app.assistant.routing import normalize_scopes
+
+    assert normalize_scopes(question, route) == expected
