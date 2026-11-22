@@ -1,0 +1,13 @@
+{
+  "rate_per_1000": 0.065,
+  "minimum_api": 600,
+  "ideal_tokens": 2500,
+  "route_tokens": 1000,
+  "selection_tokens": 5700,
+  "audit_tokens": 4300,
+  "fixed_ai": 10000,
+  "fixed_web": 30000,
+  "monthly_price": 75000,
+  "development": 300000,
+  "amortization_months": 24
+}
