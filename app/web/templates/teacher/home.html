@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% from "partials/_lesson.html" import slot_card %}
 {% from "teacher/_macros.html" import res_tile %}
 {% block title %}Главная{% endblock %}
 {% block header %}<p class="header__title">Кабинет преподавателя</p>{% endblock %}
 {% block content %}
 {#- Верх главной (вариант A1 дизайн-ревью 2026-11-22): приветствие с датой, цифры чипами,
     «Сегодня» лентой дня (время в одну строку, своё ФИО не показываем), «Требует внимания» —
-    задания со сроком в пределах недели с прогрессом проверки; пусто — одна строка «Всё проверено». -#}
+    задания со сроком в пределах недели с прогрессом проверки. -#}
 {% macro plural(n, one, few, many) %}{{ one if n % 10 == 1 and n % 100 != 11 else (few if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14) else many) }}{% endmacro %}
-{% macro agenda(slots, mark_now) -%}
+{% macro agenda(slots, day) -%}
+  {% set mark_now = day == today_date %}
   {% set ns = namespace(next_marked=false) %}
   {% for slot in slots %}{% for l in slot.lessons %}
     {% set past = mark_now and slot.ends_at <= clock %}
-    {% set now_on = mark_now and slot.begins_at <= clock < slot.ends_at %}
-    {% set is_next = mark_now and not past and not now_on and not ns.next_marked %}
+    {% set now_on = mark_now and not l.cancelled and slot.begins_at <= clock < slot.ends_at %}
+    {% set is_next = mark_now and not l.cancelled and clock < slot.begins_at and not ns.next_marked %}
     {% if is_next %}{% set ns.next_marked = true %}{% endif %}
     <li>
-      <a class="th-slot{% if now_on %} th-slot--now{% elif past %} th-slot--past{% endif %}{% if l.cancelled %} th-slot--cancelled{% endif %}" href="/t/schedule">
+      <a class="th-slot{% if now_on %} th-slot--now{% elif past %} th-slot--past{% endif %}{% if l.cancelled %} th-slot--cancelled{% endif %}" href="/t/schedule?week={{ day.isoformat() }}#d-{{ day.isoformat() }}">
         <div class="th-time">{{ slot.begins_at | hhmm }}–{{ slot.ends_at | hhmm }}
           {%- if l.cancelled %}<small>отменено</small>{% elif now_on %}<small><span class="th-dot"></span>идёт сейчас</small>{% elif is_next %}<small>следующая</small>{% elif past %}<small>прошла</small>{% endif %}</div>
         <div class="th-body">
@@ -34,7 +34,6 @@
 <div class="page">
   {% set fio = viewer.teacher.full_name.split() %}
   {% set hello = "Доброе утро" if clock.hour < 12 else ("Добрый день" if clock.hour < 18 else "Добрый вечер") %}
-  {% set pairs = lessons | map(attribute="lessons") | map("length") | sum %}
   <div class="th-head">
     <div>
       <h1 class="th-hello">{{ hello }}, {{ fio[1] if fio | length > 1 else fio[0] }}</h1>
@@ -43,7 +42,7 @@
     <ul class="th-chips">
       <li><a class="th-chip" href="/t/courses"><b>{{ cards | length }}</b> {{ plural(cards | length, "ведомость", "ведомости", "ведомостей") }}</a></li>
       <li><a class="th-chip" href="/t/courses"><b>{{ students_total }}</b> {{ plural(students_total, "студент", "студента", "студентов") }}</a></li>
-      {% if due_soon %}<li><a class="th-chip th-chip--warn" href="/t/homework"><b>{{ due_soon | length }}</b> {{ plural(due_soon | length, "срок", "срока", "сроков") }} ДЗ на неделе</a></li>{% endif %}
+      {% if due_soon %}<li><a class="th-chip th-chip--warn" href="/t/homework"><b>{{ due_soon }}</b> {{ plural(due_soon, "срок", "срока", "сроков") }} ДЗ на неделе</a></li>{% endif %}
     </ul>
   </div>
 
@@ -51,17 +50,19 @@
     <section class="th-sec" aria-labelledby="th-today">
       <div class="th-sec__head">
         <h2 class="th-sec__title" id="th-today">{% if lessons or not next_day %}Сегодня{% else %}Ближайшие пары{% endif %}</h2>
-        <a class="th-sec__link" href="/t/schedule">Расписание {{ icon("arrow", 16) }}</a>
+        <a class="th-sec__link" href="/t/schedule{% if next_day and not lessons %}?week={{ next_day.isoformat() }}#d-{{ next_day.isoformat() }}{% endif %}">Расписание {{ icon("arrow", 16) }}</a>
       </div>
       <ul class="th-agenda">
         {% if lessons %}
-          {{ agenda(lessons, true) }}
+          {{ agenda(lessons, today_date) }}
         {% elif next_day %}
-          {% set gap = (next_day - today_date).days %}
           <li class="th-none">{{ icon("calendar", 16) }}Сегодня пар нет</li>
+        {% endif %}
+        {% if next_day %}
+          {% set gap = (next_day - today_date).days %}
           <li class="th-day"><b>{{ sv.WEEKDAYS_FULL[next_day.weekday()] }}, {{ next_day.day }} {{ sv.MONTHS_GEN[next_day.month - 1] }}</b> · {{ "завтра" if gap == 1 else ("послезавтра" if gap == 2 else "через " ~ gap ~ " " ~ plural(gap, "день", "дня", "дней")) }}</li>
-          {{ agenda(next_lessons, false) }}
-        {% else %}
+          {{ agenda(next_lessons, next_day) }}
+        {% elif not pairs %}
           <li class="th-none">{{ icon("calendar", 16) }}Пар в ближайший месяц нет</li>
         {% endif %}
       </ul>
@@ -90,7 +91,7 @@
       {% endfor %}
     </section>
     {% else %}
-      <p class="th-ok">{{ icon("check", 16) }}<span><b>Всё проверено</b> — сроков сдачи на этой неделе нет</span><a href="/t/homework">Задания</a></p>
+      <p class="th-ok">{{ icon("check", 16) }}<span>Нет заданий со сроком в пределах недели, требующих проверки</span><a href="/t/homework">Задания</a></p>
     {% endif %}
   </div>
 

@@ -772,7 +772,9 @@ body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity {
   .th-time { font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
   .th-time small { display: inline; margin: 0; }
   .th-day, .th-none { padding-left: 16px; padding-right: 16px; }
-  .th-att { padding: 14px 16px; }
+  .th-att { padding: 14px 16px; overflow-wrap: anywhere; }
+  .th-att__foot { flex-direction: column; align-items: flex-start; }
+  .th-att__foot .th-btn { max-width: calc(100% - 60px); }
   .th-ok { align-items: flex-start; font-size: 13px; }
   .th-ok .ico { margin-top: 1px; }
 }
