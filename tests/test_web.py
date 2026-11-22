@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 import httpx
 import pytest
@@ -15,10 +15,11 @@ from app.db.session import make_engine, make_session_factory
 from app.main import create_app
 from app.models import Activity, ActivitySignup, Lesson, LessonGroup, Student, StudyGroup
 from app.models.auth import Role, User
-from app.models.certificates import CertificateKind
+from app.models.certificates import CertificateKind, RequestStatus
 from app.certificates import service as certs
 
 PASSWORD = "test-only-password"
+CERTIFICATE_PDF = b"%PDF-test-certificate"
 
 
 @pytest.fixture
@@ -63,6 +64,10 @@ async def client(tmp_path, monkeypatch):
             User(login="boris", password_hash=hash_password(PASSWORD), role=Role.STUDENT, student_id=2, created_at=utcnow()),
         ])
         borisreq = await certs.create_request(s, 2, kind=CertificateKind.STUDY, purpose="секрет Бориса")
+        borisreq.status = RequestStatus.READY
+        borisreq.pdf = CERTIFICATE_PDF
+        borisreq.ready_at = utcnow()
+        borisreq.download_until = borisreq.ready_at + timedelta(days=1)
         await s.commit()
     await engine.dispose()
 
@@ -112,12 +117,28 @@ async def test_schedule_only_own_group(client):
 
 
 async def test_foreign_certificate_is_404(client):
-    await login(client)
+    csrf = await login(client)
     rid = client.boris_request_id
-    assert (await client.get(f"/mfc/certificates/{rid}")).status_code == 404
-    assert (await client.get(f"/mfc/certificates/{rid}/pdf")).status_code == 404
+    url = f"/mfc/certificates/{rid}"
+    assert (await client.get(url)).status_code == 404
+    assert (await client.post(f"{url}/pdf", data={"csrf": csrf})).status_code == 404
     listing = await client.get("/mfc/certificates")
     assert "секрет Бориса" not in listing.text
+
+    csrf = await login(client, "boris")
+    response = await client.post(f"{url}/pdf", data={"csrf": csrf})
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content == CERTIFICATE_PDF
+
+
+async def test_certificate_pdf_is_post_with_csrf(client):
+    """Скачивание ставит отметку downloaded_at, поэтому не GET и только с CSRF."""
+    csrf = await login(client, "boris")
+    url = f"/mfc/certificates/{client.boris_request_id}"
+    assert (await client.get(f"{url}/pdf")).status_code == 405
+    assert (await client.post(f"{url}/pdf", data={})).status_code == 403
+    assert (await client.post(f"{url}/paper", data={"csrf": csrf})).status_code == 409
 
 
 async def test_order_certificate_needs_csrf(client):

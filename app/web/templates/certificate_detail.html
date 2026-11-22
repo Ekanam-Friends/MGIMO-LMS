@@ -18,7 +18,10 @@
       <dt>{{ _('Бумажный оригинал') }}</dt><dd>{{ certs.paper_label(req) or "Можно запросить" }}</dd>
     </dl>
     {% if req.status == RequestStatus.READY and req.pdf and not certs.download_expired(req) %}
-      <a class="btn btn--primary" href="/mfc/certificates/{{ req.id }}/pdf">{{ icon("download", 18) }} {{ _('Скачать PDF') }}</a>
+      <form class="dl-form" method="post" action="/mfc/certificates/{{ req.id }}/pdf">
+        <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+        <button class="btn btn--primary" type="submit">{{ icon("download", 18) }} {{ _('Скачать PDF') }}</button>
+      </form>
     {% endif %}
   </section>
 

@@ -28,7 +28,10 @@
             <td data-label="Статус">{{ status_badge(certs.electronic_label(r), r.status) }}</td>
             <td data-label="Скачать">
               {% if r.status == RequestStatus.READY and r.pdf and not certs.download_expired(r) %}
-                <a class="icon-btn" href="/mfc/certificates/{{ r.id }}/pdf" aria-label="{{ _('Скачать PDF') }}">{{ icon("download") }}</a>
+                <form class="dl-form" method="post" action="/mfc/certificates/{{ r.id }}/pdf">
+                  <input type="hidden" name="csrf" value="{{ viewer.csrf }}">
+                  <button class="icon-btn" type="submit" aria-label="{{ _('Скачать PDF') }}">{{ icon("download") }}</button>
+                </form>
               {% else %}<span class="icon-btn icon-btn--off" aria-hidden="true">{{ icon("download") }}</span>{% endif %}
             </td>
             <td data-label="Бумажный оригинал" class="table__paper">

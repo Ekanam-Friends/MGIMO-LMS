@@ -26,6 +26,7 @@ FONT_CANDIDATES = (
     "/usr/share/fonts/dejavu/DejaVuSans.ttf",
     "C:/Windows/Fonts/arial.ttf",
     "/Library/Fonts/Arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",  # macOS 10.15+: системные шрифты переехали сюда
 )
 DISCLAIMER = "Концепт для конкурса MGIMO×AI Challenge. Не является официальным документом."
 BLUE = HexColor("#1f4fbf")
