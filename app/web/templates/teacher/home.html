@@ -26,7 +26,12 @@
       {% if lessons %}
         {% for slot in lessons %}{{ slot_card(slot) }}{% endfor %}
       {% else %}
-        <p class="panel muted">Сегодня занятий нет.</p>
+        {% if next_day %}
+          <p class="next-day">Сегодня занятий нет. Ближайшие — <strong>{{ sv.WEEKDAYS_FULL[next_day.weekday()] | lower }}, {{ next_day.day }} {{ sv.MONTHS_GEN[next_day.month - 1] }}</strong>{% if (next_day - today_date).days == 1 %} (завтра){% endif %}</p>
+          {% for slot in next_lessons %}{{ slot_card(slot) }}{% endfor %}
+        {% else %}
+          <p class="panel muted">Занятий в ближайший месяц нет.</p>
+        {% endif %}
       {% endif %}
     </section>
 

@@ -703,3 +703,7 @@ body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity {
 .form:has(#aud [value="student"]:checked) [data-aud="student"] { display: flex; }
 .student-results { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 12px; }
 .student-results__item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+
+/* главная преподавателя: сегодня пар нет — подпись над ближайшим днём с занятиями */
+.next-day { margin: 0; font-size: 14px; color: var(--muted); }
+.next-day strong { color: var(--text); font-weight: 600; }

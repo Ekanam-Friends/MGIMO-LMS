@@ -139,6 +139,19 @@ async def _arrange(
     return dict(days)
 
 
+async def teacher_next_day(session: AsyncSession, teacher_id: int | None, after: date, within: int = 30) -> date | None:
+    """Ближайший день после `after` (не дальше `within` дней), когда у преподавателя есть неотменённые занятия."""
+    if teacher_id is None:
+        return None
+    return await session.scalar(
+        select(Lesson.date)
+        .join(lesson_teachers, lesson_teachers.c.lesson_id == Lesson.id)
+        .where(lesson_teachers.c.teacher_id == teacher_id, Lesson.date > after,
+               Lesson.date <= after + timedelta(days=within), Lesson.status == LessonStatus.ACTIVE)
+        .order_by(Lesson.date).limit(1)
+    )
+
+
 async def days_with_lessons(session: AsyncSession, group_id: int | None, start: date, end: date) -> set[date]:
     if group_id is None:
         return set()

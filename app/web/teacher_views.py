@@ -90,7 +90,11 @@ async def teacher_home(request: Request, viewer: Viewer = Depends(teacher_viewer
     due_soon = sorted((c for c in cards if c.next_due and c.next_due <= now + timedelta(days=7)),
                       key=lambda c: c.next_due)
     lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, now, now)).get(now, [])
+    # Сегодня пар нет — показываем ближайший день с занятиями, а не пустую плашку.
+    next_day = None if lessons else await sv.teacher_next_day(db, viewer.teacher_id, now)
+    next_lessons = (await sv.teacher_lessons_for(db, viewer.teacher_id, next_day, next_day)).get(next_day, []) if next_day else []
     return render(request, "teacher/home.html", viewer, cards=cards, due_soon=due_soon, lessons=lessons,
+                  next_day=next_day, next_lessons=next_lessons,
                   resources=TEACHER_RESOURCES, work=TEACHER_WORK, today_date=now,
                   students_total=sum({c.group: c.students for c in cards}.values()))  # группа — один раз
 

@@ -303,3 +303,22 @@ async def test_max_points_parsed_like_points(client):
         assert r.status_code == 400 and "Максимум баллов" in r.text, bad
     r = await client.post("/t/courses/1/assessments", data={**base, "max_points": " 7,5 "})
     assert r.status_code == 303
+
+
+async def test_teacher_home_shows_next_lesson_day(client):
+    """Сегодня пар нет — на главной ближайший день с занятиями, а не пустое «занятий нет»."""
+    from datetime import time
+    from app.models import Lesson, LessonGroup, lesson_teachers
+    day = date.today() + timedelta(days=2)
+    async with client.sf() as s:  # type: ignore[attr-defined]
+        s.add(Lesson(id=900, date=day, begins_at=time(10, 35), ends_at=time(12, 5), discipline="Своя дисциплина",
+                     kind_of_work="семинар", first_seen_at=datetime(2026, 9, 1), last_seen_at=datetime(2026, 9, 1)))
+        await s.flush()
+        s.add(LessonGroup(lesson_id=900, group_id=10))
+        await s.execute(lesson_teachers.insert().values(lesson_id=900, teacher_id=1))
+        await s.commit()
+    await login(client, "teacher")
+    page = (await client.get("/t/home")).text
+    assert "Сегодня занятий нет. Ближайшие" in page and "Своя дисциплина" in page
+    await login(client, "other")  # у второго преподавателя занятий нет вовсе
+    assert "Занятий в ближайший месяц нет" in (await client.get("/t/home")).text
