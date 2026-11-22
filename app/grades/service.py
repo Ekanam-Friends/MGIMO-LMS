@@ -486,13 +486,23 @@ class HomeworkItem:
 
 async def teacher_homework(db: AsyncSession, teacher_id: int, academic_year: str,
                            today: date | None = None) -> list[HomeworkItem]:
-    cards = {c.course.id: c for c in await teacher_courses(db, teacher_id, academic_year, today)}
+    cards = await teacher_courses(db, teacher_id, academic_year, today)
+    return await homework_for_courses(db, cards)
+
+
+async def homework_for_courses(
+    db: AsyncSession, course_cards: list[CourseCard], *, due_between: tuple[date, date] | None = None,
+) -> list[HomeworkItem]:
+    """Домашние задания для ведомостей, уже отобранных по преподавателю."""
+    cards = {card.course.id: card for card in course_cards}
     if not cards:
         return []
-    items = (await db.scalars(
-        select(Assessment).where(Assessment.course_id.in_(list(cards)), Assessment.kind == AssessmentKind.HOMEWORK)
-        .order_by(Assessment.due_date.desc(), Assessment.id.desc())
-    )).all()
+    query = select(Assessment).where(
+        Assessment.course_id.in_(cards), Assessment.kind == AssessmentKind.HOMEWORK,
+    )
+    if due_between is not None:
+        query = query.where(Assessment.due_date.between(*due_between))
+    items = (await db.scalars(query.order_by(Assessment.due_date.desc(), Assessment.id.desc()))).all()
     counts = dict((await db.execute(
         select(Score.assessment_id, func.count()).where(Score.assessment_id.in_([a.id for a in items]))
         .group_by(Score.assessment_id)
