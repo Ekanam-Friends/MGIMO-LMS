@@ -19,7 +19,7 @@ from .corpus import CorpusError, terms
 from .errors import ProviderError
 from .ports import CorpusRepository, PersonalEvidenceReader, LanguageModel, ConversationRepository
 from .retrieval import evidence_context, source_payload
-from .routing import SESSION_ADMISSION, normalize_scopes
+from .routing import CLASSROOM_ATTIRE, SESSION_ADMISSION, normalize_scopes
 from .memory import answer_context
 from app.cache import get_cache
 from app.schedule.query import ScheduleQuery
@@ -351,16 +351,18 @@ class Assistant:
 
     async def chat(self, user_id, student_id, question, history, as_of, conversation,
                    evidence_reader: PersonalEvidenceReader | None):
+        attire_search = False
         if conversation.language == "ru":
             question_for_admission = redact_question(question)
             result = self._admission_clarification(question_for_admission, conversation.actor_role)
             if result is not None:
                 conversation.remember(question_for_admission, answer_context(result))
                 return result
-        if not self.enabled:
+            attire_search = CLASSROOM_ATTIRE.fullmatch(question_for_admission) is not None
+        if not self.enabled and not attire_search:
             return self._result("unavailable", "Ассистент пока не подключён. Обратитесь в деканат.")
         cache = get_cache()
-        key = await self._answer_key(user_id, student_id, question, as_of, conversation)
+        key = None if attire_search else await self._answer_key(user_id, student_id, question, as_of, conversation)
         if key is not None:
             hit = await cache.get_json(key)
             if isinstance(hit, dict) and self._cacheable(hit, False):
@@ -368,6 +370,11 @@ class Assistant:
                 return hit
         self._reserve(user_id)
         try:
+            if attire_search:
+                return await asyncio.wait_for(self._answer(question, [], as_of, conversation.actor_role,
+                    search_query="одежда опрятность эстетические нормы",
+                    consequences_query="одно из следующих дисциплинарных взысканий замечание",
+                    search_only=True), 70)
             result = await asyncio.wait_for(self._chat(student_id, question, history, as_of, conversation, evidence_reader), 70)
             contains_grades = result.pop("_contains_grades", False)
             if result["status"] in {"answer", "partial", "clarify", "not_found"}:
@@ -510,7 +517,7 @@ class Assistant:
                    for i, title in enumerate(titles[:30])], snapshot=corpus.snapshot, as_of=as_of.isoformat())
 
     async def _answer(self, question, history, as_of, actor_role="student", *,
-                      search_query=None, consequences_query=None, dialogue=None):
+                      search_query=None, consequences_query=None, dialogue=None, search_only=False):
         today = moscow_today()
         as_of = as_of or today
         if as_of > today:
@@ -537,7 +544,7 @@ class Assistant:
                                        if consequence_terms.isdisjoint(terms(word)))
                 queries = [focused_rule or search_question, consequences_search]
         vectors = [None] * len(queries)
-        embedding_model = self.cfg.llm_embedding_model if self.cfg.rag_use_embeddings else ""
+        embedding_model = self.cfg.llm_embedding_model if self.cfg.rag_use_embeddings and not search_only else ""
         split_search = len(queries) > 1
         candidate_limit = min(3, self.cfg.rag_top_k) if split_search else self.cfg.rag_top_k * 3
         weights = {}
@@ -572,6 +579,19 @@ class Assistant:
                     "effective_from": c.effective_from.isoformat() if c.effective_from else None,
                     "checked_at": c.checked_at.isoformat(), "source_sha256": c.source_sha256}
 
+        found = list(dict.fromkeys(hit.id for hit in priority_hits if hit.id in by_id))
+        if search_only:
+            # Длинные пункты корпуса могут продолжаться перечислением в следующей выдержке.
+            for index, row in enumerate(rows[:-1]):
+                following = rows[index + 1]
+                if (row.id in found and following.document_id == row.document_id and following.revision == row.revision
+                        and following.id in by_id and following.id not in found
+                        and re.match(r"^\s*[\w]\)", following.text)):
+                    found.insert(found.index(row.id) + 1, following.id)
+            return self._result("sources_only", "Выдержки о внешнем виде и дисциплинарных мерах. "
+                                "Применимость норм и возможные последствия в вашем случае уточните в деканате.",
+                                steps=[view(cid) for cid in found], **common)
+
         try:
             draft = parse_json(await self._complete("draft", SYSTEM, payload, response_schema=schema), Draft)
             if draft.status in {"answer", "partial"} and not draft.summary_id and not draft.steps:
@@ -583,10 +603,7 @@ class Assistant:
                     return self._result("not_found", "Не удалось выделить выдержки, подтверждающие ответ. "
                                         "Уточните вопрос или обратитесь в деканат.", **common)
         except ProviderError as exc:
-            if exc.code != "generation_refused" or not priority_hits:
-                raise
-            found = list(dict.fromkeys(hit.id for hit in priority_hits if hit.id in by_id))
-            if not found:
+            if exc.code != "generation_refused" or not found:
                 raise
             failure = self._provider_failure(exc)
             return self._result("sources_only", "GigaChat отказался формировать ответ. Ниже — результаты поиска "
