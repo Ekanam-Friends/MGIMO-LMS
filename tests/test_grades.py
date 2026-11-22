@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 import httpx
 import pytest
@@ -22,13 +22,18 @@ from app.models import (
     CourseEnrollment,
     Discipline,
     GradeEvent,
+    Lesson,
+    LessonGroup,
     Score,
     Student,
     StudyGroup,
     Teacher,
+    lesson_teachers,
 )
 from app.models.auth import Role, User
-from app.models.grades import AssessmentKind, ControlForm, FinalResult
+from app.models.grades import AssessmentKind, ControlForm, CourseStatus, FinalResult
+from app.models.schedule import LessonStatus
+from app.web import teacher_views
 
 PASSWORD = "test-only-password"
 YEAR = scale.academic_year(date.today())
@@ -303,3 +308,99 @@ async def test_max_points_parsed_like_points(client):
         assert r.status_code == 400 and "Максимум баллов" in r.text, bad
     r = await client.post("/t/courses/1/assessments", data={**base, "max_points": " 7,5 "})
     assert r.status_code == 303
+
+
+def freeze_teacher_clock(monkeypatch, day, hour=8):
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls.combine(day, time(hour, 30), tzinfo=tz)
+
+    monkeypatch.setattr(teacher_views, "datetime", FixedDatetime)
+
+
+async def add_teacher_lessons(client, *entries):
+    async with client.sf() as session:
+        for lesson_id, (day, hour, status, title) in enumerate(entries, start=900):
+            session.add(Lesson(id=lesson_id, date=day, begins_at=time(hour), ends_at=time(hour + 1),
+                               discipline=title, status=status, first_seen_at=datetime.now(),
+                               last_seen_at=datetime.now(), kind_of_work="семинар"))
+            await session.flush()
+            session.add(LessonGroup(lesson_id=lesson_id, group_id=10))
+            await session.execute(lesson_teachers.insert().values(lesson_id=lesson_id, teacher_id=1))
+        await session.commit()
+
+
+async def test_teacher_home_shows_next_lesson_day(client, monkeypatch):
+    """Ссылка на ближайшую пару открывает нужную неделю и день; чужих пар нет."""
+    today_date = date.today()
+    freeze_teacher_clock(monkeypatch, today_date)
+    day = today_date + timedelta(days=8)
+    await add_teacher_lessons(client, (day, 10, LessonStatus.ACTIVE, "Своя ближайшая пара"))
+    await login(client, "teacher")
+    page = (await client.get("/t/home")).text
+    assert "Сегодня пар нет" in page and "Ближайшие пары" in page
+    href = f"/t/schedule?week={day.isoformat()}#d-{day.isoformat()}"
+    assert f'href="{href}"' in page and "Своя ближайшая пара" in page
+    assert "Своя ближайшая пара" in (await client.get(href)).text
+    await login(client, "other")
+    assert "Пар в ближайший месяц нет" in (await client.get("/t/home")).text
+
+
+@pytest.mark.parametrize("active_today", [True, False])
+async def test_cancelled_lessons_do_not_hide_the_next_active_lesson(client, monkeypatch, active_today):
+    today_date = date.today()
+    freeze_teacher_clock(monkeypatch, today_date)
+    active_date = today_date if active_today else today_date + timedelta(days=1)
+    await add_teacher_lessons(client, (today_date, 9, LessonStatus.CANCELLED, "Отменённая пара"),
+                              (active_date, 10, LessonStatus.ACTIVE, "Действующая пара"))
+    await login(client, "teacher")
+    page = (await client.get("/t/home")).text
+    assert "Отменённая пара" in page and "<small>отменено</small>" in page
+    assert "Действующая пара" in page
+    if active_today:
+        assert "<small>следующая</small>" in page and "· 1 пара</p>" in page
+    else:
+        assert "· пар нет</p>" in page and "завтра</li>" in page
+
+
+async def test_teacher_home_uses_moscow_date_and_time(client, monkeypatch):
+    server_date = date.today()
+    moscow_date = server_date + timedelta(days=1)
+    freeze_teacher_clock(monkeypatch, moscow_date, hour=0)
+    await add_teacher_lessons(client, (server_date, 10, LessonStatus.ACTIVE, "Вчерашняя пара"),
+                              (moscow_date, 10, LessonStatus.ACTIVE, "Сегодняшняя пара"))
+    await login(client, "teacher")
+    page = (await client.get("/t/home")).text
+    assert "Сегодняшняя пара" in page and "Вчерашняя пара" not in page
+    assert "<small>следующая</small>" in page
+
+
+async def test_teacher_home_limits_attention_and_counts_homework_deadlines(client, monkeypatch):
+    today_date = date.today()
+    freeze_teacher_clock(monkeypatch, today_date)
+    async with client.sf() as session:
+        course = await session.get(Course, 1)
+        session.add(Course(id=3, discipline_id=course.discipline_id, group_id=20, teacher_id=1,
+                           semester=1, academic_year=YEAR, control_form=ControlForm.CREDIT,
+                           status=CourseStatus.CLOSED, created_at=datetime.now()))
+        await session.flush()
+        session.add(CourseEnrollment(course_id=3, student_id=2))
+        for assessment_id, course_id, offset, kind, title in (
+            (900, 1, -8, AssessmentKind.HOMEWORK, "Давняя просрочка"),
+            (901, 3, -1, AssessmentKind.HOMEWORK, "ДЗ закрытой ведомости"),
+            (902, 1, 2, AssessmentKind.HOMEWORK, "Проверенное ДЗ"),
+            (903, 1, 1, AssessmentKind.TEST, "Ближайшая контрольная"),
+        ):
+            session.add(Assessment(id=assessment_id, course_id=course_id, due_date=today_date + timedelta(days=offset),
+                                   kind=kind, title=title, max_points=10, position=4, created_at=datetime.now()))
+        await session.flush()
+        session.add(Score(assessment_id=902, student_id=1, points=8, graded_by=1, graded_at=datetime.now()))
+        await session.commit()
+    await login(client, "teacher")
+    page = (await client.get("/t/home")).text
+    assert "Давняя просрочка" not in page and "ДЗ закрытой ведомости" not in page
+    assert "Ближайшая контрольная" not in page
+    assert "<b>1</b> срок ДЗ на неделе" in page
+    assert "Нет заданий со сроком в пределах недели, требующих проверки" in page
+    assert "Давняя просрочка" in (await client.get("/t/homework")).text
