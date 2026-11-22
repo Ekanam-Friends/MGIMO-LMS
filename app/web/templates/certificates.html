@@ -76,4 +76,16 @@
     </form>
   </section>
 </div>
+<script>
+/* С главной сюда ведёт ссылка /mfc/certificates#order. Браузер прыгает к якорю при загрузке
+   резко (scroll-behavior на это не действует), поэтому начинаем сверху и доезжаем плавно. */
+(function () {
+  if (location.hash !== "#order") return;
+  var target = document.getElementById("order");
+  if (!target || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  window.scrollTo({ top: 0, behavior: "instant" });
+  setTimeout(function () { target.scrollIntoView({ behavior: "smooth", block: "start" }); }, 150);
+})();
+</script>
 {% endblock %}

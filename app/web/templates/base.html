@@ -30,7 +30,7 @@
           {% set ns = namespace(open=false) %}
           {% for sub in item.children %}{% if path.startswith(sub.href) %}{% set ns.open = true %}{% endif %}{% endfor %}
           {% set open = ns.open %}
-          <details class="menu__group"{% if open %} open{% endif %}>
+          <details class="menu__group" data-group="{{ item.title }}"{% if open %} open{% endif %}>
             <summary class="menu__link{% if open %} menu__link--active{% endif %}">{{ icon(item.icon) }}<span>{{ item.title }}</span>{{ icon("chev-down", 16) }}</summary>
             <div class="menu__sub">
               {% for sub in item.children %}<a href="{{ sub.href }}" class="menu__sublink{% if path.startswith(sub.href) %} menu__sublink--active{% endif %}">{{ sub.title }}</a>{% endfor %}
@@ -41,6 +41,24 @@
         {% endif %}
       {% endfor %}
     </nav>
+    <script>
+    /* Раскрытые группы меню остаются раскрытыми при переходе между разделами, пока человек
+       сам их не свернёт. Состояние — только удобство в этом браузере (localStorage). */
+    (function () {
+      var KEY = "lms-menu-open", saved;
+      try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+      document.querySelectorAll(".menu__group").forEach(function (d) {
+        var name = d.dataset.group;
+        if (d.open) saved[name] = true;           /* группа текущего раздела — тоже «открыта» */
+        else if (saved[name]) d.open = true;
+        d.querySelector("summary").addEventListener("click", function () {
+          saved[name] = !d.open;  /* click срабатывает до переключения */
+          try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        });
+      });
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    })();
+    </script>
   </aside>
   <label for="menu-toggle" class="menu-backdrop" aria-hidden="true"></label>
   <div class="layout__main">

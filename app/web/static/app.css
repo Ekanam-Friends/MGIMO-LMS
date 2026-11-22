@@ -780,3 +780,35 @@ body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity {
   .th-ok { align-items: flex-start; font-size: 13px; }
   .th-ok .ico { margin-top: 1px; }
 }
+
+/* Кнопки действий в «Заданиях» и «Отметке»: в grid-форме .btn растягивалась на всю ширину
+   и без фона брала серый цвет браузера. Делаем компактную красную «таблетку» по содержимому. */
+.learning .btn {
+  justify-self: start; align-self: start; width: auto; min-height: 44px;
+  padding: 10px 22px; gap: 10px; border: 0;
+  background: linear-gradient(90deg, #df2935, #ef4b4b); color: #fff;
+  box-shadow: 0 4px 14px rgba(223, 41, 53, .28);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.learning .btn::after {
+  content: ""; width: 16px; height: 16px; flex: none;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform .15s ease;
+}
+.learning .btn:hover { filter: brightness(.94); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(223, 41, 53, .36); }
+.learning .btn:hover::after { transform: translateX(3px); }
+.learning .btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(223, 41, 53, .3); }
+.learning form + h3 { margin-top: 12px; }
+.learning .btn:focus-visible { outline: 3px solid rgba(223, 41, 53, .35); outline-offset: 2px; }
+/* Вторичное действие (личное сообщение) — та же форма, но контурная, чтобы не спорить с «Отправить решение». */
+.learning .btn--outline { background: #fff; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.learning .btn--outline:hover { background: var(--accent-soft, #fdecee); box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+/* Плавный переход по якорям (кнопка «Заказать справку» → форма). */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .learning .btn, .learning .btn::after { transition: none; }
+}
