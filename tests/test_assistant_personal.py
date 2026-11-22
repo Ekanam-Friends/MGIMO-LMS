@@ -55,6 +55,15 @@ async def test_no_grade_read_or_transfer_before_permission(tmp_path, monkeypatch
     assert len(reads) == 1 and second["facts"][0]["text"] == "Тест: 75 баллов"
 
 
+async def test_session_admission_requests_discipline_before_reading_grades(tmp_path):
+    provider = FakeProvider()
+    assistant = Assistant(config(tmp_path), provider)
+    conversation = Conversation("session", float("inf"))
+    answer = await assistant.chat(1, 1, "Есть ли у меня допуск к аессии?", [], None, conversation, None)
+    assert answer["status"] == "clarify" and answer["section"] == "grades"
+    assert not conversation.grades_pending and not provider.calls
+
+
 async def test_acknowledgement_and_grant_require_explicit_server_flow(client):
     csrf = await login(client)
     headers = {"X-CSRF-Token":csrf}

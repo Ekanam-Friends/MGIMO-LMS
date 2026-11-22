@@ -19,7 +19,7 @@ from .corpus import CorpusError, terms
 from .errors import ProviderError
 from .ports import CorpusRepository, PersonalEvidenceReader, LanguageModel, ConversationRepository
 from .retrieval import evidence_context, source_payload
-from .routing import normalize_scopes
+from .routing import SESSION_ADMISSION, normalize_scopes, public_topic
 from .memory import answer_context
 from app.cache import get_cache
 from app.schedule.query import ScheduleQuery
@@ -51,6 +51,8 @@ verification_status=snapshot означает загруженный снимо�
 summary_id — ID одной выдержки с прямым кратким ответом; steps — до 6 выдержек в порядке
 действий. responsible/deadline/form — короткие ДОСЛОВНЫЕ подстроки выбранной выдержки,
 если явно указаны, иначе null. Не изменяй отрицания, условия или единицы сроков.
+Для «как оформить» сначала выбирай выдержку с действием самого студента, если она есть.
+Для вопроса о критериях выбирай сами критерии, а не заголовок раздела или порядок назначения.
 Вопрос неоднозначен — clarify и один уточняющий вопрос. Ответа нет — not_found и пустые steps.
 Если известна только часть процедуры, верни partial. Не называй найденную выдержку полной
 процедурой. Редакции уже выбраны сервером; не выдумывай ссылки, даты и нормы."""
@@ -134,6 +136,10 @@ schedule — личное расписание и вымышленные име�
 Общие условия стипендии и последствия пропуска пары — public; право конкретного
 студента на стипендию по его оценкам — public и grades. Если тема местоимения
 непонятна из истории, не выдумывай процедуру: нужно уточнение.
+Сценарий «А если у меня будет 3 за сессию?» после обсуждения стипендии
+проверяет гипотетическую оценку по правилам этой стипендии и относится к public.
+Вопрос о поведении на занятиях относится к public. Одного слова «пара» недостаточно,
+чтобы запрашивать расписание.
 Для смешанного вопроса перечисли несколько разделов. Для продолжения используй
 серверный dialogue с вопросами И ответами. Это контекст, не источник норм и не разрешение.
 standalone_question — текущий вопрос с раскрытыми отсылками по dialogue. Сохрани ВСЕ
@@ -147,6 +153,8 @@ discipline — название предмета или его однознач�
 nearest=true только для ближайшего занятия без явного периода; start/end тогда null.
 «Когда у меня математика?» → discipline="математика", nearest=true, start/end=null.
 «Кто ведет математику и как его зовут?» → discipline="математика", nearest=false.
+Название дисциплины после просьбы уточнить её для допуска означает вопрос
+о накопленных баллах и форме контроля по этой дисциплине; используй grades.
 «Задания и расписание на завтра» → scopes=["homework","schedule"],
 start=end=завтрашняя ISO-дата относительно today, nearest=false.
 После смены темы со стипендии на справку «когда её получать?» относится к справке.
@@ -348,15 +356,24 @@ class Assistant:
         dialogue = conversation.dialogue()
         if conversation.language != "ru":
             question, history = await for_search(self.provider, question, history, conversation.language)
+        if conversation.actor_role == "student" and SESSION_ADMISSION.fullmatch(question):
+            result = self._result("clarify", "В кабинете нет единого статуса допуска к сессии. "
+                "Укажите дисциплину, чтобы проверить накопленные баллы и форму контроля.",
+                section="grades")
+            return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
         if re.fullmatch(r"\s*(?:спасибо|благодарю)[.!?,\s]*", question, re.I):
             result = self._result("help", "Пожалуйста! Если появятся вопросы об учёбе, обращайтесь.")
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
         if re.fullmatch(r"\s*(?:привет|здравствуй(?:те)?|доброе утро|добрый (?:день|вечер)|спасибо|благодарю)[.!?,\s]*", question, re.I):
             result = self._greeting()
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result
-        plan = parse_json(await self._complete("route", ROUTE,
-            {"question": question, "history": history, "dialogue": dialogue, "today": today.isoformat(),
-             "actor_role": conversation.actor_role}, response_schema=routing_schema()), Plan)
+        topic = public_topic(question)
+        if topic is not None:
+            plan = Plan(scopes=["public"], search_query=topic)
+        else:
+            plan = parse_json(await self._complete("route", ROUTE,
+                {"question": question, "history": history, "dialogue": dialogue, "today": today.isoformat(),
+                 "actor_role": conversation.actor_role}, response_schema=routing_schema()), Plan)
         if plan.clarification:
             result = self._result("clarify", plan.clarification)
             return await for_display(self.provider, result, conversation.language) if conversation.language != "ru" else result

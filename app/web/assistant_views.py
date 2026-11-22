@@ -9,9 +9,10 @@ from sqlalchemy import select
 
 from app.models import Student
 
-from app.assistant.service import BusyError
+from app.assistant.service import BusyError, moscow_today
 from app.assistant.personal import SqlPersonalEvidenceReader, SqlTeachingEvidenceReader
 from app.assistant import teaching
+from app.web.assistant_notifications import NOTIFICATION_CONTEXT, notification_answer, notification_filter
 from app.web.deps import Viewer, check_csrf, current_viewer, get_db
 from app.web.views import render
 from app.web.i18n import language_for
@@ -160,9 +161,17 @@ async def assistant_ask(request: Request, viewer: Viewer = Depends(check_csrf), 
         if student_id is not None:
             await selected_student(request, viewer, db, student_id)
     try:
-        answer = await request.app.state.assistant.chat(viewer.user.id, student_id, data.question.strip(),
-            data.history, data.as_of, conversation,
-            SqlTeachingEvidenceReader(db, viewer.teacher_id) if viewer.user.role == "teacher" else SqlPersonalEvidenceReader(db))
+        question = data.question.strip()
+        previous = conversation.dialogue()
+        source = notification_filter(question, previous[-1]["content"] if previous else "") if viewer.user.role == "student" else None
+        if source is not None:
+            answer = await notification_answer(db, viewer, source, data.as_of, moscow_today())
+            # В дальнейший контекст модели не попадают заголовки или содержимое ленты.
+            conversation.remember("Вопрос об уведомлениях", NOTIFICATION_CONTEXT)
+        else:
+            answer = await request.app.state.assistant.chat(viewer.user.id, student_id, question,
+                data.history, data.as_of, conversation,
+                SqlTeachingEvidenceReader(db, viewer.teacher_id) if viewer.user.role == "teacher" else SqlPersonalEvidenceReader(db))
     except BusyError:
         return JSONResponse({"status": "busy", "message": "Запрос уже выполняется или достигнут лимит. Подождите минуту."},
                             status_code=429, headers={"Retry-After": "60", "Cache-Control": "no-store"})

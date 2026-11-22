@@ -1,5 +1,6 @@
 """Минимальные факты кабинета. student_id поступает только из серверной сессии."""
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +14,10 @@ from app.models.schedule import LessonStatus
 from app.schedule.choices import elective_catalog, get_choices, selected_lesson, subgroup_parts
 from app.schedule.query import ScheduleQuery
 from .evidence import bounded_facts
+
+
+def _request_time(value: datetime) -> str:
+    return value.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("Europe/Moscow")).strftime("%d.%m.%Y %H:%M МСК")
 
 
 class SqlPersonalEvidenceReader:
@@ -48,7 +53,8 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
                 name = course.card.discipline
                 final = (f"Итог: {FinalResult.TITLES.get(course.final.result, course.final.result)}, {course.final.total_points:g} баллов, "
                          f"дата {course.final.graded_on}." if course.final else "Итоговая оценка не выставлена.")
-                add(f"{name}; {semester.title}. Накоплено: {course.current:g} баллов. {final}",
+                add(f"{name}; {semester.title}. Форма контроля: {course.card.form_title}. "
+                    f"Накоплено: {course.current:g} баллов. {final}",
                     "/grades", "Успеваемость")
                 for item in course.assessments:
                     if item.score:
@@ -143,11 +149,13 @@ async def collect(db: AsyncSession, student_id: int, scopes: list[str], today: d
             .where(CertificateRequest.student_id == student_id)
             .order_by(CertificateRequest.created_at.desc(), CertificateRequest.id.desc()).limit(21))).all()
         for row in rows[:20]:
+            paper_status = ("не запрошен" if row.paper_status == PaperStatus.NONE else
+                            PaperStatus.TITLES.get(row.paper_status, "статус неизвестен"))
             add(f"Заявка №{row.id}: {CertificateKind.TITLES.get(row.kind, row.kind)}; "
                 f"статус: {RequestStatus.TITLES.get(row.status, row.status)}; "
-                f"бумажный оригинал: {PaperStatus.TITLES.get(row.paper_status, row.paper_status)}; "
-                f"обновлено в кабинете {row.updated_at.isoformat()}; "
-                f"последняя синхронизация с деканатом: {row.synced_at.isoformat() if row.synced_at else 'ещё не выполнена'}.",
+                f"бумажный оригинал: {paper_status}; "
+                f"обновлено в кабинете {_request_time(row.updated_at)}; "
+                f"последняя синхронизация с деканатом: {_request_time(row.synced_at) if row.synced_at else 'ещё не выполнена'}.",
                 f"/mfc/certificates/{row.id}", "Заявки")
         if not rows:
             add("В кабинете нет заявок текущего студента.", "/mfc/certificates", "Заявки")

@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, literal, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,8 +60,11 @@ class Item:
         return Source.TITLES[self.source]
 
 
-async def _announcements(db: AsyncSession, student: Student | None, since: datetime, limit: int) -> list[Item]:
+async def _announcements(db: AsyncSession, student: Student | None, since: datetime, limit: int,
+                         source: str | None) -> list[Item]:
     q = select(Announcement).where(Announcement.created_at >= since)
+    if source is not None:
+        q = q.where(Announcement.source == source)
     if student is not None:
         cond = [Announcement.audience == Audience.ALL]
         if student.faculty_name:
@@ -109,16 +112,20 @@ async def _certificates(db: AsyncSession, student_id: int, since: datetime, limi
     return [i for ev, req in rows if (i := _cert_item(ev, req))]
 
 
-async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
+async def _grades(db: AsyncSession, student_id: int, since: datetime, limit: int, *,
+                  grade_details: bool) -> list[Item]:
+    title = (Discipline.name + ": " + GradeEvent.text if grade_details else
+             literal("Новое событие по успеваемости"))
     rows = (await db.execute(
-        select(GradeEvent, Discipline.name)
+        select(GradeEvent.id, GradeEvent.created_at, title)
+        .select_from(GradeEvent)
         .join(Course, Course.id == GradeEvent.course_id)
         .join(Discipline, Discipline.id == Course.discipline_id)
         .where(GradeEvent.student_id == student_id, GradeEvent.created_at >= since)
         .order_by(GradeEvent.created_at.desc()).limit(limit)
     )).all()
-    return [Item("grade", ev.id, Source.TEACHER, f"{name}: {ev.text}", "", ev.created_at, "/grades")
-            for ev, name in rows]
+    return [Item("grade", event_id, Source.TEACHER, heading, "", created_at, "/grades")
+            for event_id, created_at, heading in rows]
 
 
 async def _documents(db: AsyncSession, student_id: int, since: datetime, limit: int) -> list[Item]:
@@ -144,15 +151,15 @@ def _restore_items(raw: list[dict]) -> list[Item]:
 
 
 async def feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None = None,
-               limit: int = LIMIT) -> list[Item]:
+               limit: int = LIMIT, source: str | None = None, grade_details: bool = True) -> list[Item]:
     """Свежие уведомления пользователя, новые сверху, с отметкой прочитанного.
 
     Обычная лента (колокольчик на каждой странице) — через кэш (решение 0027). Ключ — id
     пользователя из сессии и его студента; поколения сбрасываются при новом объявлении, событии
     справки, балле, уведомлении о документе (общее) и при отметке «прочитано» (личное).
     """
-    if now is not None or limit != LIMIT:
-        return await _load_feed(db, user, student, now=now, limit=limit)
+    if now is not None or limit != LIMIT or source is not None or not grade_details:
+        return await _load_feed(db, user, student, now=now, limit=limit, source=source, grade_details=grade_details)
     cache = get_cache()
     gens = await cache.generations(NOTIFICATIONS, reads_of(user.id))
     if gens is None:
@@ -163,13 +170,15 @@ async def feed(db: AsyncSession, user: User, student: Student | None, *, now: da
 
 
 async def _load_feed(db: AsyncSession, user: User, student: Student | None, *, now: datetime | None,
-                     limit: int) -> list[Item]:
+                     limit: int, source: str | None = None, grade_details: bool = True) -> list[Item]:
     since = (now or utcnow()) - HORIZON
-    items = await _announcements(db, student, since, limit)
+    items = await _announcements(db, student, since, limit, source)
     if student is not None:
-        items += await _certificates(db, student.id, since, limit)
-        items += await _grades(db, student.id, since, limit)
-        items += await _documents(db, student.id, since, limit)
+        if source in (None, Source.DEAN):
+            items += await _certificates(db, student.id, since, limit)
+            items += await _documents(db, student.id, since, limit)
+        if source in (None, Source.TEACHER):
+            items += await _grades(db, student.id, since, limit, grade_details=grade_details)
     items.sort(key=lambda i: i.created_at, reverse=True)
     items = items[:limit]
     if items:

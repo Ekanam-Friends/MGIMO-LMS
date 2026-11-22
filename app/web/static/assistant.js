@@ -135,14 +135,19 @@
         }
       }
     }
+    const section = data.section;
+    if (section === 'notifications' || section === 'grades') {
+      const link = el('a', section === 'notifications' ? 'Уведомления' : 'Успеваемость', el('p', '', article));
+      link.href = '/' + section;
+    }
     if (data.personal_checked_at) el('p', tf('Кабинет проверен: {date}. Статусы ограничены временем последней синхронизации.', {date:new Date(data.personal_checked_at).toLocaleString(window.lmsLocale || 'ru')}), article);
     if (data.summary) {
-      el('h3', 'Краткий ответ · выдержка', article);
+      el('h3', 'Основная выдержка', article);
       el('p', data.summary.translation || data.summary.text, article); source(article, data.summary);
     }
     const visibleSteps = (data.steps || []).filter(step => step.id !== data.summary?.id || step.responsible || step.deadline || step.form);
     if (visibleSteps.length) {
-      el('h3', 'Шаги по положениям', article);
+      el('h3', 'Выдержки из положений', article);
       const list = el('ol', '', article);
       for (const step of visibleSteps) {
         const li = el('li', '', list);

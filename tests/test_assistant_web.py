@@ -24,6 +24,59 @@ async def test_assistant_requires_login_and_csrf(client):
     assert result.headers["cache-control"] == "no-store"
 
 
+async def test_assistant_notifications_use_current_feed_and_remember_sender_followups(client, monkeypatch):
+    from app.auth.service import utcnow
+    from app.models import Course, Discipline, GradeEvent
+    from app.models.notifications import Announcement, Audience, Source
+
+    csrf = await login(client)
+    headers = {"X-CSRF-Token": csrf}
+    token = await start_chat(client, csrf)
+    state = client._transport.app.state
+
+    async def unexpected_model(*args, **kwargs):
+        pytest.fail("Лента не должна передаваться ассистенту")
+
+    monkeypatch.setattr(state.assistant, "chat", unexpected_model)
+    async with state.session_factory() as db:
+        db.add(Discipline(id=1, name="Тестовая дисциплина"))
+        await db.flush()
+        db.add(Course(id=1, discipline_id=1, group_id=10, semester=1,
+                      academic_year="2026/2027", created_at=utcnow()))
+        await db.flush()
+        db.add(GradeEvent(student_id=1, course_id=1, kind="score",
+                          text="Контрольная: 8 из 10", created_at=utcnow()))
+        for source, title, student_id in (
+            (Source.TEACHER, "Объявление преподавателя", 1),
+            (Source.DEAN, "Объявление деканата", 1),
+            (Source.TEACHER, "Чужое объявление", 2),
+        ):
+            db.add(Announcement(source=source, title=title, body="Полный текст",
+                                author_user_id=1, audience=Audience.STUDENT,
+                                student_id=student_id, created_at=utcnow()))
+        await db.commit()
+
+    async def ask(question, **payload):
+        response = await client.post("/s/assistant/ask", headers=headers,
+            json={"question": question, "conversation_token": token, **payload})
+        assert response.status_code == 200
+        return response.json()
+
+    for question, expected in [
+        ("А что у меня в уведах?", {"Объявление преподавателя", "Объявление деканата",
+                                   "Новое событие по успеваемости"}),
+        ("А от преподов там что-то", {"Объявление преподавателя", "Новое событие по успеваемости"}),
+        ("Нет, это от деканата, а не от преподов", {"Объявление деканата"}),
+    ]:
+        answer = await ask(question)
+        assert answer["status"] == "answer" and answer["section"] == "notifications"
+        assert {fact["text"].rsplit(" · ", 1)[-1] for fact in answer["facts"]} == expected
+    assert (await ask("Что у меня в уведомлениях?", as_of="2000-01-01"))["status"] == "clarify"
+    conversation = state.assistant.conversations.items[token]
+    assert not conversation.grades_pending
+    assert "Объявление" not in str(conversation.dialogue())
+
+
 async def test_assistant_page_and_payload_limits(client):
     csrf = await login(client)
     page = await client.get("/s/assistant")
