@@ -94,7 +94,7 @@
   }
   function show(data) {
     const article = el('article', '', log); article.className = 'assistant__message';
-    el('h2', labels[data.status] || labels.error, article);
+    el('h2', data.status === 'sources_only' ? 'Выдержки из положений' : labels[data.status] || labels.error, article);
     el('p', data.message || 'Повторите запрос позднее.', article);
     if (data.status === 'error') {
       const a = el('a', 'Открыть разделы кабинета', article); a.href = '/services';
@@ -147,7 +147,7 @@
     }
     const visibleSteps = (data.steps || []).filter(step => step.id !== data.summary?.id || step.responsible || step.deadline || step.form);
     if (visibleSteps.length) {
-      el('h3', 'Выдержки из положений', article);
+      if (data.status !== 'sources_only') el('h3', 'Выдержки из положений', article);
       const list = el('ol', '', article);
       for (const step of visibleSteps) {
         const li = el('li', '', list);

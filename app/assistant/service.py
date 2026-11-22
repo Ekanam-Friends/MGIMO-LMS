@@ -482,7 +482,7 @@ class Assistant:
         if personal:
             result["personal_checked_at"] = datetime.now(ZoneInfo("Europe/Moscow")).isoformat(timespec="seconds")
         result["_contains_grades"] = "grades" in personal or "notifications" in personal
-        if conversation.language != "ru":
+        if conversation.language != "ru" and result["status"] != "sources_only":
             result = await for_display(self.provider, result, conversation.language)
         return result
 
@@ -562,16 +562,37 @@ class Assistant:
         ids = [c.id for c in hits]
         schema["properties"]["summary_id"] = {"anyOf": [{"type": "string", "enum": ids}, {"type": "null"}]}
         schema["$defs"]["DraftStep"]["properties"]["source_id"]["enum"] = ids
-        draft = parse_json(await self._complete("draft", SYSTEM, payload, response_schema=schema), Draft)
-        if draft.status in {"answer", "partial"} and not draft.summary_id and not draft.steps:
-            # Повторяем только структурно корректный пустой выбор, а не ошибки провайдера
-            # или поддельные ссылки. Никаких норм из свободного текста модели не выводим.
-            draft = parse_json(await self._complete("draft", SYSTEM,
-                {**payload, "selection_error": "Предыдущий ответ пуст: выбери подходящие source ID, "
-                 "иначе status=not_found. answer/partial требуют хотя бы одну выдержку."}, response_schema=schema), Draft)
+        by_id = {c.id: c for c in hits}
+
+        def view(cid):
+            c = by_id[cid]
+            return {"id": c.id, "text": c.text, "title": c.title, "clause": c.clause,
+                    "page": c.page, "page_end": c.page_end, "url": c.original_url, "revision": c.revision,
+                    "verification_status": c.verification_status, "downloaded_at": c.downloaded_at.isoformat(),
+                    "effective_from": c.effective_from.isoformat() if c.effective_from else None,
+                    "checked_at": c.checked_at.isoformat(), "source_sha256": c.source_sha256}
+
+        try:
+            draft = parse_json(await self._complete("draft", SYSTEM, payload, response_schema=schema), Draft)
             if draft.status in {"answer", "partial"} and not draft.summary_id and not draft.steps:
-                return self._result("not_found", "Не удалось выделить выдержки, подтверждающие ответ. "
-                                    "Уточните вопрос или обратитесь в деканат.", **common)
+                # Повторяем только структурно корректный пустой выбор.
+                draft = parse_json(await self._complete("draft", SYSTEM,
+                    {**payload, "selection_error": "Предыдущий ответ пуст: выбери подходящие source ID, "
+                     "иначе status=not_found. answer/partial требуют хотя бы одну выдержку."}, response_schema=schema), Draft)
+                if draft.status in {"answer", "partial"} and not draft.summary_id and not draft.steps:
+                    return self._result("not_found", "Не удалось выделить выдержки, подтверждающие ответ. "
+                                        "Уточните вопрос или обратитесь в деканат.", **common)
+        except ProviderError as exc:
+            if exc.code != "generation_refused" or not priority_hits:
+                raise
+            found = list(dict.fromkeys(hit.id for hit in priority_hits if hit.id in by_id))
+            if not found:
+                raise
+            failure = self._provider_failure(exc)
+            return self._result("sources_only", "GigaChat отказался формировать ответ. Ниже — результаты поиска "
+                                "по положениям. Применимость норм и возможные последствия в вашем случае "
+                                "уточните в деканате.", steps=[view(cid) for cid in found],
+                                request_id=failure["request_id"], **common)
         if draft.status in {"clarify", "not_found"}:
             if draft.steps or draft.summary_id:
                 raise ValueError("Противоречивый отказ")
@@ -579,7 +600,6 @@ class Assistant:
             if draft.status == "clarify" and not message:
                 raise ValueError("Нет уточнения")
             return self._result(draft.status, message or "В найденных положениях нет подтверждённого ответа. Обратитесь в деканат.", **common)
-        by_id = {c.id: c for c in hits}
         selected = set()
         dropped = 0
         valid_steps = []
@@ -605,14 +625,6 @@ class Assistant:
         if not set(audit.accepted_ids) <= wanted:
             raise ValueError("Аудит добавил неизвестные выдержки")
         accepted = set(audit.accepted_ids)
-
-        def view(cid):
-            c = by_id[cid]
-            return {"id": c.id, "text": c.text, "title": c.title, "clause": c.clause,
-                    "page": c.page, "page_end": c.page_end, "url": c.original_url, "revision": c.revision,
-                    "verification_status": c.verification_status, "downloaded_at": c.downloaded_at.isoformat(),
-                    "effective_from": c.effective_from.isoformat() if c.effective_from else None,
-                    "checked_at": c.checked_at.isoformat(), "source_sha256": c.source_sha256}
 
         steps = [{**view(s.source_id), "responsible": s.responsible, "deadline": s.deadline, "form": s.form}
                  for s in valid_steps if s.source_id in accepted]
