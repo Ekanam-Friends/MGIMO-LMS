@@ -365,10 +365,12 @@ async def certificate_detail(
                   kinds=CertificateKind.TITLES, RequestStatus=RequestStatus, error=None)
 
 
-@router.get("/mfc/certificates/{request_id}/pdf")
+@router.post("/mfc/certificates/{request_id}/pdf")
 async def certificate_pdf(
-    request_id: int, viewer: Viewer = Depends(current_viewer), db: AsyncSession = Depends(get_db)
+    request_id: int, viewer: Viewer = Depends(check_csrf), db: AsyncSession = Depends(get_db)
 ) -> Response:
+    """POST, а не GET: первое скачивание ставит отметку downloaded_at, от неё зависит заказ
+    бумажного оригинала. GET-ссылку могли бы открыть предзагрузка браузера или расширение."""
     pdf = await certs.download_pdf(db, viewer.student_id, request_id)
     if pdf is None:
         raise HTTPException(status_code=404)

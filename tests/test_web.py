@@ -112,10 +112,18 @@ async def test_schedule_only_own_group(client):
 
 
 async def test_foreign_certificate_is_404(client):
-    await login(client)
+    csrf = await login(client)
     rid = client.boris_request_id
     assert (await client.get(f"/mfc/certificates/{rid}")).status_code == 404
-    assert (await client.get(f"/mfc/certificates/{rid}/pdf")).status_code == 404
+    assert (await client.post(f"/mfc/certificates/{rid}/pdf", data={"csrf": csrf})).status_code == 404
+
+
+async def test_certificate_pdf_is_post_with_csrf(client):
+    """Скачивание ставит отметку downloaded_at, поэтому не GET и только с CSRF."""
+    await login(client)
+    rid = client.boris_request_id
+    assert (await client.get(f"/mfc/certificates/{rid}/pdf")).status_code == 405
+    assert (await client.post(f"/mfc/certificates/{rid}/pdf", data={})).status_code == 403
     listing = await client.get("/mfc/certificates")
     assert "секрет Бориса" not in listing.text
 
