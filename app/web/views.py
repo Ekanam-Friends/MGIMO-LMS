@@ -102,7 +102,7 @@ async def login(
     if user is None:
         return templates.TemplateResponse(
             request, "login.html", {"viewer": None, "path": "/login", "error": "Неверный логин или пароль", "login": login},
-            status_code=401,  # неверные учётные данные; WWW-Authenticate не нужен — вход формой, а не Basic
+            status_code=400,
         )
     cfg = request.app.state.settings
     token = await auth.open_session(db, user, ttl=timedelta(days=cfg.session_days))
