@@ -6,21 +6,6 @@ SESSION_ADMISSION = re.compile(
     r"\s+(?:к|до)\s+[са]ессии[.!?\s]*",
     re.I,
 )
-_CONDUCT = re.compile(
-    r"(?:а\s+)?что\s+будет[, ]+если\s+я\s+"
-    r"(?:гол(?:ым|ой)\s+приду\s+на\s+пар[уы]|оскорблю\s+преподавателя)[.!?\s]*"
-)
-_LEAVE = re.compile(r"(?:а\s+)?как\s+(?:мне\s+)?(?:взять|оформить|получить)\s+академ[.!?\s]*")
-
-
-def public_topic(question: str) -> str | None:
-    q = question.lower().strip()
-    if _CONDUCT.fullmatch(q):
-        return question
-    if _LEAVE.fullmatch(q):
-        return "Как оформить академический отпуск?"
-    return None
-
 
 def normalize_scopes(question, scopes):
     q = question.lower().replace("ё", "е")

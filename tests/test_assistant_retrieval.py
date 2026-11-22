@@ -1,7 +1,10 @@
 """Регрессии реальных отказов: разговорные вопросы, контекст и пустой выбор модели."""
+import pytest
+
 from app.assistant.bootstrap import create_assistant
 from app.assistant.conversation import Conversation
 from app.assistant.corpus import Corpus
+from app.assistant.errors import ProviderError
 from app.assistant.retrieval import evidence_context
 from tests.test_assistant import chunk, config, write_corpus, FakeProvider, fixed_today
 
@@ -84,6 +87,44 @@ async def test_search_rewrite_does_not_replace_question_seen_by_auditor(tmp_path
         1, None, question, [], None, Conversation("owner", float("inf")), None)
     assert result["status"] == "answer"
     assert all(data["question"] == question for _, data in provider.calls)
+
+
+@pytest.mark.parametrize("question", [
+    "Что будет если я голым приду на пару?",
+    "А что если я приду голым на пару?",
+])
+async def test_model_searches_dress_requirement_for_colloquial_scenario(tmp_path, question):
+    rule = chunk(id="dress", document_id="conduct", title="Правила внутреннего распорядка",
+        text="Обучающиеся должны быть опрятными и придерживаться меры в одежде.")
+    measures = chunk(id="measures", document_id="measures", title="Меры ответственности",
+        text="Дисциплинарные взыскания применяются с учётом обстоятельств проступка.")
+    write_corpus(tmp_path, [rule, measures])
+    corpus = Corpus([rule, measures], "snapshot")
+    assert not corpus.search(question, corpus.chunks, 5)
+    provider = FakeProvider(
+        {"scopes": ["public"], "search_query": "внешний вид",
+         "consequences_query": "дисциплинарные взыскания"},
+        {"status": "partial", "summary_id": rule.id},
+        {"accepted_ids": [rule.id], "complete": False},
+    )
+    result = await create_assistant(config(tmp_path, rag_use_embeddings=False), provider).chat(
+        1, 1, question, [], None, Conversation("owner", float("inf")), evidence_reader=None)
+    assert result["status"] == "partial" and result["summary"]["id"] == rule.id
+    assert result["steps"] == [] and len(provider.calls) == 3
+    assert all(data["question"] == question for _, data in provider.calls)
+    assert [source["id"] for source in provider.calls[1][1]["sources"]] == [rule.id, measures.id]
+
+
+async def test_route_recovers_from_empty_structured_generation(tmp_path):
+    write_corpus(tmp_path, [chunk()])
+    provider = FakeProvider(ProviderError("Пустой ответ", code="empty_response"),
+        {"scopes": ["public"], "search_query": "академический отпуск"},
+        {"status": "answer", "summary_id": "leave-1"},
+        {"accepted_ids": ["leave-1"], "complete": True})
+    result = await create_assistant(config(tmp_path), provider).chat(
+        1, 1, "Как мне взять академ?", [], None, Conversation("owner", float("inf")), None)
+    assert result["status"] == "answer" and result["summary"]["id"] == "leave-1"
+    assert len(provider.calls) == 4 and provider.calls[0] == provider.calls[1]
 
 
 async def test_greeting_needs_neither_corpus_nor_personal_data(tmp_path):

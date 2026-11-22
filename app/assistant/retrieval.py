@@ -12,7 +12,8 @@ def source_payload(row: Chunk) -> dict:
             "document_date": row.document_date.isoformat() if row.document_date else None}
 
 
-def evidence_context(hits: list[Chunk], rows: list[Chunk], *, budget: int = 32000) -> list[Chunk]:
+def evidence_context(hits: list[Chunk], rows: list[Chunk], *,
+                     budget: int = 32000, neighbor_radius: int = 2) -> list[Chunk]:
     groups: dict[tuple[str, str], list[Chunk]] = {}
     positions = {}
     for row in rows:
@@ -24,9 +25,10 @@ def evidence_context(hits: list[Chunk], rows: list[Chunk], *, budget: int = 3200
     # Сначала контекст наиболее релевантной выдержки. Старые индексы могут
     # хранить основания в предыдущей выдержке того же акта; второстепенные
     # совпадения не должны вытеснить эти условия из бюджета.
+    offsets = (0, -1, 1, -2, 2)[:1 + 2 * neighbor_radius]
     for hit in hits:
         group = groups[(hit.document_id, hit.revision)]
-        for offset in (0, -1, 1, -2, 2):
+        for offset in offsets:
             index = positions[hit.id] + offset
             if not 0 <= index < len(group):
                 continue
