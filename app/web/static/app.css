@@ -9,6 +9,8 @@
   --line: #eaeaed;
   --accent: #df2935;
   --accent-soft: #fdecee;
+  /* Тёмный акцент: белый текст на нём и он на --accent-soft дают контраст не ниже 4.5:1. */
+  --accent-strong: #c41f2b;
   --blue: #447abc;
   --blue-soft: #ecf2f9;
   --green: #3ba55c;
@@ -227,8 +229,9 @@ small { font-size: 12px; }
   display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; font-weight: 700; font-size: 14px;
   padding: 11px 19px; border-radius: 28px 3px; line-height: 21px;
 }
-.btn--primary { background: linear-gradient(90deg, #df2935, #ef4b4b); color: #fff; }
-.btn--primary:hover { background: #c41f2b; }
+/* Градиент от тёмного к акценту: прежний правый край #ef4b4b давал с белым текстом 3.6:1 (нужно 4.5:1). */
+.btn--primary { background: linear-gradient(90deg, var(--accent-strong), var(--accent)); color: #fff; }
+.btn--primary:hover { background: var(--accent-strong); }
 .btn--ghost { background: var(--surface); color: var(--text); border-color: var(--line); }
 .btn--wide { width: 100%; justify-content: center; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 700; font-size: 12px; text-align: left; }
@@ -781,34 +784,51 @@ body:has(.cal-layer__input[data-layer="activity"]:not(:checked)) .ev--activity {
   .th-ok .ico { margin-top: 1px; }
 }
 
-/* Кнопки действий в «Заданиях» и «Отметке»: в grid-форме .btn растягивалась на всю ширину
-   и без фона брала серый цвет браузера. Делаем компактную красную «таблетку» по содержимому. */
-.learning .btn {
-  justify-self: start; align-self: start; width: auto; min-height: 44px;
-  padding: 10px 22px; gap: 10px; border: 0;
-  background: linear-gradient(90deg, #df2935, #ef4b4b); color: #fff;
-  box-shadow: 0 4px 14px rgba(223, 41, 53, .28);
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+/* --- кнопки: контурный вариант, фокус, стрелка --- */
+/* Вторичное действие рядом с основным (.btn--primary), чтобы они не спорили. */
+.btn--outline { background: var(--surface); color: var(--accent); border-color: var(--accent); }
+.btn--outline:hover { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent-strong); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Стрелка — только у действий «вперёд» (отправить, открыть), не у «сохранить». */
+.btn--arrow {
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E");
+  gap: 10px;
 }
-.learning .btn::after {
-  content: ""; width: 16px; height: 16px; flex: none;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+.btn--arrow::after {
+  content: ""; width: 16px; height: 16px; flex: none; background: currentColor;
+  -webkit-mask: var(--arrow) center / contain no-repeat; mask: var(--arrow) center / contain no-repeat;
   transition: transform .15s ease;
 }
-.learning .btn:hover { filter: brightness(.94); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(223, 41, 53, .36); }
-.learning .btn:hover::after { transform: translateX(3px); }
-.learning .btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(223, 41, 53, .3); }
-.learning form + h3 { margin-top: 12px; }
-.learning .btn:focus-visible { outline: 3px solid rgba(223, 41, 53, .35); outline-offset: 2px; }
-/* Вторичное действие (личное сообщение) — та же форма, но контурная, чтобы не спорить с «Отправить решение». */
-.learning .btn--outline { background: #fff; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.learning .btn--outline:hover { background: var(--accent-soft, #fdecee); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.btn--arrow:hover::after { transform: translateX(3px); }
 
-/* Плавный переход по якорям (кнопка «Заказать справку» → форма). */
-html { scroll-behavior: smooth; }
+/* --- «Задания» и «Отметка на паре» (learning/*); раньше — <style> в каждом шаблоне --- */
+.learning { overflow-wrap: anywhere; }
+.learning pre { white-space: pre-wrap; }
+.learning small { display: block; }
+.learning .panel { margin-bottom: 16px; }
+.learning form { display: grid; gap: 12px; }
+.learning form + h3 { margin-top: 12px; }
+.learning label { display: grid; gap: 6px; }
+.learning input, .learning textarea, .learning select { width: 100%; max-width: 100%; padding: 10px; }
+.learning button { min-height: 44px; }
+/* В grid-форме кнопка растягивалась на всю ширину — на десктопе она по содержимому. */
+.learning form .btn { justify-self: start; }
+/* Выбор файла — вместо серой кнопки браузера кнопка в стиле .btn--ghost. */
+.learning input[type="file"] { padding: 0; }
+.learning input[type="file"]::file-selector-button {
+  margin-right: 12px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 28px 3px;
+  background: var(--surface); color: var(--text); font: inherit; font-weight: 700; cursor: pointer;
+}
+.learning input[type="file"]::file-selector-button:hover { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 640px) {
+  /* На телефоне — во всю ширину, как кнопки форм в журнале (.final-row__form). */
+  .learning form .btn { justify-self: stretch; justify-content: center; }
+}
+
+/* Плавный переход к форме «Заказать справку» — только на странице справок, а не во всём кабинете. */
+html:has(#order) { scroll-behavior: smooth; }
+#order:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .learning .btn, .learning .btn::after { transition: none; }
+  html:has(#order) { scroll-behavior: auto; }
+  .btn--arrow::after { transition: none; }
 }
