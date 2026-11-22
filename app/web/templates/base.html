@@ -30,7 +30,7 @@
           {% set ns = namespace(open=false) %}
           {% for sub in item.children %}{% if path.startswith(sub.href) %}{% set ns.open = true %}{% endif %}{% endfor %}
           {% set open = ns.open %}
-          <details class="menu__group"{% if open %} open{% endif %}>
+          <details class="menu__group" data-group="{{ item.key }}"{% if open %} open{% endif %}>
             <summary class="menu__link{% if open %} menu__link--active{% endif %}">{{ icon(item.icon) }}<span>{{ item.title }}</span>{{ icon("chev-down", 16) }}</summary>
             <div class="menu__sub">
               {% for sub in item.children %}<a href="{{ sub.href }}" class="menu__sublink{% if path.startswith(sub.href) %} menu__sublink--active{% endif %}">{{ sub.title }}</a>{% endfor %}
@@ -41,6 +41,7 @@
         {% endif %}
       {% endfor %}
     </nav>
+    <script src="/static/menu.js"></script>
   </aside>
   <label for="menu-toggle" class="menu-backdrop" aria-hidden="true"></label>
   <div class="layout__main">

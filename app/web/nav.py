@@ -9,7 +9,7 @@ from __future__ import annotations
 
 MENU = [
     {"title": "Расписание", "icon": "calendar", "href": "/schedule"},
-    {"title": "Учёба", "icon": "cap", "children": [
+    {"title": "Учёба", "key": "study", "icon": "cap", "children": [
         {"title": "Успеваемость", "href": "/grades"},
         {"title": "Задания и сообщения", "href": "/learning/tasks"},
         {"title": "Отметка на паре", "href": "/attendance"},
@@ -17,14 +17,14 @@ MENU = [
     ]},
     {"title": "Элективные дисциплины", "icon": "book", "href": "/electives"},
     {"title": "Воинский учёт", "icon": "star", "href": "/s/military"},
-    {"title": "Студенческий офис", "icon": "office", "children": [
+    {"title": "Студенческий офис", "key": "office", "icon": "office", "children": [
         {"title": "Справки и выписки", "href": "/mfc/certificates"},
         {"title": "Заявления", "href": "/s/statements"},
         {"title": "Платные услуги", "href": "/s/paid"},
         {"title": "Практики", "href": "/s/practice"},
     ]},
     {"title": "Сервисы", "icon": "grid", "href": "/services"},
-    {"title": "Помощь", "icon": "lifebuoy", "children": [
+    {"title": "Помощь", "key": "help", "icon": "lifebuoy", "children": [
         {"title": "ИИ-ассистент деканата", "href": "/s/assistant"},
         {"title": "Психологическая служба", "href": "/s/psy"},
         {"title": "Обращения", "href": "/s/tickets"},
@@ -33,7 +33,7 @@ MENU = [
 ]
 
 # Общая часть меню «сотрудника» (решение 0008): кадровые сервисы одинаковы у преподавателя и деканата.
-HR_MENU = {"title": "Кадровые сервисы", "icon": "office", "children": [
+HR_MENU = {"title": "Кадровые сервисы", "key": "hr", "icon": "office", "children": [
     {"title": "Заказ справок", "href": "/s/hr-certificates"},
     {"title": "КЭДО", "href": "/s/kedo"},
     {"title": "Отпуск, больничный, командировки", "href": "/s/hr-info"},
@@ -44,7 +44,7 @@ HR_MENU = {"title": "Кадровые сервисы", "icon": "office", "childr
 TEACHER_MENU = [
     {"title": "ИИ-ассистент", "icon": "chat", "href": "/s/assistant"},
     {"title": "Главная", "icon": "home", "href": "/t/home"},
-    {"title": "Преподавателю", "icon": "cap", "children": [
+    {"title": "Преподавателю", "key": "teaching", "icon": "cap", "children": [
         {"title": "Мои курсы", "href": "/t/courses"},
         {"title": "Домашние задания", "href": "/t/homework"},
         {"title": "Решения и сообщения", "href": "/learning/tasks"},
@@ -70,7 +70,7 @@ TEACHER_TABBAR = [
 STAFF_MENU = [
     {"title": "ИИ-ассистент", "icon": "chat", "href": "/s/assistant"},
     {"title": "Главная", "icon": "home", "href": "/d/home"},
-    {"title": "Деканат", "icon": "chat", "children": [
+    {"title": "Деканат", "key": "dean", "icon": "chat", "children": [
         {"title": "Объявления", "href": "/d/announcements"},
     ]},
     {"title": "Сервисы Академии", "icon": "grid", "href": "/d/services"},

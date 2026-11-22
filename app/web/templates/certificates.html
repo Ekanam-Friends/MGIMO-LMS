@@ -76,4 +76,24 @@
     </form>
   </section>
 </div>
+<script>
+/* С главной сюда ведёт ссылка /mfc/certificates#order. При загрузке браузер прыгает к якорю
+   резко и, пока страница грузится, может прыгнуть ещё раз. Поэтому убираем якорь из адреса
+   (повторного прыжка не будет), открываем страницу сверху и плавно доезжаем до формы.
+   Кнопка на самой странице (href="#order") едет плавно за счёт scroll-behavior в app.css. */
+(function () {
+  var form = document.getElementById("order");
+  if (!form || location.hash !== "#order") return;
+  form.setAttribute("tabindex", "-1");
+  /* Фокус на форму — чтобы клавиатура и скринридер продолжили с неё, а не с начала страницы. */
+  var focusForm = function () { form.focus({ preventScroll: true }); };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { focusForm(); return; }
+  history.replaceState(history.state, "", location.pathname + location.search);
+  window.scrollTo({ top: 0, behavior: "instant" });
+  requestAnimationFrame(function () {
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+    focusForm();
+  });
+})();
+</script>
 {% endblock %}
