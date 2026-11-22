@@ -91,10 +91,10 @@ async def test_anonymous_redirected_to_login(client):
 
 async def test_wrong_password_rejected(client):
     r = await client.post("/login", data={"login": "anna", "password": "nope"})
-    assert r.status_code == 400
+    assert r.status_code == 401
     assert "lms_session" not in r.cookies
     r = await client.post("/login", data={"login": "nobody", "password": "nope"})
-    assert r.status_code == 400
+    assert r.status_code == 401
 
 
 async def test_cookie_flags(client):
